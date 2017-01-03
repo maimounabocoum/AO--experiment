@@ -1,0 +1,37 @@
+Bugs
+ * See redmine issue database
+ * lutScanConvertImage: lutFirstLinePos is in number of elements and XOrigin is in mm
+ * PRF not modified in acmo.ultrafast ? used in acmo.acmo ?
+ * Wrong display axis while using UFBfInfo
+ * In lutFlats.m use somthing similar to FlatAngles = All_ACMOs{ModeId}.getParam('FlatAngles'); but which works with elusev
+ * Timeouts not working when using popups
+ * Bad BF image if InitSequence == 1 in initializeRemote call
+
+Use
+ * Ultrafast Color cleanup & host buffer check
+ * Create a config class to manage hardware/probe/IP/legHAL and pass it to usse
+ * Use a class for +processing as for others
+
+Features
+ * Make parameter limits depends on probe pitch and number of elements
+ * Manage events calls / jumps
+ * Do sequence diagram plot
+ * Do a release maker with options for each clients
+ * Have a 200 ns accuracy on noops (today the accuracy is 1 us)
+ * Have lower PRF by using elusev.pause
+
+UI
+ * Alert user if TGC or RxFreq change from one event to another (hardware stabilization time is a limitation)
+
+Optimization
+ * Use event calls / repeat
+ * Timing managment should be done bottom-up (to avoid top the need to know the bottom)
+
+Documentation
+ * Modify documentation concerning uppercase parameters
+ * Add legHAL_help explanation
+ * Add functions in legHAL_help (use introspection)
+
+Distribution
+ * Define what client gets what feature
+
