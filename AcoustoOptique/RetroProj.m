@@ -1,7 +1,7 @@
 %% Algo de rétroprojetction filtrée
-% clear
-% load('OP0deg.mat')
-% DataOP0=data;
+ clear
+ load('F:\code et developpement\code matlab\snake-matlab\dataOP-JB\2016-02-01\OP0deg-2016-02-01_13-22.mat')
+ DataOP0=data;
 % load('OP90deg.mat')
 % DataOP90=data;
 % clear data
@@ -18,7 +18,6 @@ yt=(0:size(Proj,1)-1)*1540/(SamplingRate)*1000;
 
 FFTt=fftshift(fft(Proj));
 f=linspace(-SamplingRate/(2*1540),SamplingRate/(2*1540),length(yt));
-
 [x,y]=meshgrid(xsonde,yt);
 
 BPt=1.5; %MHz
@@ -46,32 +45,41 @@ for i=1:length(theta)
     imgfilt(:,:,i) = reshape(projContrib,length(yt),length(xsonde));
         figure(1)
         imagesc(xsonde,yt,imgfilt(:,:,i))
+
+        drawnow
     
 end
 
-Proj=DataOP90(:,:,1);
-FFTt2=fftshift(fft(Proj));
 
-imgfilt2=zeros(length(yt),length(xsonde),length(theta));
-FFTtfilt=FFTt;
 
-for i=1:size(FFTt,2)
-    FFTtfilt(:,i)=abs(f)'.*FFTt(:,i).*LP';
-end
- 
-Projfilt=abs(ifft(fftshift(FFTtfilt)));
 
-for i=1:length(theta)
-        t = x.*sin(thetar(i)) + y.*cos(thetar(i))...
-        -0.5*(1+sign(thetar(i)))*abs(xsonde(end).*tan(thetar(i)))...
-        +abs(xsonde(end).*tan(max(abs(X))*pi/180));
-    projContrib = interp1(yt',Projfilt(:,i),t(:),'linear');
-    projContrib(isnan(projContrib))=0;%Projfilt(end,i);
-    imgfilt2(:,:,i) = reshape(projContrib,length(yt),length(xsonde));
-        figure(1)
-        imagesc(xsonde,yt,imgfilt2(:,:,i))
-    
-end
+
+% 
+% Proj=DataOP90(:,:,1);
+% FFTt2=fftshift(fft(Proj));
+% 
+% imgfilt2=zeros(length(yt),length(xsonde),length(theta));
+% FFTtfilt=FFTt;
+% 
+% for i=1:size(FFTt,2)
+%     FFTtfilt(:,i)=abs(f)'.*FFTt(:,i).*LP';
+% end
+%  
+% Projfilt=abs(ifft(fftshift(FFTtfilt)));
+% 
+% for i=1:length(theta)
+%         t = x.*sin(thetar(i)) + y.*cos(thetar(i))...
+%         -0.5*(1+sign(thetar(i)))*abs(xsonde(end).*tan(thetar(i)))...
+%         +abs(xsonde(end).*tan(max(abs(X))*pi/180));
+%     projContrib = interp1(yt',Projfilt(:,i),t(:),'linear');
+%     projContrib(isnan(projContrib))=0;%Projfilt(end,i);
+%     imgfilt2(:,:,i) = reshape(projContrib,length(yt),length(xsonde));
+%         figure(1)
+%         imagesc(xsonde,yt,imgfilt2(:,:,i))
+%     
+% end
+
+imgfilt2 = imgfilt;
 
 IMG = sum(imgfilt2(:,:,:),3)/size(imgfilt2,3);
 
