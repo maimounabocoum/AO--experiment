@@ -9,7 +9,7 @@ function varargout=AOSeqInit_FOC(varargin)
 
 display('Building sequence')
 
-% addpath('D:\legHAL')
+ addpath('..\legHAL')
 % addPathLegHAL;
 
 % System parameters (parametres ajustables)

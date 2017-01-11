@@ -1,7 +1,7 @@
 %% LegHal for Aixplorer
 
 addpath('D:\legHAL')
-addPathLegHAL;
+%addPathLegHAL;
 
 %% Gage folders
 
