@@ -21,18 +21,27 @@ ImagingCurrent = 1;              % security current limit [A]
 
 % Arbitrary variables
 f0      = 7.5;     % MHz
-NbCycle = 4;
+NbCycle = 2;
 Pause   = 1 / f0; % us
 AcqDur  = 110; % us
 
 % Create arbitrary waveform
-SampFreq = system.hardware.ClockFreq;
+SampFreq = 80;%system.hardware.ClockFreq;
 NSamples = floor(SampFreq / (2*f0));
 
 % 1st waveform
 Wf1 = cos(ceil((1 : NSamples * 2* NbCycle) / NSamples) * pi);
-Wf1 = [Wf1 zeros(1, round(Pause * SampFreq))];
-Wf1 = - [Wf1 cos(ceil((1 : NSamples * 2) / NSamples) * pi)];
+%Wf1 = [Wf1 zeros(1, round(Pause * SampFreq))];
+%Wf1 = - [Wf1 cos(ceil((1 : NSamples * 2) / NSamples) * pi)];
+
+%% principle of input waveform
+t = (1 : NSamples * 2* NbCycle)*1/SampFreq;
+ plot(t,cos(2*pi*f0*t+pi/2),'o-r')
+  hold on
+  stem(t,Wf1)
+ xlabel('time \my s')
+ ylabel('tension')
+ title('input waveform over 1 cycle')
 
 % 2nd waveform
 Wf2 = 0 * cos(ceil((1 : NSamples * 2* NbCycle) / NSamples) * pi);
