@@ -227,6 +227,8 @@ set(hf,'visible','on');
         loadSEQ(hf);
     end
 
+%% starts the aquisition after all parameters have been loaded
+
     function data=startAcquisition(source, eventdata)
         
         AO=guidata(hf);
