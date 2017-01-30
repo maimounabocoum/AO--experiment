@@ -187,8 +187,8 @@ Exit = uicontrol('Style', 'pushbutton',...
 
 
 %% Base code
-AO = guihandles(hf)
-AO.parentcolor=parentcolor;
+AO = guihandles(hf);
+AO.parentcolor = parentcolor;
 
 guidata(hf,AO);
 
@@ -204,7 +204,7 @@ set(hf,'visible','on');
         % code slower and slower. AO.hlOpen is a marker stating if the
         % window is closed or open so that the initialization of the
         % buttons only occurs when necessary
-        AO=guidata(hf);
+        AO = guidata(hf);
         
         if findobj('type','figure','tag','hl')
             AO.hlOpen = 1;

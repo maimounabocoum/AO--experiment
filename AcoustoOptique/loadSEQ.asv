@@ -14,11 +14,8 @@ USParamList = {'val','Volt','FreqSonde','NbHemicycle','NTrig','Prof',...
 UnSetFields = USParamList(~isfield(AO,USParamList));
 
 % if at least one of the parameters is already in the AO structure :
-% this loop execute on the first run of AcoutoOptiqueGUI (parent GUI)
-
 if ~isempty( UnSetFields )
     for ii = 1: length( UnSetFields ) % loop on the number of defined parameters
-        
         if any(strcmpi(UnSetFields{ii},{'val','Np'}))  % reinitialization of val and Np
             AO.( UnSetFields{ii} ) = 1;
         elseif any(strcmpi(UnSetFields{ii},{'Foc','freqx'}))
@@ -26,7 +23,6 @@ if ~isempty( UnSetFields )
         else
             AO.( UnSetFields{ii} ) = [0 0 0];
         end
-        
     end
 end
 
@@ -356,40 +352,38 @@ end
 
     function Load(source,eventdata)
 
-        % common values definition, A0.val : index 1 for value to
-        % initialize
         AO.Volt(AO.val)         = str2double(get(VoltEdit,'string'))      ;
         AO.FreqSonde(AO.val)    = str2double(get(FreqEdit,'string'))      ;
         AO.NbHemicycle(AO.val)  = str2double(get(HemicycleEdit,'string')) ;      
         AO.NTrig(AO.val)        = str2double(get(NtrigEdit,'string'))     ;
         AO.Prof(AO.val)         = str2double(get(USDepthEdit,'string'))   ;
-
-         switch get(ScanEdit,'value');
-             case 1 % focused wave
-                 
-                 AO.X0(AO.val)          = str2double(get(X0Edit,'string'));
-                 AO.Foc                 = str2double(get(FocEdit,'string'));
-                 AO.ScanLength(AO.val)  = str2double(get(WidthXEdit,'string'));
-                 
-                [AO.SEQ,AO.Param] = AOSeqInit_FOC(AO);
-                 
-             case 2 % plane waves
+        
+        get(ScanEdit,'value')
+%         switch get(ScanEdit,'value');
+%             case 1
+%                 AO.X0(AO.val)          = str2double(get(X0Edit,'string'));
+%                 AO.Foc         = str2double(get(FocEdit,'string'));
+%                 AO.ScanLength(AO.val)  = str2double(get(WidthXEdit,'string'));
+%                 
+%                 [AO.SEQ,AO.Param] = AOSeqInit_FOC( AO );
+%                 
+%             case 2
 %                 AO.AlphaM(AO.val)   = str2double(get(AlphaEdit,'string'));
 %                 AO.dA(AO.val)       = str2double(get(dAEdit,'string'));
 %                 AO.ScanLength(AO.val)  = str2double(get(WidthXEdit,'string'));
 %                 
 %                 [AO.SEQ,AO.Param] = AOSeqInit_OP( AO );
 %                 
-             case 3 % structured plane waves
+%             case 3
 %                 AO.AlphaM(AO.val)   = str2double(get(AlphaEdit,'string'));
 %                 AO.dA(AO.val)       = str2double(get(dAEdit,'string'));
 %                 AO.Np               = get(NphaseEdit,'value');
 %                 AO.Nphase           = NN(AO.Np);
 %                 AO.freqx            = str2double(get(freqxEdit,'string'));
 %                 
-%                 [AO.SEQ,AO.Param] = AOSeqInit_STRUCT( AO );
+% %                 [AO.SEQ,AO.Param] = AOSeqInit_STRUCT( AO );
 %                 [AO.SEQ,AO.Param] = AOSeqInit_STRUCT2( AO );
-         end
+%         end
         
         set(AO.LOADED,'visible','on')
         set(AO.start,'enable','on','string','Start Sequence')
