@@ -78,6 +78,8 @@ CP.RxFreq     = 60;              % Receiving center frequency
 Delay = sqrt(CP.PosZ^2+(CP.TxWidth/2)^2)/(common.constants.SoundSpeed*1e-3) ...
     - 1/(common.constants.SoundSpeed*1e-3)*sqrt(CP.PosZ^2+((0:system.probe.Pitch:CP.TxWidth)-CP.TxWidth/2).^2);
 
+% Delay = sqrt( (Foc^2 +  (Foc/4)^2)/c -(1/c)*( Foc^2 + (actuatorXposition - (Foc/2) )^2 )     )
+
 DlySmpl=round(Delay*CP.SampFreq);
 
 T_Wf = 0:1/CP.SampFreq:0.5*CP.NbHcycle/CP.TwFreq;
@@ -113,9 +115,9 @@ end
 
 for nbs = 1:round(CP.ScanLength/system.probe.Pitch)
     
-    PosX     = CP.PosX + (nbs-1)*system.probe.Pitch;
+    PosX     = CP.PosX + (nbs-1)*system.probe.Pitch; % center position for the line
     EvtDur   = ceil(0.5*CP.NbHcycle/CP.TwFreq + max(Delay) + 1/CP.PRF);
-    %EvtDur   = ceil(1/CP.PRF);
+    %EvtDur   = 0.5*(NbHemicycle)/(6e6) + () + ) ;
     
     %CP.EvtDur = EvtDur;
     MedElmt  = round(PosX/system.probe.Pitch);
@@ -167,8 +169,8 @@ ELUSEV = elusev.elusev( ...
     'fc',           FC,...
     'event',        EVENTList, ...
     'TrigOut',      CP.TrigOut, ... 0,...
-    'TrigIn',       0,...
-    'TrigAll',      1, ...
+    'TrigIn',       0,...% trigged sequence 
+    'TrigAll',      1, ...% 0: sends output trigger at first emission 
     'TrigOutDelay', 0, ...
     0);
 

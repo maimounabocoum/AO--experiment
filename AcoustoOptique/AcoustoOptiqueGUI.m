@@ -187,7 +187,7 @@ Exit = uicontrol('Style', 'pushbutton',...
 
 
 %% Base code
-AO = guihandles(hf);
+AO = guihandles(hf)
 AO.parentcolor=parentcolor;
 
 guidata(hf,AO);
