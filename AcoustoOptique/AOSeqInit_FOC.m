@@ -7,8 +7,7 @@ function varargout = AOSeqInit_FOC(A0)
 %
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
  clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
- 
- addpath('..\legHAL')
+
  AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
  
  % get loaded sequence :

@@ -235,7 +235,7 @@ set(hf,'visible','on');
     function [] = startAcquisition(source, eventdata)
         
         AO              =   guidata(hf); % get parameters
-        AO.SamplingRate =   str2double(get(AO.SREdit,'string'));
+        AO.SamplingRate =   str2double(get(AO.SREdit,'string'))
         AO.Range=           str2double(get(AO.RangeEdit,'string'));
         
         AO.Name =           get(AO.NameEdit,'string');
