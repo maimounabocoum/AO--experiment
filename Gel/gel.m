@@ -19,9 +19,9 @@ concIntralipid=0.1269;
 concInkSolution=0;
 
 Youngmodulus=60;
-mu_sprime=7;
+mu_sprime=10;
 mu_a=0;
-massGel=70;
+massGel=220;
 
 
 

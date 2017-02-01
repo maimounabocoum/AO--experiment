@@ -7,14 +7,13 @@ function varargout = AOSeqInit_FOC(A0)
 %
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
 
- addpath('..\legHAL')
- AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
- 
 % status :
- display('Initializing sequence parameters')
- 
- 
+ display('Building sequence')
+ addpath('..\legHAL')
+% addPathLegHAL;
 
+% System parameters (parametres ajustables)
+AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 
 % parameter input :
     Volt            = A0.Volt(A0.val);
@@ -42,8 +41,8 @@ CP.ScanLength = ScanLength;      % mm
 
 c = 1540 ;% common.constants.SoundSpeed ; % unit ??
 
-CP.SampFreq   = 10;%system.hardware.ClockFreq ; % NE PAS MODIFIER % emitted signal sampling
-CP.PRF        = common.constants.SoundSpeed*1e-3/CP.Prof ;  % pulse frequency repetition [MHz]
+ CP.SampFreq   = 10;%system.hardware.ClockFreq ; % NE PAS MODIFIER % emitted signal sampling
+ CP.PRF        = common.constants.SoundSpeed*1e-3/CP.Prof ;  % pulse frequency repetition [MHz]
 
 CP.FIRBandwidth = 90;            % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
 CP.DutyCycle  = 1;               % duty cycle [0, 1]
@@ -58,7 +57,7 @@ CP.RxFreq     = 60;              % Receiving center frequency MHz , ??
 %% Codage en arbitrary : delay matrix and waveform
 
 %actuator pitch :
-pitch = system.probe.Pitch 
+pitch = 0.2 ; %system.probe.Pitch ;
 dt_s = 1/(CP.SampFreq); % unit ??
 
 Delay = sqrt(CP.PosZ^2+(CP.TxWidth/2)^2)/(c*1e-3) ...
@@ -203,20 +202,16 @@ SEQ = usse.usse( ...
     'Popup', 0, ...
     0);
 
- display('Building sequence to controllor')
  [SEQ NbAcq] = SEQ.buildRemote();
- 
  display('Build OK')
- 
-%%%    Do NOT CHANGE - Sequence execution 
-%%%    Initialize remote on systems
-
+% 
+% %% Do NOT CHANGE - Sequence execution
+% 
+% % Initialize remote on systems
  SEQ = SEQ.initializeRemote('IPaddress',AixplorerIP);
  display('Remote OK')
 
- % status :
- display('Loading sequence to Hardware')
- %SEQ = SEQ.loadSequence();
+ SEQ = SEQ.loadSequence();
  display('Load OK')
  
  
@@ -224,31 +219,29 @@ SEQ = usse.usse( ...
 % 
 % to be erased :
 
+varargout{1}   = 0;
+varargout{2}   = 0;
 
-  varargout{1}   = SEQ;  % loaded sequence 
-  varargout{2}   = CP;   % Structure containing the Parameters
+%  varargout{1}   = SEQ;
+%  varargout{2}   = CP;
+% 
+% %% Save SEQ file
+% SEQfilename=['D:\Codes Matlab\AcoustoOptique\SEQdir\SEQ' ...
+%     '_Foc_'    num2str(CP.PosZ) ...
+%     '_Volt_'   num2str(CP.ImgVoltage) ...
+%     '_Freq_'   num2str(CP.TwFreq) ...
+%     '_NbHem_'  num2str(CP.NbHcycle) ...
+%     '_X0_'     num2str(fix(CP.PosX)) 'p' num2str(round(abs(CP.PosX-fix(CP.PosX))*100)) ...
+%     '_Length_' num2str(fix(CP.ScanLength)) 'p' num2str(round(abs(CP.ScanLength-fix(CP.ScanLength))*100)) ...
+%     '_Prof_'   num2str(fix(CP.Prof)) 'p' num2str(round(abs(CP.Prof-fix(CP.Prof))*100)) ...
+%     '_NTrig_'  num2str(CP.Repeat) ...
+%     '_NoOp_'   num2str(CP.NoOp) ...
+%     '.mat'];
+% 
+% 
+% if ~exist(SEQfilename,'file');
+%     save(SEQfilename,'CP', 'SEQ')
+%     display('Sequence saved')
+% end
 
-  
-% % ======================================================================= %
-% %% Save the Sequence
-% % ======================================================================= %
-
-SEQfilename=['D:\Codes Matlab\AcoustoOptique\SEQdir\SEQ' ...
-    '_Foc_'    num2str(CP.PosZ) ...
-    '_Volt_'   num2str(CP.ImgVoltage) ...
-    '_Freq_'   num2str(CP.TwFreq) ...
-    '_NbHem_'  num2str(CP.NbHcycle) ...
-    '_X0_'     num2str(fix(CP.PosX)) 'p' num2str(round(abs(CP.PosX-fix(CP.PosX))*100)) ...
-    '_Length_' num2str(fix(CP.ScanLength)) 'p' num2str(round(abs(CP.ScanLength-fix(CP.ScanLength))*100)) ...
-    '_Prof_'   num2str(fix(CP.Prof)) 'p' num2str(round(abs(CP.Prof-fix(CP.Prof))*100)) ...
-    '_NTrig_'  num2str(CP.Repeat) ...
-    '_NoOp_'   num2str(CP.NoOp) ...
-    '.mat'];
-
-
-if ~exist(SEQfilename,'file');
-    save(SEQfilename,'CP', 'SEQ')
-    display('Sequence saved')
-end
-
-disp('-------------Ready to use-------------------- ')
+disp('-------------Sequence loaded, ready to use-------------------- ')
