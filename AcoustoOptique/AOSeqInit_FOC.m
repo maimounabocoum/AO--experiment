@@ -6,14 +6,19 @@ function varargout = AOSeqInit_FOC(A0)
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 %
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
-
+ clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
+ 
  addpath('..\legHAL')
  AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
  
+ % get loaded sequence :
+ %srv = remoteDefineServer('extern',AixplorerIP, 9999);
+ %SEQ = remoteGetUserSequence(srv)
+ 
+ 
+ %srv = remoteDefineServer('extern', '192.168.1.125', 9999)
 % status :
- display('Initializing sequence parameters')
- 
- 
+ display('Initializing remote control')
 
 
 % parameter input :
@@ -26,11 +31,12 @@ function varargout = AOSeqInit_FOC(A0)
     NTrig           = A0.NTrig(A0.val);
     Prof            = A0.Prof(A0.val);
 
-NoOp       = 500;             % µs minimum time between two US pulses
+NoOp       = 500;             % µs minimum time between two US pulses, (5 by default ??)
 
 %% Probe parameters
 CP.ImgVoltage = Volt;             % imaging voltage [V]
 CP.ImgCurrent = 1;                % security limit for imaging current [A]
+
 % ======================================================================= %
 CP.TwFreq     = FreqSonde;       % MHz
 CP.NbHcycle   = NbHemicycle;     %
@@ -40,9 +46,9 @@ CP.TxWidth    = Foc/2;           % mm
 CP.Prof       = Prof;            % mm
 CP.ScanLength = ScanLength;      % mm
 
-c = 1540 ;% common.constants.SoundSpeed ; % unit ??
+c = common.constants.SoundSpeed ; % [m/s]
 
-CP.SampFreq   = 10;%system.hardware.ClockFreq ; % NE PAS MODIFIER % emitted signal sampling
+CP.SampFreq   = system.hardware.ClockFreq ;  % NE PAS MODIFIER % emitted signal sampling = 180 in [MHz]
 CP.PRF        = common.constants.SoundSpeed*1e-3/CP.Prof ;  % pulse frequency repetition [MHz]
 
 CP.FIRBandwidth = 90;            % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
@@ -58,11 +64,15 @@ CP.RxFreq     = 60;              % Receiving center frequency MHz , ??
 %% Codage en arbitrary : delay matrix and waveform
 
 %actuator pitch :
-pitch = system.probe.Pitch 
-dt_s = 1/(CP.SampFreq); % unit ??
+pitch = system.probe.Pitch ; % in mm
+dt_s = 1/(CP.SampFreq);      % unit us
 
+% Delay [us]
+% c[m/s] -> [mm/us] ; eg factor 1e-3 in the above expression
 Delay = sqrt(CP.PosZ^2+(CP.TxWidth/2)^2)/(c*1e-3) ...
         - 1/(c*1e-3)*sqrt(CP.PosZ^2+((0:pitch:CP.TxWidth)-CP.TxWidth/2).^2);
+    
+    
       
 %  figure;
 %  plot(Delay,'r')
@@ -70,7 +80,7 @@ Delay = sqrt(CP.PosZ^2+(CP.TxWidth/2)^2)/(c*1e-3) ...
 % number of steps offset dt_s for each actuators position : 
  DlySmpl = round(Delay/dt_s); 
 
- % common waveform for emission:
+ % common waveform for emission, square envoppe - non apodized:
  T_Wf = 0:dt_s:0.5*CP.NbHcycle/CP.TwFreq;
  Wf = sin(2*pi*CP.TwFreq*T_Wf); 
  
@@ -88,25 +98,25 @@ Delay = sqrt(CP.PosZ^2+(CP.TxWidth/2)^2)/(c*1e-3) ...
  
  WF_mat_sign = sign(WF_mat); % l'aixplorer code sur 3 niveaux [-1,0,1]
 
-figure(470)
-imagesc((0:pitch:CP.TxWidth)-CP.TxWidth/2,1:N_T, WF_mat)
+figure(470);
+imagesc((0:pitch:CP.TxWidth)-CP.TxWidth/2,1:N_T, WF_mat);
 grid on
-title('input waveform')
-xlabel('position x')
-ylabel('offset num ??')
+title('input waveform');
+xlabel('position x');
+ylabel('offset num ??');
 
 % ======================================================================= %
 %% Arbitrary definition of US events
 % 
 % % Elusev
- clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
+
 % 
  FC = remote.fc('Bandwidth', CP.FIRBandwidth , 0);
  RX = remote.rx('fcId', 1, 'RxFreq', CP.RxFreq, 'QFilter', 2, 'RxElemts', 0, 0);
 
-    if round((CP.PosX+CP.ScanLength)/system.probe.Pitch)>system.probe.NbElemts
+    if round((CP.PosX+CP.ScanLength)/system.probe.Pitch) > system.probe.NbElemts
 
-        warning('Scan length too long, set to maximum value')
+        warning('Scan length too long, set to maximum value');
         CP.ScanLength=system.probe.NbElemts*system.probe.Pitch-CP.PosX;
 
     end
@@ -204,20 +214,27 @@ SEQ = usse.usse( ...
     0);
 
  display('Building sequence to controllor')
- [SEQ NbAcq] = SEQ.buildRemote();
  
+ [SEQ NbAcq] = SEQ.buildRemote();
+
  display('Build OK')
  
 %%%    Do NOT CHANGE - Sequence execution 
 %%%    Initialize remote on systems
-
  SEQ = SEQ.initializeRemote('IPaddress',AixplorerIP);
- display('Remote OK')
+ %SEQ.Server
+ %SEQ.InfoStruct.event
+ 
+% remoteGetUserSequence(SEQ.Server)
+% remoteGetStatus(SEQ.Server)
+
+ 
+ display('Remote OK');
 
  % status :
- display('Loading sequence to Hardware')
- %SEQ = SEQ.loadSequence();
- display('Load OK')
+ display('Loading sequence to Hardware');
+ SEQ = SEQ.loadSequence();
+ display('Load OK');
  
  
 % % Set output variables
@@ -247,8 +264,9 @@ SEQfilename=['D:\Codes Matlab\AcoustoOptique\SEQdir\SEQ' ...
 
 
 if ~exist(SEQfilename,'file');
-    save(SEQfilename,'CP', 'SEQ')
-    display('Sequence saved')
+    save(SEQfilename,'CP', 'SEQ');
+    display('Sequence saved');
 end
+
 
 disp('-------------Ready to use-------------------- ')

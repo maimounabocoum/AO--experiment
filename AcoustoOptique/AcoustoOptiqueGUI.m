@@ -232,7 +232,7 @@ set(hf,'visible','on');
 
 %% starts the aquisition after all parameters have been loaded
 
-    function data=startAcquisition(source, eventdata)
+    function [] = startAcquisition(source, eventdata)
         
         AO              =   guidata(hf); % get parameters
         AO.SamplingRate =   str2double(get(AO.SREdit,'string'));
@@ -245,6 +245,7 @@ set(hf,'visible','on');
         display('Encore du travail ?')
         
                  SEQ = AO.SEQ;  
+                 SEQ = SEQ.loadSequence();
                  SEQ = SEQ.startSequence();
                  
         %         Scp = InitTiePie(AO);

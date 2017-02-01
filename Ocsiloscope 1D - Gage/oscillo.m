@@ -53,6 +53,9 @@ end
 [ret, sysinfo] = CsMl_GetSystemInfo(handle); % Get card infos
 CsMl_ErrorHandler(ret, 1, handle);
 
+
+
+
 s = sprintf('-----Board name: %s\n', sysinfo.BoardName);
 disp(s);
 
@@ -61,15 +64,15 @@ disp(s);
  
 %Customed Parameters
 
-acqInfo.SampleRate      = SamplingRate*1e6;% Possible values 50MHz,25MHz,10MHz,5MHz,2MHz,1MHz
-acqInfo.SegmentCount    = 1000; % Number of memory segments 
-%acqInfo.Depth           = ceil((acqInfo.SampleRate*1e-6*ceil(Prof/(common.constants.SoundSpeed*1e-3)))/32)*32; % Must be a multiple of 32
+acqInfo.SampleRate      = 50e6;% Possible values 50MHz,25MHz,10MHz,5MHz,2MHz,1MHz
+acqInfo.SegmentCount    = 1; % Number of memory segments 
+acqInfo.Depth           = 400;%ceil((acqInfo.SampleRate*1e-6*ceil(Prof/(common.constants.SoundSpeed*1e-3)))/32)*32; % Must be a multiple of 32
 
 %"Do not change" Parameters
 acqInfo.ExtClock        = 0; % activates external clock when none 0
 acqInfo.Mode            = CsMl_Translate('Single', 'Mode');% Use only one channel
-acqInfo.SegmentSize     = acqInfo.Depth; % Must be a multiple of 32
-acqInfo.TriggerTimeout  = 2e6; % in µs
+acqInfo.SegmentSize     = 400;%acqInfo.Depth; % Must be a multiple of 32
+acqInfo.TriggerTimeout  = 20; % in µs
 acqInfo.TriggerHoldoff  = 0; % Number of points during which the card ignores trigs
 acqInfo.TriggerDelay    = 0; % Number of points
 acqInfo.TimeStampConfig = 1; % Get the time at which each waveform was acquired
