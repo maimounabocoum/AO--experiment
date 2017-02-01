@@ -5,6 +5,7 @@ AO = guidata(hf);
 
 %% Definition of window
 % cell containing loading parameters to be field in AO structure ('adding z0'):
+% val = 1 : Focused Waves , 2 : Plane waves , 3 : Structured Waves
 USParamList = {'val','Volt','FreqSonde','NbHemicycle','NTrig','Prof',...
                 'X0','Foc','ScanLength',...
                 'AlphaM','dA',...
@@ -483,7 +484,7 @@ end
                     AO.FreqSonde(AO.val)    = CP.TwFreq;
                     AO.NbHemicycle(AO.val)  = CP.NbHcycle;
                     
-                    AO.Foc          = CP.PosZ;
+                    AO.Foc                  = CP.PosZ;
                     AO.X0(AO.val)           = CP.PosX;
                     AO.ScanLength(AO.val)   = CP.ScanLength;
                     

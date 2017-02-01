@@ -204,6 +204,7 @@ set(hf,'visible','on');
         % code slower and slower. AO.hlOpen is a marker stating if the
         % window is closed or open so that the initialization of the
         % buttons only occurs when necessary
+        
         AO = guidata(hf);
         
         if findobj('type','figure','tag','hl')
@@ -222,43 +223,44 @@ set(hf,'visible','on');
             AO.hl = hl;
             AO.hlOpen = 0;
         end
-        guidata(hf,AO);
+        
+        guidata(hf,AO); % save parameters data
         
         loadSEQ(hf);
+        
     end
 
 %% starts the aquisition after all parameters have been loaded
 
     function data=startAcquisition(source, eventdata)
         
-        AO=guidata(hf);
-        AO.SamplingRate=str2double(get(AO.SREdit,'string'));
-        AO.Range=str2double(get(AO.RangeEdit,'string'));
+        AO              =   guidata(hf); % get parameters
+        AO.SamplingRate =   str2double(get(AO.SREdit,'string'));
+        AO.Range=           str2double(get(AO.RangeEdit,'string'));
         
-        AO.Name = get(AO.NameEdit,'string');
-        AO.Save = get(AO.SaveBox,'value');
-        AO.Path = get(AO.FolderEdit,'string');
+        AO.Name =           get(AO.NameEdit,'string');
+        AO.Save =           get(AO.SaveBox,'value');
+        AO.Path =           get(AO.FolderEdit,'string');
+        
         display('Encore du travail ?')
-        %         SEQ=AO.SEQ;
         
-        %Scp=InitTiePie(AO);
-        %data=AcqTiePie(Scp,AO);
+                 SEQ = AO.SEQ;  
+                 SEQ = SEQ.startSequence();
+                 
+        %         Scp = InitTiePie(AO);
+        %         data = AcqTiePie(Scp,AO);         
+        %         [~,handle,AO.actNTrig,AO.Nlignes] = InitGage(AO);
+        %         [raw,data,tsdata]=AcqGage(handle,AO);
         
-        %         SEQ = SEQ.startSequence();
-        
-        
-        [~,handle,AO.actNTrig,AO.Nlignes]=InitGage(AO);
-        [raw,data,tsdata]=AcqGage(handle,AO);
-        
-        Y = linspace(0,AO.Prof(AO.val),size(data,1));
-        switch AO.val
-            case 1
-                X = linspace(AO.X0(AO.val),AO.X0(AO.val)+AO.ScanLength(AO.val),size(data,2));
-                    figure(1126)
-                    imagesc(X,Y,squeeze(data(:,:,1)))
-                    axis equal
-                    axis tight
-                    colorbar
+        %Y = linspace(0,AO.Prof(AO.val),size(data,1));
+%         switch AO.val
+%             case 1
+%                 X = linspace(AO.X0(AO.val),AO.X0(AO.val)+AO.ScanLength(AO.val),size(data,2));
+%                     figure(1126)
+%                     imagesc(X,Y,squeeze(data(:,:,1)))
+%                     axis equal
+%                     axis tight
+%                     colorbar
 %                 for ii = 1:size(data,3)
 %                     figure(1125 + ii)
 %                     imagesc(X,Y,squeeze(data(:,:,ii)))
@@ -267,58 +269,23 @@ set(hf,'visible','on');
 %                     axis tight
 %                     colorbar
 %                 end
-                
-            case 2
-                X = AO.Param.FlatAngles;
-                
-                for ii = 1:size(data,3)
-                    figure(1125 + ii)
-                    imagesc(X,Y,squeeze(data(:,:,ii)))
-                    title(['channel ' num2str(ii)])
-                    axis equal
-                    axis tight
-                    colorbar
-                end
-            case 3
-                
-                Theta = AO.Param.FlatAngles;
-                X = AO.Param.freqx;
-                
-                data = reshape(data(:,:,1),size(data,1),AO.Nphase,length(Theta)*length(X));
-                
-                for ii = 1:size(data,2)
-                    figure(1125 + ii)
-                    imagesc(repmat(X,1,length(Theta)),Y,squeeze(data(:,ii,:)))
-                    title(['channel ' num2str(ii)])
-                    axis equal
-                    axis tight
-                    colorbar
-                end
-        end
+
         
-        %         figure(1123)
-        %         imagesc(X,Y,squeeze(data(:,:,2)))
-        %         title('channel 2')
-        %         axis equal
-        %
-        
-        %         figure (1125)
-        %         plot(Y,data(:,:,1))
-        
+
         if(AO.Save == 1)
             switch AO.val
                 case 1
                     display(['Saving data in ' AO.Path])
-%                    SaveData(AO,data,X,Y,raw);
-                   SaveData(AO,data,X,Y);
+                    %SaveData(AO,data,X,Y,raw);
+                    %SaveData(AO,data,X,Y);
                 case 2
-                    display(['Saving data in ' AO.Path])
-%                    SaveData(AO,data,X,Y,raw);
-                     SaveData(AO,data,X,Y);
+                     display(['Saving data in ' AO.Path])
+                     %SaveData(AO,data,X,Y,raw);
+                     %SaveData(AO,data,X,Y);
                 case 3
                     display(['Saving data in ' AO.Path])
                     %SaveData(AO,data,X,Y,raw);
-                    SaveData(AO,data,X,Y,Theta);
+                    %SaveData(AO,data,X,Y,Theta);
             end
         end
        
