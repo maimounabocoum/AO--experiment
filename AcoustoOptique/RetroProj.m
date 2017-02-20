@@ -38,8 +38,8 @@ end
 Projfilt=abs(ifft(fftshift(FFTtfilt)));
 
 for i=1:length(theta)
-        t = x.*sin(thetar(i)) + y.*cos(thetar(i));%-0.5*(1+sign(thetar(i)))*abs(xsonde(end).*tan(thetar(i)))...
-       % +abs(xsonde(end).*tan(max(abs(X))*pi/180)); % modification of the offset with respect to \theta
+        t = x.*sin(thetar(i)) + y.*cos(thetar(i))-0.5*(1+sign(thetar(i)))*abs(xsonde(end).*tan(thetar(i)))...
+        +abs(xsonde(end).*tan(max(abs(X))*pi/180)); % modification of the offset with respect to \theta
     projContrib = interp1(yt',Projfilt(:,i),t(:),'linear');
     projContrib(isnan(projContrib))=0;%Projfilt(end,i);
     imgfilt(:,:,i) = reshape(projContrib,length(yt),length(xsonde));
