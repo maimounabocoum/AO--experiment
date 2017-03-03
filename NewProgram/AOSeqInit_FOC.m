@@ -2,7 +2,7 @@
 % Maïmouna Bocoum 26 - 02 -2017
  clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
- AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
  
  % get loaded sequence :
  %srv = remoteDefineServer('extern',AixplorerIP, 9999);
@@ -25,19 +25,19 @@
     Prof            = 70; % mm
 
 
-%% Focusing parameters
-% ======================================================================= %
-TxWidth       = Foc/2;           % mm : effective width for focus line
-PropagationTime = (Prof)/(c)*1e3 ; % duration for one line in \mu s
-
-
 %% System parameters import :
 % ======================================================================= %
 c =           common.constants.SoundSpeed ; %[m/s]
 SampFreq   =  system.hardware.ClockFreq; %NE PAS MODIFIER % emitted signal sampling = 180 in [MHz]
 NbElemts =    system.probe.NbElemts ; 
-pitch =       system.probe.pitch ; % in mm
+pitch =       system.probe.Pitch ; % in mm
 MinNoop =     system.hardware.MinNoop ;
+
+%% Focusing parameters
+% ======================================================================= %
+TxWidth       = Foc/2;           % mm : effective width for focus line
+PropagationTime = (Prof)/(c)*1e3 ; % duration for one line in \mu s
+
 
 NoOp       = 500;             % µs minimum time between two US pulses, (5 by default ??)
 FIRBandwidth = 90;            % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
@@ -222,9 +222,11 @@ SEQ = usse.usse( ...
  display('Loading sequence to Hardware');
  SEQ = SEQ.loadSequence();
  display('Load OK');
- %SEQ = SEQ.startSequence();
+  SEQ = SEQ.startSequence();
  
 % % Set output variables
+% Stop sequence
+ SEQ = SEQ.stopSequence( 'Wait', 1 );
 
-
+%SEQ = SEQ.quitRemote();
 disp('-------------Ready to use-------------------- ')

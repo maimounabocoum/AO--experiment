@@ -10,7 +10,7 @@
 
 Nloop = 100;
 % US Parameters
-Volt        = 40; % V
+Volt        = 20; % V
 FreqSonde   = 6;  % MHz
 NbHemicycle = 20;
 X0          = 19; % mm
@@ -36,7 +36,7 @@ end
 
 
 %% Set Aixplorer parameters
-AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
+AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
 
 NoOp       = 500;             % µs minimum time between two US pulses
 
