@@ -15,7 +15,7 @@
 
 
 % user defined parameters :
-    Volt            = 20; % Volts
+    Volt            = 10; % Volts
     f0              = 6;  % MHz
     NbHemicycle     = 8;  % number of have cycles
     X0              = 0;  % mm : position of min actuator for the scan
@@ -39,7 +39,7 @@ TxWidth       = Foc/2;           % mm : effective width for focus line
 PropagationTime = (Prof)/(c)*1e3 ; % duration for one line in \mu s
 
 
-NoOp       = 500;             % µs minimum time between two US pulses, (5 by default ??)
+NoOp       = 1000;             % µs minimum time between two US pulses, (5 by default ??)
 FIRBandwidth = 90;            % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
 RxFreq    = 6;                % Receiving center frequency MHz , ??
 
@@ -226,7 +226,7 @@ SEQ = usse.usse( ...
  
 % % Set output variables
 % Stop sequence
- SEQ = SEQ.stopSequence( 'Wait', 1 );
+% SEQ = SEQ.stopSequence( 'Wait', 1 );
 
 %SEQ = SEQ.quitRemote();
 disp('-------------Ready to use-------------------- ')
