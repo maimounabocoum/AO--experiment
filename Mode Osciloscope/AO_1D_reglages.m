@@ -1,7 +1,6 @@
 %% Script for AO setup optimization. To be used with Aixplorer and Gage
 %% acquisition card.
 % Display and refresh an acousto-optic line
-%
 % Created by Clement on 10/06/2015
 % Last modified : Clement 10/06/2015
 
