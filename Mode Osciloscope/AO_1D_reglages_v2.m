@@ -5,28 +5,19 @@
 % Created by Clement on 10/06/2015
 % Last modified : Clement 10/06/2015
 
+addpath('..\legHAL\')
 
 %% Parameters
 
-Nloop = 100;
+Nloop = 1;
 % US Parameters
-Volt        = 40; % V
+Volt        = 20; % V
 FreqSonde   = 6;  % MHz
-NbHemicycle = 20;
+NbHemicycle = 8;
 X0          = 19; % mm
 Foc         = 20; % mm
-NTrig       = 1000;
-Prof        = 40; % mm
-
-%Acquisition parameters
-Range = 1; % V
-SampleRate = 10; % MHz
-
-% Save
-Sauvegarde =0;
-Date = datestr(now,'yyyy-mm-dd');
-path = 'D:\Data\Clement\In Vivo\Bras JB';
-Name = 'Poignet JB';
+NTrig       = 1000; %1000
+Prof        = 70; % mm
 
 %% Security check
 if FreqSonde ==15 && Volt>25
@@ -37,8 +28,10 @@ end
 
 %% Set Aixplorer parameters
 AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
+% SRV = remoteDefineServer( 'extern' ,AixplorerIP,'9999');
+% SEQ = remoteGetUserSequence(SRV);
 
-NoOp       = 500;             % µs minimum time between two US pulses
+NoOp       = 400;             % µs minimum time between two ELUSEV (useless here than)
 
 %% Paramètres de la séquence US
 % tension etc...
@@ -107,8 +100,8 @@ FOCUSED = elusev.focused( ...
     'Polarity', 1, ...
     'SteerAngle', 0, ...
     'Focus', CP.PosZ, ...    %en mm
-    'Pause', NoOp, ...       % Debut de la pause entre chaque tir (µs)
-    'PauseEnd', CP.NbHcycle/(2*CP.TwFreq*0.002),... %200, ...       % Fin de la pause (µs)
+    'Pause', NoOp, ...       % Debut de la pause entre chaque tir (µs) => seems completly usesless !!
+    'PauseEnd',500, ... %CP.NbHcycle/(2*CP.TwFreq*0.002),... %200, ...       % Fin de la pause (µs)
     'DutyCycle', 1, ...
     'TxCenter', CP.PosX, ...
     'TxWidth', CP.TxWidth, ...
@@ -122,7 +115,7 @@ FOCUSED = elusev.focused( ...
     'TrigOut', 50, ...%slogP.AcqTime , ...    %en µs
     'TrigAll', 1, ...
     'TrigIn', 0, ...
-    'Repeat', NTrig+1, ...
+    'Repeat', NTrig, ...
     'ApodFct', 'none', ...
     0);
 
@@ -163,149 +156,24 @@ clear 'TPC'
 % ============================================================================ %
 % Build the REMOTE structure
 [SEQ NbAcq] = SEQ.buildRemote();
-
-
+%% Acquisition AO
+SEQ = SEQ.initializeRemote('IPaddress', AixplorerIP);
+%SEQ.Server
 %% Initialize Gage Acquisition card
-[ret,handle] = InitGage_1D_reglages(NTrig,Prof,SampleRate,Range);
-
-[ret, acqInfo] = CsMl_QueryAcquisition(handle);
-CsMl_ErrorHandler(ret, 1, handle);
-[ret, sysinfo] = CsMl_GetSystemInfo(handle); % Get card infos
-CsMl_ErrorHandler(ret, 1, handle);
-
-CsMl_ResetTimeStamp(handle);
-
-
-% Set transfer parameters
-transfer.Mode           = CsMl_Translate('Default', 'TxMode');
-transfer.Start          = 0;
-transfer.Length         = acqInfo.SegmentSize;
-
-MaskedMode              = bitand(acqInfo.Mode, 15); % Check acq. mode
-ChannelsPerBoard        = sysinfo.ChannelCount / sysinfo.BoardCount; % get number of channels
-ChannelSkip             = ChannelsPerBoard / MaskedMode; % number of channels that are skipped during
-% the transfer step.
-
 
 % %% Sequence execution
 % % ============================================================================ %
-% % Initialize & load sequence remote
-% SRV = remoteDefineServer('extern',AixplorerIP,'9999');
-% 
-% remoteSetLevel(SRV,'user_coarse');
-% 
-% remoteFreeze(SRV,0);
-% 
-% msg.name='set_user_sequence';
-% msg.mode_action='value';
-% msg.mode_value='B';
-% remoteSendMessage(SRV,msg);
-% clear msg
-% 
-% msg.name='set_output_format';
-% msg.format='FF';
-% msg.image_format='bmp';
-% msg.framerate_limit=10000;
-% remoteSendMessage(SRV,msg);
-% clear msg
-% remoteSetOutputFormat(SRV, 'FF');
+ SEQ = SEQ.loadSequence();
 
-% remoteFreeze(SRV,1);
-% 
-% [bmode, status] = remoteTransfertData(SRV, 'FF');
-% 
+for loop = 1:Nloop
 
+ SEQ = SEQ.startSequence();
+ pause(1)
+ SEQ = SEQ.stopSequence();
+ close all
 
-%% Acquisition BMode
-% msg.name        = 'set_level';
-% msg.level       = 'user_coarse';
-% remoteSendMessage(SRV, msg);
-% clear msg
-% 
-% msg=struct('name', 'get_status');
-% status=remoteSendMessage(SRV,msg);
-% if strcmp(status.freeze,'1');
-%     msg.name      = 'freeze';
-%     msg.active    = 0;
-%     remoteSendMessage(SRV, msg);
-% end
-% clear msg
-% 
-% msg.name='set_user_sequence';
-% msg.mode_action='value';
-% msg.mode_value='B';
-% remoteSendMessage(SRV,msg);
-% clear msg
-% 
-% % Set Output Format to FF
-% msg.name='set_output_format';
-% msg.format='FF';
-% msg.image_format='bmp';
-% msg.framerate_limit=10000;
-% remoteSendMessage(SRV,msg);
-% clear msg
-% 
-% bmode.data = int8(0);
-% param = remoteGetFFData(SRV,bmode);
-% 
-% msg.name        = 'set_level';
-% msg.level       = 'system';
-% remoteSendMessage(SRV, msg);
-% 
-% figure
-% imagesc(bmode.data)
-% colormap gray
-
-%% Acquisition AO
-SEQ = SEQ.initializeRemote('IPaddress', AixplorerIP);
-SEQ = SEQ.loadSequence();
-
-%% Acquire data
-for k = 1:Nloop
-    ret = CsMl_Capture(handle);
-    CsMl_ErrorHandler(ret, 1, handle);
-    
-    SEQ = SEQ.startSequence();
-    
-    status = CsMl_QueryStatus(handle);
-    while status ~= 0
-        status = CsMl_QueryStatus(handle);
-    end
-    
-    SEQ = SEQ.stopSequence('Wait', 0);
-    
-    % Transfer data to Matlab
-    raw = zeros(acqInfo.Depth,acqInfo.SegmentCount);
-    data = zeros(acqInfo.Depth,1);
-    Z = linspace(0,Prof,acqInfo.Depth);
-    
-    transfer.Channel = 1;
-    for ii = 1:acqInfo.SegmentCount
-        transfer.Segment = ii; % number of the memory segment to be read
-        [ret, datatmp, actual] = CsMl_Transfer(handle, transfer); % transfer
-        % actual contains the actual length of the acquisition that may be
-        % different from the requested one.
-        CsMl_ErrorHandler(ret, 1, handle);
-        
-        data = data +(1/NTrig)*datatmp';
-        raw(:,ii) = datatmp';
-        
-    end
-    
-    figure (42)
-    plot(Z,data)
-    xlabel ('Depth (mm)')
-    ylabel ('Signal (V)')
-    
-%     data_end(:,k)=data;
-    fullDate = datestr(now,'yyyy-mm-dd_MM_ss');
-
-     if(Sauvegarde == 1)
-        mkdir([path '\' Date]);
-        save([path '\' Date '\' Name '-' fullDate '.mat'],'Z','data','raw', 'Volt','FreqSonde',...
-                    'NbHemicycle', 'X0', 'Foc', 'NTrig', 'Prof', 'Range', 'SampleRate');
-    end
+ 
 end
-
+ 
 
 SEQ = SEQ.quitRemote();

@@ -1,5 +1,6 @@
 % Sequence AO Foc JB 01-04-15 ( d'apres 03-03-2015 Marc) modified by
 % Maïmouna Bocoum 26 - 02 -2017
+clearvars
  clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
  AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
@@ -7,10 +8,8 @@
  % get loaded sequence :
  %srv = remoteDefineServer('extern',AixplorerIP, 9999);
  %SEQ = remoteGetUserSequence(srv)
- 
- 
- %srv = remoteDefineServer('extern', '192.168.1.125', 9999)
-% status :
+ %srv = remoteDefineServer('extern', '192.168.1.16', 9999)
+ % status :
  display('Initializing remote control')
 
 
@@ -20,15 +19,12 @@
     NbHemicycle     = 8;  % number of have cycles
     X0              = 0;  % mm : position of min actuator for the scan
     Foc             = 35; % mm
-    ScanLength      = 30; % mm
-    NTrig           = 10; % number of repetition
-    Prof            = 70; % mm
+    ScanLength      = 15; % mm
+    NTrig           = 2; % number of repetition
+    
+    Z1              = 1;  % mm
+    Z2            = 70; % mm
 
-
-%% Focusing parameters
-% ======================================================================= %
-TxWidth       = Foc/2;           % mm : effective width for focus line
-PropagationTime = (Prof)/(c)*1e3 ; % duration for one line in \mu s
 
 
 %% System parameters import :
@@ -36,12 +32,18 @@ PropagationTime = (Prof)/(c)*1e3 ; % duration for one line in \mu s
 c =           common.constants.SoundSpeed ; %[m/s]
 SampFreq   =  system.hardware.ClockFreq; %NE PAS MODIFIER % emitted signal sampling = 180 in [MHz]
 NbElemts =    system.probe.NbElemts ; 
-pitch =       system.probe.pitch ; % in mm
+pitch =       system.probe.Pitch ; % in mm
 MinNoop =     system.hardware.MinNoop ;
 
-NoOp       = 500;             % µs minimum time between two US pulses, (5 by default ??)
-FIRBandwidth = 90;            % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
-RxFreq    = 6;                % Receiving center frequency MHz , ??
+%% Focusing parameters
+% ======================================================================= %
+TxWidth       = Foc/2;           % mm : effective width for focus line
+PropagationTime = (Z2)/(c)*1e3 ; % duration for one line in \mu s
+
+
+NoOp       = 100;             % µs minimum time between two US pulses, (5 by default ??)
+FIRBandwidth = 2;            % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
+RxFreq    = 60;                % Receiving center frequency MHz , ??
 
 TrigOut    = ceil(PropagationTime);  % µs
 Pause      = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause duration in µs
@@ -84,21 +86,16 @@ Delay = sqrt(Foc^2+(TxWidth/2)^2)/(c*1e-3) ...
  
  WF_mat_sign = sign(WF_mat); % l'aixplorer code sur 3 niveaux [-1,0,1]
 
-figure(470);
-imagesc((0:pitch:TxWidth)-TxWidth/2,1:N_T, WF_mat);
-grid on
-title('input waveform');
-xlabel('position x');
-ylabel('offset num ??');
+% figure(470);
+% imagesc((0:pitch:TxWidth)-TxWidth/2,1:N_T, WF_mat);
+% grid on
+% title('input waveform');
+% xlabel('position x');
+% ylabel('offset num ??');
 
 % ======================================================================= %
-%% Arbitrary definition of US events
-% 
-% % Elusev
-
-% 
+%% Arbitrary definition of US events 
  FC = remote.fc('Bandwidth', FIRBandwidth , 0);
- RX = remote.rx('fcId', 1, 'RxFreq', RxFreq, 'QFilter', 2, 'RxElemts', 0, 0);
 
     if round((X0+ScanLength)/pitch) > NbElemts
         warning('Scan length too long, set to maximum value');
@@ -119,14 +116,14 @@ for Nloop = 1:round(ScanLength/pitch)
                MedElmt+floor(TxWidth/(2*pitch));
     
     WFtmp    = WF_mat_sign( : , ( TxElemts>0 & TxElemts<= NbElemts ) );
-    
-    %     figure(471)
-    %     imagesc(WFtmp)
-    %     drawnow
+%     
+%         figure(471)
+%         imagesc(WFtmp)
+%         drawnow
     
     % Flat TX
     TXList{Nloop} = remote.tx_arbitrary('txClock180MHz', 1,'twId',Nloop,'Delays',0);
-    
+    RXList{Nloop} = remote.rx('fcId',1, 'RxFreq', RxFreq, 'QFilter', 2, 'RxElemts', 0, 1);
     % Arbitrary TW
     TWList{Nloop} = remote.tw_arbitrary( ...
         'Waveform',WFtmp', ...
@@ -142,13 +139,14 @@ for Nloop = 1:round(ScanLength/pitch)
     % Event
     EVENTList{Nloop} = remote.event( ...
         'txId', Nloop, ...
-        'rxId', 1, ...
+        'rxId',Nloop, ...
         'noop', Pause, ...
         'numSamples', 128, ...
         'skipSamples', 0, ... 128, ...
-        'duration', EvtDur, ...
+        'duration', EvtDur, ... %
         0);
     
+
 end
 
 % % ======================================================================= %
@@ -158,10 +156,10 @@ end
 ELUSEV = elusev.elusev( ...
     'tx',           TXList, ...
     'tw',           TWList, ...
-    'rx',           RX,...
+    'rx',           RXList,...
     'fc',           FC,...
     'event',        EVENTList, ...
-    'TrigOut',      TrigOut, ... 0,...
+    'TrigOut',      TrigOut, ... 
     'TrigIn',       0,...% trigged sequence 
     'TrigAll',      1, ...% 0: sends output trigger at first emission 
     'TrigOutDelay', 0, ...
@@ -196,13 +194,12 @@ SEQ = usse.usse( ...
     'Repeat', NTrig, ...    'Popup',0, ...
     'DropFrames', 0, ...
     'Loop', 0, ...
-    'DataFormat', 'FF', ...
     'Popup', 0, ...
     0);
 
  display('Building sequence to controllor')
  
- [SEQ NbAcq] = SEQ.buildRemote();
+ [SEQ NbAcqRx] = SEQ.buildRemote();
 
  display('Build OK')
  
@@ -222,9 +219,60 @@ SEQ = usse.usse( ...
  display('Loading sequence to Hardware');
  SEQ = SEQ.loadSequence();
  display('Load OK');
- %SEQ = SEQ.startSequence();
+ disp('-------------Ready to use-------------------- ')
  
-% % Set output variables
+ SEQ = SEQ.startSequence();
+
+clear buffer;
+        disp('Getting buffer');
+
+        for k = 1:NbAcqRx
+        buf(k) = SEQ.getData('Realign', 2, 'Timeout',5);
+        end
+        
+        %------- initialize retreiving process for focused waves -----
+
+% %-------------------------------- retreive data ------
+% % retreived Image infos :PROBLEM : seqUENCE NOT COMBPATOIBLE WHEN NOT
+% DEFINED AS bfoc
+            %  ImgInfo.TxPolarity      = [ 0 ]; % [ 0 1 ] : 0: Standard polarity, 1:Inverted polarity
+            %  ImgInfo.TxElemsPattern  = [ 0 ]; % [ 0 2 ] : 0: All elements, 1: Odd elements, 2: Even elements
+            %  ImgInfo.SteeringAngle   = 0; % steering angle [not implemented yet]
+            %  ImgInfo.XOrigin         = 0 ; % xmin [mm]
+            %  ImgInfo.FirstLinePos    = 1 ; % position of the first line in elt [>=1]
+            %  ImgInfo.txPitch         = 1 ; % txpitch [elements] : entire value corresponding to constant spacing (min = 1)
+            %  ImgInfo.nbTx            = 128 ; % txpitch [elements] 128 number of element shooting from element 1
+            %  ImgInfo.RxLinesPerTx    = 1;  % number of received line per tx (beamforming) ????????????
+            %  ImgInfo.PitchPix        = 0.5;  % dz / lambda
+            %  ImgInfo.Depth(1)        = Z1;   % initial depth [mm]
+            %  ImgInfo.Depth(2)        = Z2;  % final depth [mm]
+            %  ImgInfo.RxApod(1)       = 0.4; % RxApodOne
+            %  ImgInfo.RxApod(2)       = 0.6; % RxApodZero    
+            %  
+            % disp('LUT computation');
+            % NThreads = 1; %%%%??
+            % bfocId = 1; %%%%%????
+            % BFStruct = processing.lutBfoc( SEQ, bfocId, ImgInfo, NThreads );
+            % 
+            % if system.probe.Radius > 0
+            % Data = processing.lutScanConvertImage( BFStruct, ImgInfo, 1024, 1024 ); % TODO: remove hardcoded size
+            % end
 
 
-disp('-------------Ready to use-------------------- ')
+for k = 1 : length(SEQ.InfoStruct.event)
+    
+    TmpImg = 20 * log10(single(abs(buf.RFdata(:,:,k))));
+
+    
+    imagesc(TmpImg, [50 100]);
+    drawnow
+    pause(0.1)
+    
+end
+
+figure;
+imagesc(log(double(abs(sum(buf.RFdata,3)))))
+ SEQ = SEQ.stopSequence();
+ 
+ %SEQ = SEQ.quitRemote();
+ 
