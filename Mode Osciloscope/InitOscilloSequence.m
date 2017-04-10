@@ -1,4 +1,4 @@
-function [ SEQ ] = InitOscilloSequence(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc , X0)
+function [ SEQ ] = InitOscilloSequence(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc , X0, NTrig)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 %% Security check
