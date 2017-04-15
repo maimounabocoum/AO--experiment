@@ -30,6 +30,43 @@ classdef oscilloTrace
             
         end
         
+        function S = saveobj(obj,savingfolder)
+            S.t           = obj.t   ;
+            S.z           = obj.z ;
+            S.Nlines      = obj.Nlines ;
+            S.Lines       = obj.Lines  ;
+            S.SampleRate  = obj.SampleRate ;
+            
+            save(savingfolder,'S');
+        end
+        
+        function obj = loadobj(S)
+            
+           if isstruc(S)
+               
+                newObj = ClassConstructor; 
+                newObj.t = S.t;
+                newObj.z = S.z;
+                newObj.Nlines = S.Nlines;
+                newObj.Lines = S.Lines;
+                newObj.SampleRate = S.SampleRate;
+                obj = newObj;
+               
+           else
+              error('you need to enter a Structure with rigth members') 
+           end
+        end
+        
+        function [] = SNR(obj)
+            
+            figure
+            plot(obj.Lines,'--')
+            hold on
+            plot(sum(obj.Lines,2),'red')
+            
+            
+        end
+        
         function [] = ScreenAquisition(obj,FigHandle)
             % does the figue handle exist :
 
@@ -43,15 +80,18 @@ classdef oscilloTrace
                 N = length(LineAverage);
                 xdft = fft(LineAverage);
                 xdft = xdft(1:N/2+1);
-                xdft_filtered = xdft;
                 psdx = (1/(Fs*N)) * abs(xdft).^2;
                 psdx(2:end-1) = 2*psdx(2:end-1);
                 freq = 0:Fs/N:Fs/2;
                 
-                b = [1/6 1/6 1/6 1/6 1/6 1/6];
+                n_smooth = 7;
+                b = (1/n_smooth)*ones(1,n_smooth);
                 a = 1;
                 LineAverage_filtered = filter(b,a,LineAverage);
-
+                xdft_filtered  = fft(LineAverage_filtered);
+                xdft_filtered = xdft_filtered(1:N/2+1);
+                psdx_filtered = (1/(Fs*N)) * abs(xdft_filtered).^2;
+                psdx_filtered(2:end-1) = 2*psdx_filtered(2:end-1);
             
               subplot(311)
               
@@ -87,6 +127,9 @@ classdef oscilloTrace
 
 
                 plot(lambda*1e3,psdx(10:end))
+                hold on 
+                plot(lambda*1e3,psdx_filtered(10:end),'red')
+                hold off
                 grid on
                 title('Periodogram Using FFT')
                 xlabel('\lambda (mm)')
@@ -95,10 +138,13 @@ classdef oscilloTrace
                 subplot(313)
                 
                 plot(freq*1e-6,10*log10(psdx))
+                hold on
+                plot(freq*1e-6,10*log10(psdx_filtered),'red')
                 grid on
                 title('Periodogram Using FFT')
                 xlabel('Frequency (MHz)')
                 ylabel('Power/Frequency (dB/Hz)')
+                hold off
 
             
         end

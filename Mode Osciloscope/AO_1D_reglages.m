@@ -15,11 +15,11 @@ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 % SEQ = remoteGetUserSequence(SRV);
 
 % US Parameters
-Volt        = 30; % V
+Volt        = 40; % V
 FreqSonde   = 6;  % MHz
 NbHemicycle = 8;
-X0          = 15; % mm
-Foc         = 20; % mm
+X0          = 10; % mm
+Foc         = 35; % mm
 NTrig       = 1000; %1000
 Prof        = 70; % mm
 
@@ -103,9 +103,13 @@ for k = 1:Nloop
     CsMl_ErrorHandler(ret, 1, Hgage);
     SEQ = SEQ.stopSequence('Wait', 0);
     
+   % MyMeasurement.SNR();
     MyMeasurement.ScreenAquisition(Hfig);
+    
 toc
 end
 
+% saving datas:
+MyMeasurement.saveobj('D:\Data\Mai\2017-04-14\1D oscilloscope\G10dB_1000av_X010mm_Volt40_PasseHaut200kHzPasseBas1MHz_Ref')
 
 SEQ = SEQ.quitRemote();
