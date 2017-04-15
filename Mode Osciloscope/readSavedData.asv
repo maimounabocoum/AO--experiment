@@ -1,0 +1,15 @@
+%% read trace from saved datas %%%
+
+
+% open file to read :
+
+[filename,foldername] = uigetfile('D:\Data\Mai\2017-04-14\1D oscilloscope')
+
+S = load([foldername,filename]);
+SData = oscilloTrace(size(S.Lines,1),S.Nlines,S.SampleRate,1540) ;
+SData.Lines = S.Lines;
+SData.z = S.
+
+Hfig = figure;
+
+SData.ScreenAquisition(Hfig)
