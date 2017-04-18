@@ -6,24 +6,26 @@ if (exist('Pilotage_materiel')~=7)
     disp(['Library Pilotage_materiel not loaded']);
 end
 
-%% Tiepie
-% Initialisation
-TiePie1 = TiePie('TiePie','HS5','USB','1');
+%==============================================================================%
+%% Tiepie :: Initialisation
+%==============================================================================%
+% TiePie1 = TiePie('TiePie','HS5','USB','1');
 % Commandes Oscillo
-nb_mean = 5;
-fe = 914e3;
-TiePie1.State_channels = [1 0]; % Voies 1 et 2 activées
-TiePie1.Resolution = 14; % 14bits de résolution
-TiePie1.Nb_points = 20000; % Nombre de points acquis
-fs = 1e6*100;
-TiePie1.Sample_Frequency = fs;% Fréquence d'échantillonage
-TiePie1.Trigger_EXT1 = 1; % On/Off
-time_cursor = [15000 19000]/fs;
-time = (1:TiePie1.Nb_points)*1/fs;
+nb_mean                     = 4;
+fe                          = 6e6;
+fs                          = 100e6;    % sampling frequency
+
+TiePie1.State_channels      = [1 0];    % Voies 1 et 2 activées
+TiePie1.Resolution          = 14;       % 14bits de résolution
+TiePie1.Nb_points           = 20000;    % Nombre de points acquis
+TiePie1.Sample_Frequency    = fs;       % Fréquence d'échantillonage
+TiePie1.Trigger_EXT1        = 1;        % On/Off
+time_cursor                 = [15000 19000]/fs;
+time                        = (1:TiePie1.Nb_points)*1/fs;
 % %TiePie1.Trigger_Level1 = 0.5; % 50% du calibre de la voie 1
 % TiePie1.Yscale1 = 4; % Amplitude max voie 1 [-4 4]V
 % TiePie1.Yscale2 = 4; % Amplitude max voie 2 [-4 4]V
-% 
+
 % % Commandes GBF
 % TiePie1.Vpp = 5;
 % TiePie1.Frequency = 1e6;
@@ -32,24 +34,25 @@ time = (1:TiePie1.Nb_points)*1/fs;
 % TiePie1.State = 'on';
 
 %% GBF
-GBF1 =  GBF('Tektronix','AFG3101C','USB','0x0699::0x034B::C010648');
-% Commandes
-GBF1.Frequency = 914e3; % 914 kHz
-GBF1.State = 'off'; % Désactivation de la sortie
+%  GBF1 =  GBF('Tektronix','AFG3101C','USB','0x0699::0x034B::C010648');
+%  Commandes
+%  GBF1.Frequency = 914e3; % 914 kHz
+%  GBF1.State = 'off'; % Désactivation de la sortie
 
+%======================================================================%
+%% Actionneur 3 axes :: Initialisation
+%======================================================================%
 
-%% Actionneur 3 axes
-% Initialisation
 Axes3D1 = Axes3D('Newport','ESP301','COM','4');
+ 
+frequencies = [6e6]; % central frequency of pulse in Hz
+xstep       = 0.2;
+ystep       = 0.2;
+zstep       = 0.5;
 
-
-%%
-frequencies = [914e3];
-xstep = 0.2;
-ystep = 0.2;
-nb_point = 7;
-xcenter = 5.4;
-ycenter = 0;
+nb_point    = 7;
+xcenter     = 5.4;
+ycenter     = 0;
 
 xmin = xcenter-xstep*nb_point;%4.6-0.2*15;
 xmax = xcenter+xstep*nb_point;%4.6+0.2*15;
@@ -57,20 +60,19 @@ ymin = ycenter-ystep*nb_point;%-1.6-0.2*15;
 ymax = ycenter+ystep*nb_point;%-1.6+0.2*15;
 zmin = -29;
 zmax = -21;
-zstep = 0.5;
+
 %
 x = xmin:xstep:xmax;
 y = ymin:ystep:ymax;
 z = zmin:zstep:zmax;
 
-Data_scan = single(zeros(length(x),length(y),length(z),2,length(frequencies)));
+Data_scan = single(zeros(length(x),length(y),length(z),2));
 
+% single vector to record temporal fluctuations :
 signal = zeros(TiePie1.Nb_points,1);
 
 
-
-%%
-GBF1.State = 'on'; % Activation de la sortie
+%GBF1.State = 'on'; % Activation de la sortie
 Axes3D1.startMotor
 
 Axes3D1.X_position = x(1);
@@ -78,11 +80,11 @@ Axes3D1.Y_position = y(1);
 Axes3D1.Z_position = z(1);
 
 tic
-for zz=1:length(z)
-    Axes3D1.Z_position = z(zz);
+for zz = 1:length(z) % loop on z 
+    Axes3D1.Z_position = z(zz); % set z position
     while round(z(zz)-Axes3D1.Z_position,3)~=0
         pause(0.1);
-    end
+    end % wait for position to be reached
     pause(0.1);
     for yy=1:length(y)
         Axes3D1.Y_position = y(yy);
@@ -90,15 +92,22 @@ for zz=1:length(z)
             pause(0.1);
         end
         pause(0.1);
-        for xx=1:length(x)
-            disp(['Scan position X:' num2str(x(xx)) ',Y: ' num2str(y(yy)) ',Z: ' num2str(z(zz))]);
+        for xx=1:length(x) 
             Axes3D1.X_position = x(xx); %1m valeur absolue par rapport au zéro de la machine
             while round(x(xx)-Axes3D1.X_position,3)~=0
                 pause(0.1);
             end
             pause(0.1);
-            for ff = 1:length(frequencies)
-                GBF1.Frequency = frequencies(ff);
+            
+            
+            disp(['Scan position X:' num2str(x(xx)) ',Y: ' num2str(y(yy)) ',Z: ' num2str(z(zz))]);
+            
+            %===============================================================
+            % record single point %
+            %===============================================================
+            
+            %for ff = 1:length(frequencies)
+                %GBF1.Frequency = frequencies(ff);
                 for kk = 1:nb_mean
                     TiePie1.Trigger_Armed = 1;
                     while ~strcmp(TiePie1.Trigger_Armed,'Value available')
@@ -108,20 +117,29 @@ for zz=1:length(z)
                 end
                 signal = signal/nb_mean;
                 [amp, phi] = find_amp_phase(signal', fs, fe, time_cursor);
-                Data_scan(xx,yy,zz,1,ff) = amp;
-                Data_scan(xx,yy,zz,2,ff) = phi;
+                Data_scan(xx,yy,zz,1) = amp;
+                Data_scan(xx,yy,zz,2) = phi;
+                
                 figure(1);
                 plot(time,signal);
-                disp(['Amp : ' num2str(Data_scan(xx,yy,zz,1,ff)) ', phi : ' num2str(Data_scan(xx,yy,zz,2,ff))]);      
-            end
-        end
-    end
-end
+                disp(['Amp : ' num2str(Data_scan(xx,yy,zz,1)) ', phi : ' num2str(Data_scan(xx,yy,zz,2))]);      
+            
+                %===============================================================
+                % go to next position 
+                %===============================================================
+                
+            %end
+            
+        end % end loop x
+    end % end loop y
+end % end loop z
+
 Axes3D1.stopMotor
 disp(['Scan terminé']);
+
 time_to_measure = toc;
 
-GBF1.State = 'off';
+%GBF1.State = 'off';
 return
 
 %% Affichage
