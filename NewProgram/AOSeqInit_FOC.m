@@ -15,14 +15,15 @@
 
 
 % user defined parameters :
-    Volt            = 10; % Volts
+    Volt            = 20; % Volts
     f0              = 6;  % MHz
     NbHemicycle     = 8;  % number of have cycles
     X0              = 0;  % mm : position of min actuator for the scan
     Foc             = 35; % mm
     ScanLength      = 30; % mm
     NTrig           = 10; % number of repetition
-    Prof            = 70; % mm
+    Z1              = 10;   % mm
+    Z2              = 70;   % mm
 
 
 %% System parameters import :
@@ -36,12 +37,12 @@ MinNoop =     system.hardware.MinNoop ;
 %% Focusing parameters
 % ======================================================================= %
 TxWidth       = Foc/2;           % mm : effective width for focus line
-PropagationTime = (Prof)/(c)*1e3 ; % duration for one line in \mu s
+PropagationTime = (Z2)/(c)*1e3 ; % duration for one line in \mu s
 
 
-NoOp       = 1000;             % 탎 minimum time between two US pulses, (5 by default ??)
+NoOp         = 1000;             % 탎 minimum time between two US pulses, (5 by default ??)
 FIRBandwidth = 90;            % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
-RxFreq    = 6;                % Receiving center frequency MHz , ??
+RxFreq       = 6;                % Receiving center frequency MHz , ??
 
 TrigOut    = ceil(PropagationTime);  % 탎
 Pause      = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause duration in 탎
@@ -222,7 +223,7 @@ SEQ = usse.usse( ...
  display('Loading sequence to Hardware');
  SEQ = SEQ.loadSequence();
  display('Load OK');
-  SEQ = SEQ.startSequence();
+ SEQ = SEQ.startSequence();
  
 % % Set output variables
 % Stop sequence

@@ -66,7 +66,7 @@ disp(s);
  
 %Customed Parameters
 Prof = 30;
-NTrig = 10;
+NTrig = 1;
 acqInfo.SampleRate      = SampleRate*1e6;%Max = 50 MHz, must be divider of 50;
 acqInfo.SegmentCount    = NTrig; % Number of memory segments 
 %acqInfo.Depth           = ceil((acqInfo.SampleRate*1e-3*Prof/(common.constants.SoundSpeed))/32)*32; % Must be a multiple of 32
@@ -110,7 +110,7 @@ CsMl_ErrorHandler(ret, 1, handle);
 trig.Trigger            = 1;
 trig.Slope              = CsMl_Translate('Negative', 'Slope'); % Aixplorer Trig has a neg slope
 trig.Level              = 0; % in percent of the trig range (-100 to +100)
-trig.Source             = CsMl_Translate('Disable', 'Source'); %External
+trig.Source             = CsMl_Translate('External', 'Source'); %External,Disable
 trig.ExtCoupling        = CsMl_Translate('DC', 'ExtCoupling');
 trig.ExtRange           = 10000; % Vpp in mV, 10000=+-5V
 
@@ -152,7 +152,7 @@ for k = 1%:Nloop
     while status ~= 0
         status = CsMl_QueryStatus(handle);
     end
-   toc
+    toc
     % Transfer data to Matlab
     raw = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     data = zeros(acqInfo.Depth,1);
