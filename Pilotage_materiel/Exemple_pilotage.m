@@ -20,7 +20,7 @@ Data = Oscillo1.Data_channels; % Récupération des valeurs des voies en V
 
 %% GBF
 % Initialisation
-%GBF1 = GBF('Rigol','DG1022','USB','0x09C4::0x0400::DG1D154702380');
+% GBF1 = GBF('Rigol','DG1022','USB','0x09C4::0x0400::DG1D154702380');
 % GBF1 =  GBF('Tektronix','AFG3101C','TCPIP','10.40.1.19');
 % % Commandes
 % GBF1.Frequency = 1e6; % 1 MHz
