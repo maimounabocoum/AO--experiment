@@ -1,0 +1,99 @@
+function obj = initialize(obj, varargin)
+   
+% ============================================================================ %
+% ============================================================================ %
+
+current_class = 'elusev.characterization';
+
+try
+    
+% Initialize superclass
+    obj = initialize@elusev.elusev(obj, varargin{1:end});
+       
+% ============================================================================ %
+
+    % Emission waveform
+    Par = common.parameter( ...
+        'Waveform', ...
+        'single', ...
+        'sets the waveforms', ...
+        {[-1 1]}, ...
+        {'waveform values'}, ...
+        obj.Debug, current_class );
+    obj = obj.addParam(Par);
+
+% ============================================================================ %
+
+    % Transmitting elements
+    Par = common.parameter( ...
+        'CharactElements', 'int32', 'set elements to characterized', ...
+        {[-1 system.hardware.NbTxChan]}, ...
+        {'Characterized Elements'}, ...
+        obj.Debug, current_class );
+    obj = obj.addParam(Par);
+    
+% ============================================================================ %
+
+    % Reception frequency
+    Par = common.parameter( ...
+        'RxFreq', 'single', 'set the reception frequency', ...
+        {[1 60]}, ...
+        {'reception frequency [MHz]'}, ...
+        obj.Debug, current_class );
+    obj = obj.addParam(Par);
+
+% ============================================================================ %
+
+    % Acquisition delay
+    % TODO: verify limit max, check if per chan rx delay possible ?
+    Par = common.parameter( ...
+        'RxDelay', 'single', 'set the acquisition delay', ...
+        {[0 1000]}, ...
+        {'acquisition delay [us]'}, ...
+        obj.Debug, current_class );
+    obj = obj.addParam(Par);
+    
+% ============================================================================ %
+
+    % Acquisition duration
+    % TODO: verify limit max
+    Par = common.parameter( ...
+        'RxDuration', 'single', 'set the acquisition duration', ...
+        {[0 1000]}, ...
+        {'acquisition duration [us]'}, ...
+        obj.Debug, current_class );
+    obj = obj.addParam(Par);
+   
+% ============================================================================ %
+
+    % Pause duration after the event
+    Par = common.parameter( ...
+        'Pause', 'int32', 'set the pause duration after the event', ...
+        {[system.hardware.MinNoop 1e6]}, ...
+        {'pause duration after each emission event [us]'}, ...
+        obj.Debug, current_class );
+    obj = obj.addParam(Par);
+    
+% ============================================================================ %
+
+    % Pause duration at the end
+    Par = common.parameter( ...
+        'PauseEnd', 'int32', 'set the pause duration at the end', ...
+        {[system.hardware.MinNoop 1e6]}, ...
+        {'pause duration at the end [us]'}, ...
+        obj.Debug, current_class );
+    obj = obj.addParam(Par);
+
+% ============================================================================ %
+
+
+catch exception
+    
+    uiwait(errordlg(exception.message, exception.identifier));
+    
+end
+
+% ============================================================================ %
+% ============================================================================ %
+
+end
