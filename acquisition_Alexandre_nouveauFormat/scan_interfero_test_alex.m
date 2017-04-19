@@ -36,10 +36,10 @@ disp(['t_{max} = ',num2str(1e6*TiePie1.Nb_points/fs),'\mu s'])
 % TiePie1.State = 'on';
 
 %% GBF
-%  GBF1 =  GBF('Tektronix','AFG3101C','USB','0x0699::0x034B::C010648');
-%  Commandes
-%  GBF1.Frequency = 914e3; % 914 kHz
-%  GBF1.State = 'off'; % Désactivation de la sortie
+ GBF1 =  GBF('Tektronix','AFG3101C','USB','0x0699::0x034B::C010648');
+ Commandes
+ GBF1.Frequency = 914e3; % 914 kHz
+ GBF1.State = 'off'; % Désactivation de la sortie
 
 %======================================================================%
 %% Actionneur 3 axes :: Initialisation

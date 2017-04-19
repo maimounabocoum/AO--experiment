@@ -3,6 +3,8 @@
  clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
  AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
+ addpath('D:\legHAL');
+ addPathLegHAL();
  
  % get loaded sequence :
  %srv = remoteDefineServer('extern',AixplorerIP, 9999);
@@ -15,13 +17,13 @@
 
 
 % user defined parameters :
-    Volt            = 20; % Volts
-    f0              = 6;  % MHz
+    Volt            = 50; % Volts
+    f0              = 10;  % MHz
     NbHemicycle     = 8;  % number of have cycles
-    X0              = 0;  % mm : position of min actuator for the scan
+    X0              = 15;  % mm : position of min actuator for the scan
     Foc             = 35; % mm
-    ScanLength      = 30; % mm
-    NTrig           = 10; % number of repetition
+    ScanLength      = 0.2; % mm
+    NTrig           = 200000; % number of repetition
     Z1              = 10;   % mm
     Z2              = 70;   % mm
 
@@ -40,17 +42,17 @@ TxWidth       = Foc/2;           % mm : effective width for focus line
 PropagationTime = (Z2)/(c)*1e3 ; % duration for one line in \mu s
 
 
-NoOp         = 1000;             % 탎 minimum time between two US pulses, (5 by default ??)
+NoOp         = 500;             % 탎 minimum time between two US pulses, (5 by default ??)
 FIRBandwidth = 90;            % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
 RxFreq       = 6;                % Receiving center frequency MHz , ??
 
-TrigOut    = ceil(PropagationTime);  % 탎
+TrigOut    = ceil(PropagationTime) + 20;  % 탎
 Pause      = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause duration in 탎
 
 % ======================================================================= %
 %% Codage en arbitrary : delay matrix and waveform
 dt_s = 1/(SampFreq);      % unit us
-pulseDuration = NbHemicycle*(0.5/f0) ; % US inital pulse duration in us
+pulseDuration = NbHemicycle*(0.5/f0); % US inital pulse duration in us
 
 
 %% Delay Law [us]
@@ -85,12 +87,12 @@ Delay = sqrt(Foc^2+(TxWidth/2)^2)/(c*1e-3) ...
  
  WF_mat_sign = sign(WF_mat); % l'aixplorer code sur 3 niveaux [-1,0,1]
 
-figure(470);
-imagesc((0:pitch:TxWidth)-TxWidth/2,1:N_T, WF_mat);
-grid on
-title('input waveform');
-xlabel('position x');
-ylabel('offset num ??');
+% figure(470);
+% imagesc((0:pitch:TxWidth)-TxWidth/2,1:N_T, WF_mat);
+% grid on
+% title('input waveform');
+% xlabel('position x');
+% ylabel('offset num ??');
 
 % ======================================================================= %
 %% Arbitrary definition of US events
@@ -164,7 +166,7 @@ ELUSEV = elusev.elusev( ...
     'event',        EVENTList, ...
     'TrigOut',      TrigOut, ... 0,...
     'TrigIn',       0,...% trigged sequence 
-    'TrigAll',      1, ...% 0: sends output trigger at first emission 
+    'TrigAll',      0, ...% 0: sends output trigger at first emission 
     'TrigOutDelay', 0, ...
     0);
 
@@ -223,11 +225,10 @@ SEQ = usse.usse( ...
  display('Loading sequence to Hardware');
  SEQ = SEQ.loadSequence();
  display('Load OK');
- SEQ = SEQ.startSequence();
  
-% % Set output variables
-% Stop sequence
-% SEQ = SEQ.stopSequence( 'Wait', 1 );
 
+ SEQ = SEQ.startSequence();
+
+%SEQ = SEQ.stopSequence( 'Wait', 1 );
 %SEQ = SEQ.quitRemote();
 disp('-------------Ready to use-------------------- ')

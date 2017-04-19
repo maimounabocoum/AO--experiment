@@ -38,23 +38,23 @@ gen1=[gen1];
 gen1=[zeros(1,1e-6*Fpulse*npts./Ncycles) gen1 zeros(1,150e-6*Fpulse*npts./Ncycles)].';
 Fegen=npts*Fpulse./(Ncycles*length(gen1));
 resultat=[];
-% 
-% if exist( 'Gen' , 'var' )
-%   % Select sine:
-%   Gen.SignalType = ST.ARBITRARY;
-%   Gen.Frequency = Fegen;
-%   Gen.Amplitude = 0;
-%   Gen.Offset = 0;
-%   Gen.BurstMode = BM.COUNT;
-%   Gen.BurstCount = 1;
-%   Gen.Data = gen1;
-%   Gen.OutputOn = 1;
-%   Gen.TriggerOutputs(2).Event  = Gen.TriggerOutputs(1).Events(2);
-%   Gen.TriggerOutputs(2).Enabled = true; 
-%   % Display generator info:
-%   Gen
-% 
-% end 
+
+if exist( 'Gen' , 'var' )
+  % Select sine:
+  Gen.SignalType = ST.ARBITRARY;
+  Gen.Frequency = Fegen;
+  Gen.Amplitude = 0;
+  Gen.Offset = 0;
+  Gen.BurstMode = BM.COUNT;
+  Gen.BurstCount = 1;
+  Gen.Data = gen1;
+  Gen.OutputOn = 1;
+  Gen.TriggerOutputs(2).Event  = Gen.TriggerOutputs(1).Events(2);
+  Gen.TriggerOutputs(2).Enabled = true; 
+  % Display generator info:
+  Gen
+
+end 
 
  
   % Start measurement:

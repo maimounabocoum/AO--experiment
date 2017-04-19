@@ -34,12 +34,12 @@ Data = Oscillo1.Data_channels; % Récupération des valeurs des voies en V
 
 %% Actionneur 3 axes
 % Initialisation
-Axes3D1 = Axes3D('Newport','MM4006','COM','5');
+Axes3D1 = Axes3D('Newport','MM4006','COM','6');
 % Commandes
 Axes3D1.startMotor
-Axes3D1.X_position = 1; %mm valeur absolue par rapport au zéro de la machine
-Axes3D1.Y_position = 2;
-Axes3D1.Z_position = 3;
+Axes3D1.X_position = 0; %mm valeur absolue par rapport au zéro de la machine
+Axes3D1.Y_position = 0;
+Axes3D1.Z_position = 0;
 Axes3D1.stopMotor
 
 %% Micro-balance
@@ -54,12 +54,12 @@ Masse = Scale1.Mass; % Mesure de la masse mesuré par la balance
 % Initialisation
 TiePie1 = TiePie('TiePie','HS5','USB','1');
 % Commandes Oscillo
-TiePie1.State_channels = [1 1]; % Voies 1 et 2 activées
+TiePie1.State_channels = [1 0]; % Voies 1 et 2 activées
 TiePie1.Resolution = 14; % 14bits de résolution
 TiePie1.Nb_points = 1000; % Nombre de points acquis
 TiePie1.Sample_Frequency = 1e6*50;% Fréquence d'échantillonage
 TiePie1.Nb_points = 10000;
-TiePie1.Trigger_EXT1 = 1; % On/Off
+TiePie1.Trigger_EXT1 = 0; % On/Off
 %TiePie1.Trigger_Level1 = 0.5; % 50% du calibre de la voie 1
 TiePie1.Yscale1 = 4; % Amplitude max voie 1 [-4 4]V
 TiePie1.Yscale2 = 4; % Amplitude max voie 2 [-4 4]V

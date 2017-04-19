@@ -311,7 +311,7 @@ classdef TiePie < Measurement_tool
     function obj = set.Trigger_EXT1(obj,trigger_level)
         if(trigger_level)
           obj.tool.scp.TriggerInputs(1).Enabled=1;
-          obj.tool.scp.TriggerInputs(1).Kind=1; % rising=1, falling=2 (kinds for EXTi trigger inputs)
+          obj.tool.scp.TriggerInputs(1).Kind= 1; % rising=1, falling=2 (kinds for EXTi trigger inputs)
         else
           obj.tool.scp.TriggerInputs(1).Enabled=0;
         end
