@@ -1,0 +1,30 @@
+%%% here is the routine to generate a function
+clearvars
+
+%=========== create fourier parameters ================%
+N = 2^10;
+Fmax = 100e6; 
+fs = 100e6; % sampling frequency 
+F = TF_t(N,Fmax)
+
+%================= generate carrier frequency wave ====%
+Fwaveform = 80e6;
+waveform = cos(2*pi*Fwaveform*F.t);
+
+  figure;
+ plot(F.t*1e6,waveform)
+ xlabel('time (\mu s)')
+ ylabel('waveform')
+
+ %=============== generate gaussian noise============%
+ 
+ noiseBW = 100e3; % noise bandwith frequency in Hz
+ Dist = exp(-(F.f).^2)
+ 
+%========================= saving file to text format===================
+
+% fileID = fopen('GeneratedWave.txt','w');
+% fprintf(fileID,'%6s %12s\n','x','y');
+% fprintf(fileID,'%6.2f %12.8f\n',[x,y]);
+% fclose(fileID);
+

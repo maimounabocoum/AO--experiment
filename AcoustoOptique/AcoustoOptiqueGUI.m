@@ -256,12 +256,12 @@ set(hf,'visible','on');
         %Y = linspace(0,AO.Prof(AO.val),size(data,1));
 %         switch AO.val
 %             case 1
-%                 X = linspace(AO.X0(AO.val),AO.X0(AO.val)+AO.ScanLength(AO.val),size(data,2));
-%                     figure(1126)
-%                     imagesc(X,Y,squeeze(data(:,:,1)))
-%                     axis equal
-%                     axis tight
-%                     colorbar
+                X = linspace(AO.X0(AO.val),AO.X0(AO.val)+AO.ScanLength(AO.val),size(data,2));
+                    figure(1126)
+                    imagesc(X,Y,squeeze(data(:,:,1)))
+                    axis equal
+                    axis tight
+                    colorbar
 %                 for ii = 1:size(data,3)
 %                     figure(1125 + ii)
 %                     imagesc(X,Y,squeeze(data(:,:,ii)))
