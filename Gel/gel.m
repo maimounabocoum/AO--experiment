@@ -21,7 +21,7 @@ concInkSolution=0;
 Youngmodulus=60;
 mu_sprime=10;
 mu_a=0;
-massGel=220;
+massGel=200;
 
 
 

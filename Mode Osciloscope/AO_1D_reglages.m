@@ -3,9 +3,14 @@
 % Display and refresh an acousto-optic line
 %
 % Created by Clement on 10/06/2015
-% Last modified : Clement 10/06/2015
+% Last modified : maimouna bocoum
 
-addpath('..\legHAL\')
+% ============================== Init program ======================
+
+% clear all; close all; clc
+% w = instrfind; if ~isempty(w) fclose(w); delete(w); end
+% clear all;
+%addpath('..\legHAL\')
 
 %% Parameters loop
 Nloop = 5;
@@ -14,11 +19,12 @@ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 % SRV = remoteDefineServer( 'extern' ,AixplorerIP,'9999');
 % SEQ = remoteGetUserSequence(SRV);
 
-% US Parameters
-Volt        = 40; % V
+%=======================  US Parameters =====================
+
+Volt        = 35; % V
 FreqSonde   = 6;  % MHz
 NbHemicycle = 8;
-X0          = 10; % mm
+X0          = 15; % mm
 Foc         = 35; % mm
 NTrig       = 1000; %1000
 Prof        = 70; % mm
@@ -57,7 +63,8 @@ transfer.Channel        = 1;
 % %% Sequence execution
 % % ============================================================================ %
  SEQ = InitOscilloSequence(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc , X0 , NTrig);
- SEQ = SEQ.loadSequence();
+ 
+SEQ = SEQ.loadSequence();
 
 %% Acquire data
 close all
@@ -101,15 +108,15 @@ for k = 1:Nloop
 
     
     CsMl_ErrorHandler(ret, 1, Hgage);
-    SEQ = SEQ.stopSequence('Wait', 0);
+    
     
    % MyMeasurement.SNR();
     MyMeasurement.ScreenAquisition(Hfig);
-    
+    SEQ = SEQ.stopSequence('Wait', 0);
 toc
 end
 
 % saving datas:
-MyMeasurement.saveobj('D:\Data\Mai\2017-04-14\1D oscilloscope\G10dB_1000av_X010mm_Volt40_PasseHaut200kHzPasseBas1MHz_Ref')
+%MyMeasurement.saveobj('D:\Data\Mai\2017-04-14\1D oscilloscope\G10dB_1000av_X010mm_Volt40_PasseHaut200kHzPasseBas1MHz_Ref')
 
 SEQ = SEQ.quitRemote();

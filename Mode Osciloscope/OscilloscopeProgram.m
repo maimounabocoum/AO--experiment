@@ -52,6 +52,7 @@ function OscilloscopeProgram_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to OscilloscopeProgram (see VARARGIN)
 
+
 % Choose default command line output for OscilloscopeProgram
 handles.output = hObject;
 
@@ -60,11 +61,16 @@ addpath('C:\Users\bocoum\Documents\MATLAB\legHAL\');
 addPathLegHAL();
 common.constants.SoundSpeed
 
+
+
 % initialize buttons
 set(handles.start,'visible','off');
 set(handles.abort,'visible','off');
 
-
+global NTrig Prof SampleRate
+NTrig = 0 ;
+Prof  = 0 ;
+SampleRate = 10 ;
 % Update handles structure
 guidata(hObject, handles);
 
@@ -80,7 +86,7 @@ function varargout = OscilloscopeProgram_OutputFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Get default command line output from handles structure
-varargout{1} = handles.output;
+varargout{1} = handles.output
 
 
 
@@ -374,6 +380,24 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+NTrig =         str2double( get(handles.Naverage,'string') );
+Prof =          str2double( get(handles.Zmax,'string') );
+SampleRate =    str2double( get(handles.GageSamplFreq,'string') );
+RangeList =     get(handles.GageVoltage,'String');
+RangeValue     =     RangeList{get(handles.GageVoltage,'Value')};
+switch RangeValue
+    case '+/-1V'
+        Range = 1 ;
+    case '+/-5V'
+        Range = 5 ;
+end
+isTrigged = get(handles.IsTrigged,'value');
+%[ret,Hgage] = InitOscilloGage(NTrig,Prof,SampleRate,Range);
+
+% Update handles structure
+%handles.Hgage = Hgage ;
+
+guidata(hObject, handles);
 
 % --- Executes on button press in IsTrigged.
 function IsTrigged_Callback(hObject, eventdata, handles)
@@ -394,7 +418,9 @@ Prof =          str2double( get(handles.Zmax,'string') );
 SampleRate =    str2double( get(handles.GageSamplFreq,'string') );
 RangeList =     get(handles.GageVoltage,'String');
 Range     =     RangeList{get(handles.GageVoltage,'Value')};
-%[ret,Hgage] = InitOscilloGage(NTrig,Prof,SampleRate,Range);
+
+[ SEQ ] = InitOscilloSequence(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc , X0, NTrig);
+
 
 
 % --- Executes on button press in legalselection.
