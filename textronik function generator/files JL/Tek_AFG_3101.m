@@ -16,22 +16,22 @@
 function Tek_AFG_3101(signal,F_ech,T_rep,nb_cyc,duree,Vpp,offset)
 
 % Exemple :
-% Vpp      = 0.5;  % (V)
-% T_rep    = 20;   % (ms)
-% F_ech    = 100;  % (MHz)
-% freq     = 1.4;  % (MHz)
-% df       = 0.2;  % (MHz)
-% dt_chirp = 10;% (µs)
-% nb_cyc   = 1;
-% [signal,t] = makeChirp(F_ech,[freq-df freq+df],dt_chirp);
+Vpp      = 0.5;  % (V)
+T_rep    = 20;   % (ms)
+F_ech    = 100;  % (MHz)
+freq     = 1.4;  % (MHz)
+df       = 0.2;  % (MHz)
+dt_chirp = 10;% (µs)
+nb_cyc   = 1;
+[signal,t] = makeChirp(F_ech,[freq-df freq+df],dt_chirp);
 % Tek_AFG_3101(signal,F_ech,T_rep,freq,Vpp);
 
 nom_onde = 'USER1';
 signal   = (signal./max(abs(signal)));
 
-visaAddress = 'USB0::0x0699::0x0342::C021881::0::INSTR';
+visaAddress = 'USB0::0x0699::0x0343::C021048::0::INSTR';
 % visaAddress = 'USB0::1689::834::C021881::0::INSTR';
-AFG = visa('TEK', visaAddress);
+AFG = visa('NI', visaAddress);
 AFG.OutputBufferSize = 131072;% 2^16*2; %51200; 
 AFG.ByteOrder = 'littleEndian';
 set(AFG, 'Timeout', 10.0);
