@@ -21,7 +21,7 @@ fs                          = 50e6;    % sampling frequency
 
 TiePie1.State_channels      = [1 0];    % Voies 1 et 2 activées
 TiePie1.Resolution          = 14;       % 14bits de résolution
-TiePie1.Nb_points           = 40000;    % Nombre de points acquis
+TiePie1.Nb_points           = 80000;    % Nombre de points acquis
 TiePie1.Sample_Frequency    = fs;       % Fréquence d'échantillonage
 TiePie1.Trigger_EXT1        = 1;        % On/Off
 time_cursor                 = [18000 19000]/fs; % only to extract phase and amplitude
@@ -232,7 +232,7 @@ while k==1
     else
     fp = 69.99965*1e6;    % fréquence de la porteuse (MHz)
     Npts = TiePie1.Nb_points ;    % nbre de points
-    %Fe=fs;
+    %Fe=fs
     tps=[0:1./Fe:(Npts-1)/Fe];
     BB=BB(2:end);
     
