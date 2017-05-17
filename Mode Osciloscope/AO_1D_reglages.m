@@ -7,14 +7,19 @@
 
 % ============================== Init program ======================
 
-% clear all; close all; clc
-% w = instrfind; if ~isempty(w) fclose(w); delete(w); end
-% clear all;
-%addpath('..\legHAL\')
+ clear all; close all; clc
+ w = instrfind; if ~isempty(w) fclose(w); delete(w); end
+ clear all;
+ 
+ %=================== indicate location of LEGAL folder
+ %addpath('D:\legHAL\')
+ %addPathLegHAL;
+ %==================== indicate location for Gage Drivers
+ %addpath(genpath('D:\drivers\CompuScope MATLAB SDK\'))
+ 
+ 
 
-%% Parameters loop
-Nloop = 5;
-%% Set Aixplorer parameters
+%%====================== Set Aixplorer parameters
 AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 % SRV = remoteDefineServer( 'extern' ,AixplorerIP,'9999');
 % SEQ = remoteGetUserSequence(SRV);
@@ -26,17 +31,23 @@ FreqSonde   = 6;  % MHz
 NbHemicycle = 8;
 X0          = 15; % mm
 Foc         = 35; % mm
-NTrig       = 1000; %1000
+NTrig       = 1; %1000
 Prof        = 70; % mm
+
+%%====================== Parameters loop
+Nloop = 5;
 
 %-----------------------------------------------------------
 %% Gage Init parmaters
 %----------------------------------------------------------------------
 Range = 1; % V
 SampleRate = 10; % MHz
-c = common.constants.SoundSpeed ; % sound velocity in m/s
+TriggerSatus = 'off'; % 'on' or 'off' 
 
-[ret,Hgage] = InitOscilloGage(NTrig,Prof,SampleRate,Range);
+
+
+
+[ret,Hgage] = InitOscilloGage(NTrig,Prof,SampleRate,Range,TriggerSatus);
 
 [ret, acqInfo] = CsMl_QueryAcquisition(Hgage);
 CsMl_ErrorHandler(ret, 1, Hgage);
@@ -62,11 +73,17 @@ transfer.Channel        = 1;
 %% Initialize Gage Acquisition card
 % %% Sequence execution
 % % ============================================================================ %
- SEQ = InitOscilloSequence(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc , X0 , NTrig);
- 
-SEQ = SEQ.loadSequence();
+% SEQ = InitOscilloSequence(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc , X0 , NTrig);
+% SEQ = SEQ.loadSequence();
+c = common.constants.SoundSpeed ; % sound velocity in m/s
 
-%% Acquire data
+%%========================================== Acquire data==================
+% Possible return values for status are:
+%   0 = Ready for acquisition or data transfer
+%   1 = Waiting for trigger event
+%   2 = Triggered but still busy acquiring
+%   3 = Data transfer is in progress
+
 close all
 Hfig = figure;
 
@@ -80,7 +97,7 @@ for k = 1:Nloop
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
     
-    SEQ = SEQ.startSequence();
+   % SEQ = SEQ.startSequence();
     
     status = CsMl_QueryStatus(Hgage);
     
@@ -101,6 +118,7 @@ for k = 1:Nloop
         
        % MyMeasurement = MyMeasurement.Addline(actual.ActualStart,actual.ActualLength,datatmp,LineNumber);
        MyMeasurement.Lines((1+actual.ActualStart):actual.ActualLength,LineNumber) = datatmp' ;
+       drawnow
 %        data = data + (1/NTrig)*datatmp';
 %        raw(:,ii) = datatmp';
         
@@ -112,11 +130,15 @@ for k = 1:Nloop
     
    % MyMeasurement.SNR();
     MyMeasurement.ScreenAquisition(Hfig);
-    SEQ = SEQ.stopSequence('Wait', 0);
+   % SEQ = SEQ.stopSequence('Wait', 0);
 toc
 end
+
+% command line to force a trigger on Gage :
+CsMl_ForceCapture(Hgage);
+
 
 % saving datas:
 %MyMeasurement.saveobj('D:\Data\Mai\2017-04-14\1D oscilloscope\G10dB_1000av_X010mm_Volt40_PasseHaut200kHzPasseBas1MHz_Ref')
 
-SEQ = SEQ.quitRemote();
+%SEQ = SEQ.quitRemote();

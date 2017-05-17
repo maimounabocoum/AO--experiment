@@ -1,4 +1,4 @@
-function [ret,handle] = InitOscilloGage(NTrig,Prof,SamplingRate,Range)
+function [ret,handle] = InitOscilloGage(NTrig,Prof,SamplingRate,Range,TriggerSatus)
 % Set the acquisition, channel and trigger parameters for the system and
 % commit the parameters to the driver.
 % AO     = structure with the different parameters
@@ -101,13 +101,41 @@ chan(1).InputRange      = 2*Range*1e3; % Vpp in mV
 [ret] = CsMl_ConfigureChannel(handle, chan); % config chan parameters
 CsMl_ErrorHandler(ret, 1, handle);
 
-% Sets trigger parameters
+%========================= Sets trigger parameters
+% Trigger       - the trigger engine to set. Trigger numbers start at 1
+% Slope         - a value indicating the slope that causes a trigger event 
+%                 to occur. Use CsMl_Translate to translate a descriptive 
+%                 string into its corresponding index value.
+% Source        - a value that sets the trigger source (e.g. External (-1), 
+%                 Disable (0), 1, 2, 3, etc.). Use CsMl_Translate to translate 
+%                 a descriptive string into its corresponding index value.
+% ExtCoupling   - a value that sets the coupling for external trigger input 
+%                 (DC or AC). Use CsMl_Translate to translate a descriptive 
+%                 string into its corresponding index value. Note that
+%                 Channel numbers are just numbers (1, 2, 3, etc) not
+%                 names.
+% ExtRange      - the external trigger input range in full-scale millivolts
+%                 (e.g. 10000 = +/- 5 volt range).
+% ExtImpedance	- the external trigger impedance in Ohms. Set 1000000 for HiZ
+
+switch TriggerSatus
+    
+    case 'on'
 trig.Trigger            = 1;
 trig.Slope              = CsMl_Translate('Negative', 'Slope'); % Aixplorer Trig has a neg slope
 trig.Level              = 10; % in percent of the trig range (-100 to +100)
 trig.Source             = CsMl_Translate('External', 'Source');
 trig.ExtCoupling        = CsMl_Translate('DC', 'ExtCoupling');
 trig.ExtRange           = 10000; % Vpp in mV, 10000=+-5V
+    case 'off'
+trig.Trigger            = 1;
+trig.Slope              = CsMl_Translate('Negative', 'Slope'); % Aixplorer Trig has a neg slope
+trig.Level              = 0; % in percent of the trig range (-100 to +100)
+trig.Source             = 0;
+trig.ExtCoupling        = CsMl_Translate('DC', 'ExtCoupling');
+trig.ExtRange           = 10000; % Vpp in mV, 10000=+-5V      
+
+end
 
 [ret] = CsMl_ConfigureTrigger(handle, trig); % config Trig parameters
 CsMl_ErrorHandler(ret, 1, handle);
