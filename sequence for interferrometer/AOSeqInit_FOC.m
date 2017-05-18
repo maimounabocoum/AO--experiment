@@ -1,6 +1,10 @@
 % Sequence AO Foc JB 01-04-15 ( d'apres 03-03-2015 Marc) modified by
 % Maïmouna Bocoum 26 - 02 -2017
- clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
+%% Init program
+clear all; close all; clc
+w = instrfind; if ~isempty(w) fclose(w); delete(w); end
+
+clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
  AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
  addpath('D:\legHAL');

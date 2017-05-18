@@ -17,7 +17,7 @@ fs                          = 12e6;    % sampling frequency
 
 TiePie1.State_channels      = [1 0];    % Voies 1 et 2 activées
 TiePie1.Resolution          = 14;       % 14bits de résolution
-TiePie1.Nb_points           = 10000;    % Nombre de points acquis
+TiePie1.Nb_points           = 80000;    % Nombre de points acquis
 TiePie1.Sample_Frequency    = fs;       % Fréquence d'échantillonage
 TiePie1.Trigger_EXT1        = 1;        % On/Off
 time_cursor                 = [1800 1900]/fs; % only to extract phase and amplitude
@@ -29,11 +29,11 @@ disp(['t_{max} = ',num2str(1e6*TiePie1.Nb_points/fs),'\mu s'])
 % TiePie1.Yscale2 = 4; % Amplitude max voie 2 [-4 4]V
 
 % % Commandes GBF
-% TiePie1.Vpp = 5;
-% TiePie1.Frequency = 1e6;
-% TiePie1.Shape = 'BURST_SQUARE';
-% TiePie1.BurstCount = 100;
-% TiePie1.State = 'on';
+TiePie1.Vpp = 5;
+TiePie1.Frequency = 1e6;
+TiePie1.Shape = 'BURST_SQUARE';
+TiePie1.BurstCount = 100;
+TiePie1.State = 'on';
 
 %% GBF
  GBF1 =  GBF('Tektronix','AFG3101C','USB','0x0699::0x034B::C010648');
