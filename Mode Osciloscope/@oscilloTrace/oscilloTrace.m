@@ -22,7 +22,9 @@ classdef oscilloTrace
                % data  = zeros(Npoints,1);
                 obj.t          = (0:Npoints-1)*dt;
                 obj.z          = c*(obj.t);
-                obj.Hfig = figure;
+                
+                % initit GUI figure :
+                obj.Hfig = figure('Position',[30 60 1400 700]);
     
         end
         

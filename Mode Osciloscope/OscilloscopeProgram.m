@@ -22,7 +22,7 @@ function varargout = OscilloscopeProgram(varargin)
 
 % Edit the above text to modify the response to help OscilloscopeProgram
 
-% Last Modified by GUIDE v2.5 16-Apr-2017 02:13:29
+% Last Modified by GUIDE v2.5 18-May-2017 11:07:31
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -428,3 +428,10 @@ function legalselection_Callback(hObject, eventdata, handles)
 % hObject    handle to legalselection (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes during object creation, after setting all properties.
+function pushbutton1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to pushbutton1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
