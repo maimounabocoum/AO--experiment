@@ -68,17 +68,30 @@ acqInfo.SegmentCount    = NTrig; % Number of memory segments
 acqInfo.Depth           = ceil((acqInfo.SampleRate*1e-6*ceil(Prof/(common.constants.SoundSpeed*1e-3)))/32)*32; % Must be a multiple of 32
 
 
-%"Do not change" Parameters
+%====================== The acqInfo fields can include:
+%   SampleRate      - the rate at which to digitize the waveform
+%   ExtClock        - a flag to set external clocking on (1) or off (0)
+%   Mode            - acquisition mode (1 = Single, 2 = Dual, 4 = Quad, 8 = Octal)
+%   SegmentCount    - the number of segments to acquire
+%   Depth           - post-trigger depth, in samples
+%   SegmentSize     - post and pre-trigger depth
+%   TriggerTimeout  - how long to wait before forcing a trigger (in
+%                     microseconds). A value of -1 means wait indefinitely.
+%   TriggerHoldoff  - the amount of ensured pre-trigger data in samples
+%   TriggerDelay    - how long to delay the start of the depth counter
+%                     after the trigger event has occurred, in samples
+%   TimeStampConfig - the values for time stamp configuration
+
 acqInfo.ExtClock        = 0;
-acqInfo.Mode            = CsMl_Translate('Single', 'Mode');% Use only one channel
+acqInfo.Mode            = 1;%CsMl_Translate('Single', 'Mode');% Use only one channel
 acqInfo.SegmentSize     = acqInfo.Depth; % Must be a multiple of 32
-acqInfo.TriggerTimeout  = 2e6; % in µs
+acqInfo.TriggerTimeout  = 3e3; % in µs
 acqInfo.TriggerHoldoff  = 0; % Number of points during which the card ignores trigs
 acqInfo.TriggerDelay    = 0; % Number of points
 acqInfo.TimeStampConfig = 1; % Get the time at which each waveform was acquired
 % if non-zero, restart the time stamp counter at each acq.
 
-[ret] = CsMl_ConfigureAcquisition(handle, acqInfo);% config acq parameters
+[ret] = CsMl_ConfigureAcquisition(handle, acqInfo); % config acq parameters
 CsMl_ErrorHandler(ret, 1, handle);
 
 % initializes all the channels even though
@@ -94,7 +107,7 @@ for i = 1:sysinfo.ChannelCount
     chan(i).Filter      = 0; 
 end   
 
-% Sets channel 1
+% Overwrite setting for channel 1
 chan(1).Coupling        = CsMl_Translate('DC', 'Coupling');
 chan(1).InputRange      = 2*Range*1e3; % Vpp in mV
 

@@ -8,6 +8,7 @@ classdef oscilloTrace
         Nlines
         Lines
         SampleRate
+        Hfig
     end
     
     methods
@@ -21,6 +22,7 @@ classdef oscilloTrace
                % data  = zeros(Npoints,1);
                 obj.t          = (0:Npoints-1)*dt;
                 obj.z          = c*(obj.t);
+                obj.Hfig = figure;
     
         end
         

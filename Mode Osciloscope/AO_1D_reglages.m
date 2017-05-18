@@ -34,7 +34,7 @@ NTrig       = 1; %1000
 Prof        = 70; % mm
 
 %%====================== Parameters loop
-Nloop = 5;
+Nloop = 1;
 
 %-----------------------------------------------------------
 %% Gage Init parmaters
@@ -83,21 +83,20 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
 %   2 = Triggered but still busy acquiring
 %   3 = Data transfer is in progress
 
-close all
-Hfig = figure;
-
 clear MyMeasurement
 MyMeasurement = oscilloTrace(acqInfo.Depth,acqInfo.SegmentCount,SampleRate*1e6,c) ;
     raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     data  = zeros(acqInfo.Depth,1);
+% close all
+% Hfig = figure;
     
 for k = 1:Nloop
   tic    
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
    
-    SEQ = SEQ.startSequence('Wait',0);
-    close;
+%    SEQ = SEQ.startSequence('Wait',0);
+%    close;
     
    % SEQ = SEQ.startSequence();
     
