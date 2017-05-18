@@ -13,19 +13,19 @@
 %addpath('..\legHAL\')
 
 %% Parameters loop
-Nloop = 5;
+Nloop = 1000;
 %% Set Aixplorer parameters
 AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 % SRV = remoteDefineServer( 'extern' ,AixplorerIP,'9999');
 % SEQ = remoteGetUserSequence(SRV);
-
+decorrTime = 100000;
 %=======================  US Parameters =====================
 
-Volt        = 35; % V
+Volt        = 50; % V
 FreqSonde   = 6;  % MHz
 NbHemicycle = 8;
 X0          = 15; % mm
-Foc         = 35; % mm
+Foc         = 30; % mm
 NTrig       = 1000; %1000
 Prof        = 70; % mm
 
@@ -79,8 +79,9 @@ for k = 1:Nloop
   tic    
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
-    
-    SEQ = SEQ.startSequence();
+   
+    SEQ = SEQ.startSequence('Wait',0);
+    close;
     
     status = CsMl_QueryStatus(Hgage);
     
@@ -113,10 +114,11 @@ for k = 1:Nloop
    % MyMeasurement.SNR();
     MyMeasurement.ScreenAquisition(Hfig);
     SEQ = SEQ.stopSequence('Wait', 0);
+    
 toc
 end
 
 % saving datas:
-%MyMeasurement.saveobj('D:\Data\Mai\2017-04-14\1D oscilloscope\G10dB_1000av_X010mm_Volt40_PasseHaut200kHzPasseBas1MHz_Ref')
-
+%MyMeasurement.saveobj(['','ms.mat'])
+clear MyMeasurement
 SEQ = SEQ.quitRemote();

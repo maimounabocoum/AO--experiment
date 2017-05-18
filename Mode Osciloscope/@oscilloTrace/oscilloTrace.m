@@ -97,8 +97,8 @@ classdef oscilloTrace
               
               lambda = 1540./freq(10:end);
                plot(obj.z*1e3,LineAverage)
-               hold on 
-              plot(obj.z*1e3,LineAverage_filtered,'color','red')
+              % hold on 
+              %plot(obj.z*1e3,LineAverage_filtered,'color','red')
               hold off
 %               hl1=line(obj.z*1e3,LineAverage,LineAverage,'Color','blue');
 %               hl2=line(obj.z*1e3,smooth(LineAverage,10),'Color','r');
@@ -146,6 +146,8 @@ classdef oscilloTrace
                 ylabel('Power/Frequency (dB/Hz)')
                 hold off
 
+                
+                drawnow
             
         end
 

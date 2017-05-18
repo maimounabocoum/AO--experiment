@@ -15,10 +15,10 @@ offset = -3.8175;
 Tek_AFG_3101(sig,fe,T_rep,nb_cyc,duree,Vpp,offset);
 
 %%
-addpath O:\Instrument\Acquisition_TiePie\two_channel
+%addpath O:\Instrument\Acquisition_TiePie\two_channel
 
 
-Init_TiePie;
+%Init_TiePie;
 
 % Réglages paramètres carte TiePie
 T       = 2500;          % Durée d'acquisition (µs)
