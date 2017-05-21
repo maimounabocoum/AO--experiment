@@ -24,7 +24,7 @@ classdef oscilloTrace < handle
                 % by default, indexation in Gage starts at 0
                 obj.Lines      = zeros(Npoints,Nlines);
                % data  = zeros(Npoints,1);
-                obj.t          = (0:Npoints-1)*dt;
+                obj.t          = (0:(Nlines*Npoints-1))*dt;
                 obj.z          = c*(obj.t);
                 
             %% initialize GUI
@@ -33,6 +33,7 @@ classdef oscilloTrace < handle
 %% define callback functions inside the current class :
 set(obj.Hgui.stop,   'callback', @(src, event) stop_Callback(obj, src, event));
 set(obj.Hgui.update, 'callback', @(src, event) update_Callback(obj, src, event));
+set(obj.Hgui.save, 'callback', @(src, event) update_Callback(obj, src, event));
 % sets the figure close function. This lets the class know that
 % the figure wants to close and thus the class should cleanup in memory as
 % well :
@@ -95,13 +96,17 @@ set(obj.Hgui.figure1,'closerequestfcn', @(src,event) Close_fcn(obj, src, event))
             Nav = min(Nav,obj.Nlines);
             set(obj.Hgui.Nav,'string',num2str(Nav));
             
+            if get(obj.Hgui.unwrap,'value')
+            LineAverage = obj.Lines(:) ;
+            else
             LineAverage = sum(obj.Lines(:,1:Nav),2)/Nav;
+            end
             
                 Fs              = obj.SampleRate;
                 N               = length(LineAverage);
                 xdft            = fftshift( fft(LineAverage) ) ;
                 xdft            = xdft(N/2+1:end);
-                psdx            = 2*(1/Fs)^2 * (abs(xdft).^2/trapz(obj.t,LineAverage.^2));
+                psdx            = 2*(1/Fs)^2 * (abs(xdft).^2/trapz(obj.t(1:length(LineAverage)),LineAverage.^2));
                 freq            = (0:N/2-1)*Fs/N;
                 % (-N/2:N/2-1)*Fs/N; % freq(N/2+1)
 %                 n_smooth = 7;
@@ -125,11 +130,11 @@ set(obj.Hgui.figure1,'closerequestfcn', @(src,event) Close_fcn(obj, src, event))
               xchoice     = get(obj.Hgui.X_AO,'value')  ;
                 switch xchoiceList{xchoice}
                     case 'z ( mm )'
-              line(obj.z*1e3,LineAverage,'parent',obj.Hgui.axes1)
+              line(obj.z(1:length(LineAverage))*1e3,LineAverage,'parent',obj.Hgui.axes1)
               xlabel('parent',obj.Hgui.axes1,'z(mm)')
               ylabel('parent',obj.Hgui.axes1,'Volt')
                     case 't ( us )'
-              line(obj.t*1e6,LineAverage,'parent',obj.Hgui.axes1)
+              line(obj.t(1:length(LineAverage))*1e6,LineAverage,'parent',obj.Hgui.axes1)
               xlabel('parent',obj.Hgui.axes1,'t(\mu s)')
               ylabel('parent',obj.Hgui.axes1,'Volt')  
                 end
@@ -148,17 +153,17 @@ set(obj.Hgui.figure1,'closerequestfcn', @(src,event) Close_fcn(obj, src, event))
                   case 'wavelength'
                    
               lambda = 1540./freq(2:end);
-              trapz(lambda,psdx(2:end)./(lambda'.^2)*1540)
+             % trapz(lambda,psdx(2:end)./(lambda'.^2)*1540)
               line(lambda*1e3,psdx(2:end)./(lambda'.^2)*1540,'parent',obj.Hgui.axes2)
               xlabel('parent',obj.Hgui.axes2,'\lambda (mm)')
-              set(obj.Hgui.axes2, 'YScale') % 'log'
+              set(obj.Hgui.axes2, 'XScale','log') % 'log'
                   case 'frequency'
                       
-              trapz(freq*1e-6,psdx*1e6)
+              %trapz(freq*1e-6,psdx*1e6)
               line(freq*1e-6,psdx*1e6,'parent',obj.Hgui.axes2)
               xlabel('parent',obj.Hgui.axes2,'f (MHz)')
               ylabel('parent',obj.Hgui.axes2,'PSD(energy/MHz)')
-              
+              set(obj.Hgui.axes2, 'XScale','linear')
               end            
             
         end
