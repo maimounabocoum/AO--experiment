@@ -22,7 +22,7 @@ function varargout = oscillo_gui(varargin)
 
 % Edit the above text to modify the response to help oscillo_gui
 
-% Last Modified by GUIDE v2.5 21-May-2017 17:53:21
+% Last Modified by GUIDE v2.5 21-May-2017 17:56:36
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -216,3 +216,10 @@ function foldername_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in loading.
+function loading_Callback(hObject, eventdata, handles)
+% hObject    handle to loading (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

@@ -41,7 +41,7 @@ Nloop = 1;
 %----------------------------------------------------------------------
 Range = 1; % V
 SampleRate = 10; % MHz
-TriggerSatus = 'off'; % 'on' or 'off' 
+TriggerSatus = 'on'; % 'on' or 'off' 
 
 
 
@@ -87,19 +87,15 @@ clear MyMeasurement
 MyMeasurement = oscilloTrace(acqInfo.Depth,acqInfo.SegmentCount,SampleRate*1e6,c) ;
     raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     data  = zeros(acqInfo.Depth,1);
-% close all
-% Hfig = figure;
     
 for k = 1:Nloop
   tic    
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
    
-%    SEQ = SEQ.startSequence('Wait',0);
-%    close;
-    
-   % SEQ = SEQ.startSequence();
-    
+    SEQ = SEQ.startSequence('Wait',0);
+    close;
+  
     status = CsMl_QueryStatus(Hgage);
     
     while status ~= 0
@@ -119,7 +115,7 @@ for k = 1:Nloop
         
        % MyMeasurement = MyMeasurement.Addline(actual.ActualStart,actual.ActualLength,datatmp,LineNumber);
        MyMeasurement.Lines((1+actual.ActualStart):actual.ActualLength,LineNumber) = datatmp' ;
-       drawnow
+
 %        data = data + (1/NTrig)*datatmp';
 %        raw(:,ii) = datatmp';
         
@@ -129,15 +125,18 @@ for k = 1:Nloop
     CsMl_ErrorHandler(ret, 1, Hgage);
     
     
-   % MyMeasurement.SNR();
-    MyMeasurement.ScreenAquisition(Hfig);
-   % SEQ = SEQ.stopSequence('Wait', 0);
+   MyMeasurement.ScreenAquisition();
+   SEQ = SEQ.stopSequence('Wait', 0);    
+if MyMeasurement.IsRunning == 0
+    break;
+end
+   
     
 toc
 end
 
-% command line to force a trigger on Gage :
-CsMl_ForceCapture(Hgage);
+%% command line to force a trigger on Gage :
+%CsMl_ForceCapture(Hgage);
 
 
 % saving datas:

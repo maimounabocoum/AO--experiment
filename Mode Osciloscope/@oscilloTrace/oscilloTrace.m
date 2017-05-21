@@ -34,6 +34,8 @@ classdef oscilloTrace < handle
 set(obj.Hgui.stop,   'callback', @(src, event) stop_Callback(obj, src, event));
 set(obj.Hgui.update, 'callback', @(src, event) update_Callback(obj, src, event));
 set(obj.Hgui.save, 'callback', @(src, event) save_Callback(obj, src, event));
+set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event));
+
 % sets the figure close function. This lets the class know that
 % the figure wants to close and thus the class should cleanup in memory as
 % well :
@@ -180,6 +182,10 @@ set(obj.Hgui.figure1,'closerequestfcn', @(src,event) Close_fcn(obj, src, event))
             obj.IsRunning = 0;
         end
         
+        function obj = loading_Callback(obj, ~, ~)
+            test = 1
+        end
+        
         function obj = save_Callback(obj, ~, ~)
             foldername = get(obj.Hgui.foldername,'string');
             filename = get(obj.Hgui.filename,'string');
@@ -189,8 +195,8 @@ set(obj.Hgui.figure1,'closerequestfcn', @(src,event) Close_fcn(obj, src, event))
                set(obj.Hgui.foldername,'string',foldername);
                end
             end
-            
-         %   obj.saveobj([foldername,'\',filename,'.mat']);
+            [foldername,'\',filename,'.mat']
+            obj.saveobj([foldername,'\',filename,'.mat']);
                 
              
             
