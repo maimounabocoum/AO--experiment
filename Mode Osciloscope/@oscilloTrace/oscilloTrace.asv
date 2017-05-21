@@ -151,14 +151,14 @@ set(obj.Hgui.figure1,'closerequestfcn', @(src,event) Close_fcn(obj, src, event))
               trapz(lambda,psdx(2:end)./(lambda'.^2)*1540)
               line(lambda*1e3,psdx(2:end)./(lambda'.^2)*1540,'parent',obj.Hgui.axes2)
               xlabel('parent',obj.Hgui.axes2,'\lambda (mm)')
-              set(obj.Hgui.axes2, 'XScale','log') % 'log'
+              set(obj.Hgui.axes2, 'YScale') % 'log'
                   case 'frequency'
                       
               trapz(freq*1e-6,psdx*1e6)
               line(freq*1e-6,psdx*1e6,'parent',obj.Hgui.axes2)
               xlabel('parent',obj.Hgui.axes2,'f (MHz)')
               ylabel('parent',obj.Hgui.axes2,'PSD(energy/MHz)')
-              set(obj.Hgui.axes2, 'XScale','linear')
+              
               end            
             
         end
