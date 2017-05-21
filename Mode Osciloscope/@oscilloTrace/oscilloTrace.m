@@ -181,8 +181,8 @@ set(obj.Hgui.figure1,'closerequestfcn', @(src,event) Close_fcn(obj, src, event))
         end
         
         function obj = save_Callback(obj, ~, ~)
-            foldername = get(obj.Hgui.foldername,'string')
-            %filename = get(obj.Hgui.filename,'string');
+            foldername = get(obj.Hgui.foldername,'string');
+            filename = get(obj.Hgui.filename,'string');
             if ~isdir(foldername)
                foldername =  uigetdir();
                if foldername~=0
