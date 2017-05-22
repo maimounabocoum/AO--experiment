@@ -195,7 +195,9 @@ set(obj.Hgui.figure1,'closerequestfcn', @(src,event) Close_fcn(obj, src, event))
                set(obj.Hgui.foldername,'string',foldername);
                end
             end
-            [foldername,'\',filename,'.mat']
+            if exist([foldername,'\',filename,'.mat']) > 0
+               filename(end)
+            end
             obj.saveobj([foldername,'\',filename,'.mat']);
                 
              
