@@ -32,9 +32,9 @@ X0          = 15; % mm
 Foc         = 30; % mm
 NTrig       = 1; %1000
 Prof        = 70; % mm
-
 %%====================== Parameters loop
-Nloop = 1;
+Nloop = 1000;
+
 
 %-----------------------------------------------------------
 %% Gage Init parmaters
@@ -72,8 +72,8 @@ transfer.Channel        = 1;
 %% Initialize Gage Acquisition card
 % %% Sequence execution
 % % ============================================================================ %
-% SEQ = InitOscilloSequence(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc , X0 , NTrig);
-% SEQ = SEQ.loadSequence();
+ SEQ = InitOscilloSequence(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc , X0 , NTrig);
+ SEQ = SEQ.loadSequence();
 c = common.constants.SoundSpeed ; % sound velocity in m/s
 
 %%========================================== Acquire data==================
@@ -88,17 +88,16 @@ MyMeasurement = oscilloTrace(acqInfo.Depth,acqInfo.SegmentCount,SampleRate*1e6,c
     raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     data  = zeros(acqInfo.Depth,1);
 % close all
-% Hfig = figure;
+ Hfig = figure;
     
 for k = 1:Nloop
   tic    
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
    
-%    SEQ = SEQ.startSequence('Wait',0);
-%    close;
-    
-   % SEQ = SEQ.startSequence();
+    SEQ = SEQ.startSequence('Wait',0);
+    close;
+   
     
     status = CsMl_QueryStatus(Hgage);
     
@@ -131,7 +130,7 @@ for k = 1:Nloop
     
    % MyMeasurement.SNR();
     MyMeasurement.ScreenAquisition(Hfig);
-   % SEQ = SEQ.stopSequence('Wait', 0);
+    SEQ = SEQ.stopSequence('Wait', 0);
     
 toc
 end
@@ -143,4 +142,4 @@ CsMl_ForceCapture(Hgage);
 % saving datas:
 %MyMeasurement.saveobj(['','ms.mat'])
 clear MyMeasurement
-%SEQ = SEQ.quitRemote();
+SEQ = SEQ.quitRemote();

@@ -8,7 +8,7 @@ classdef oscilloTrace
         Nlines
         Lines
         SampleRate
-        Hfig
+       % Hfig
     end
     
     methods
@@ -24,7 +24,7 @@ classdef oscilloTrace
                 obj.z          = c*(obj.t);
                 
                 % initit GUI figure :
-                obj.Hfig = figure('Position',[30 60 1400 700]);
+                %obj.Hfig = figure('Position',[30 60 1400 700]);
     
         end
         
