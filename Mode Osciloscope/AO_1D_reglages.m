@@ -27,9 +27,9 @@ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 
 Volt        = 50; % V
 FreqSonde   = 6;  % MHz
-NbHemicycle = 8;
+NbHemicycle = 10;
 X0          = 15; % mm
-Foc         = 30; % mm
+Foc         = 25; % mm
 NTrig       = 1000; %1000
 Prof        = 70; % mm
 
@@ -86,7 +86,6 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
 clear MyMeasurement
 MyMeasurement = oscilloTrace(acqInfo.Depth,acqInfo.SegmentCount,SampleRate*1e6,c) ;
     raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
-    data  = zeros(acqInfo.Depth,1);
     
 for k = 1:Nloop
   tic    
@@ -126,7 +125,9 @@ for k = 1:Nloop
     
     
    MyMeasurement.ScreenAquisition();
-   SEQ = SEQ.stopSequence('Wait', 0);    
+   
+   SEQ = SEQ.stopSequence('Wait', 0);  
+   
 if MyMeasurement.IsRunning == 0
     break;
 end
