@@ -1,4 +1,4 @@
-function [ret,handle] = InitOscilloGage(NTrig,Prof,SamplingRate,Range,TriggerSatus)
+function [ret,handle,acqInfo,sysinfo] = InitOscilloGage(NTrig,Prof,SamplingRate,Range,TriggerSatus)
 % Set the acquisition, channel and trigger parameters for the system and
 % commit the parameters to the driver.
 % AO     = structure with the different parameters
@@ -155,5 +155,13 @@ CsMl_ErrorHandler(ret, 1, handle);
 
 ret = CsMl_Commit(handle);
 CsMl_ErrorHandler(ret, 1, handle);
+
+[ret, acqInfo] = CsMl_QueryAcquisition(handle);
+CsMl_ErrorHandler(ret, 1, handle);
+
+[ret, sysinfo] = CsMl_GetSystemInfo(handle); % Get card infos
+CsMl_ErrorHandler(ret, 1, handle);
+
+CsMl_ResetTimeStamp(handle);
 
 ret = 1;

@@ -1,14 +1,14 @@
-function varargout = AOSeqInit_FOC(A0)
-% Sequence AO Foc JB 01-04-15 ( d'apres 03-03-2015 Marc)
-% INITIALIZATION of the US Sequence
+% Sequence AO Foc JB 01-04-15 ( d'apres 03-03-2015 Marc) modified by
+% Maïmouna Bocoum 26 - 02 -2017
+%% Init program
+clear all; close all; clc
+w = instrfind; if ~isempty(w) fclose(w); delete(w); end
 
-% ATTENTION !! Même si la séquence US n'écoute pas, il faut quand même
-% définir les remote.fc et remote.rx, ainsi que les rxId des events.
-%
-% DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
- clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
+clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
- AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
+ addpath('D:\legHAL');
+ addPathLegHAL();
  
  % get loaded sequence :
  %srv = remoteDefineServer('extern',AixplorerIP, 9999);
@@ -20,68 +20,62 @@ function varargout = AOSeqInit_FOC(A0)
  display('Initializing remote control')
 
 
-% parameter input :
-    Volt            = A0.Volt(A0.val);
-    FreqSonde       = A0.FreqSonde(A0.val);
-    NbHemicycle     = A0.NbHemicycle(A0.val);
-    X0              = A0.X0(A0.val);
-    Foc             = A0.Foc ;
-    ScanLength      = A0.ScanLength(A0.val);
-    NTrig           = A0.NTrig(A0.val);
-    Prof            = A0.Prof(A0.val);
+% user defined parameters :
+    Volt            = 50; % Volts
+    f0              = 10;  % MHz
+    NbHemicycle     = 8;  % number of have cycles
+    X0              = 15;  % mm : position of min actuator for the scan
+    Foc             = 35; % mm
+    ScanLength      = 0.2; % mm
+    NTrig           = 200000; % number of repetition
+    Z1              = 10;   % mm
+    Z2              = 70;   % mm
 
-NoOp       = 500;             % µs minimum time between two US pulses, (5 by default ??)
 
-%% Probe parameters
-CP.ImgVoltage = Volt;             % imaging voltage [V]
-CP.ImgCurrent = 1;                % security limit for imaging current [A]
-
+%% System parameters import :
 % ======================================================================= %
-CP.TwFreq     = FreqSonde;       % MHz
-CP.NbHcycle   = NbHemicycle;     %
-CP.PosX       = X0;              % mm
-CP.PosZ       = Foc;             % mm
-CP.TxWidth    = Foc/2;           % mm
-CP.Prof       = Prof;            % mm
-CP.ScanLength = ScanLength;      % mm
+c =           common.constants.SoundSpeed ; %[m/s]
+SampFreq   =  system.hardware.ClockFreq; %NE PAS MODIFIER % emitted signal sampling = 180 in [MHz]
+NbElemts =    system.probe.NbElemts ; 
+pitch =       system.probe.Pitch ; % in mm
+MinNoop =     system.hardware.MinNoop ;
 
-c = common.constants.SoundSpeed ; % [m/s]
+%% Focusing parameters
+% ======================================================================= %
+TxWidth       = Foc/2;           % mm : effective width for focus line
+PropagationTime = (Z2)/(c)*1e3 ; % duration for one line in \mu s
 
-CP.SampFreq   = system.hardware.ClockFreq ;  % NE PAS MODIFIER % emitted signal sampling = 180 in [MHz]
-CP.PRF        = common.constants.SoundSpeed*1e-3/CP.Prof ;  % pulse frequency repetition [MHz]
 
-CP.FIRBandwidth = 90;            % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
-CP.DutyCycle  = 1;               % duty cycle [0, 1]
+NoOp         = 500;             % µs minimum time between two US pulses, (5 by default ??)
+FIRBandwidth = 90;            % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
+RxFreq       = 6;                % Receiving center frequency MHz , ??
 
-CP.TrigOut    = 10; %ceil(CP.Prof/(common.constants.SoundSpeed*1e-3));  %µs ??
-CP.Repeat     = NTrig ;              % a voir
-CP.NoOp       = NoOp ;             % µs minimum time between two US pulses
-CP.Pause      = max(CP.NoOp-ceil(1/CP.PRF),system.hardware.MinNoop); % pause duration in µs
-CP.RxFreq     = 60;              % Receiving center frequency MHz , ??
+TrigOut    = ceil(PropagationTime) + 20;  % µs
+Pause      = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause duration in µs
 
 % ======================================================================= %
 %% Codage en arbitrary : delay matrix and waveform
+dt_s = 1/(SampFreq);      % unit us
+pulseDuration = NbHemicycle*(0.5/f0); % US inital pulse duration in us
 
-%actuator pitch :
-pitch = system.probe.Pitch ; % in mm
-dt_s = 1/(CP.SampFreq);      % unit us
 
-% Delay [us]
+%% Delay Law [us]
+% ======================================================================= %
 % c[m/s] -> [mm/us] ; eg factor 1e-3 in the above expression
-Delay = sqrt(CP.PosZ^2+(CP.TxWidth/2)^2)/(c*1e-3) ...
-        - 1/(c*1e-3)*sqrt(CP.PosZ^2+((0:pitch:CP.TxWidth)-CP.TxWidth/2).^2);
-    
-    
-      
-%  figure;
-%  plot(Delay,'r')
+Delay = sqrt(Foc^2+(TxWidth/2)^2)/(c*1e-3) ...
+        - 1/(c*1e-3)*sqrt(Foc^2+((0:pitch:TxWidth)-TxWidth/2).^2);
+     
+%   figure;
+%   plot(Delay,'r')
+%   xlabel('actuator')
+%   ylabel('delays (\mu s)')
 
 % number of steps offset dt_s for each actuators position : 
  DlySmpl = round(Delay/dt_s); 
 
  % common waveform for emission, square envoppe - non apodized:
- T_Wf = 0:dt_s:0.5*CP.NbHcycle/CP.TwFreq;
- Wf = sin(2*pi*CP.TwFreq*T_Wf); 
+ T_Wf = 0:dt_s:0.5*NbHemicycle/f0;
+ Wf = sin(2*pi*f0*T_Wf); 
  
  % number of time-points necessary = points in waveform + maximum delay
  % offset
@@ -97,12 +91,12 @@ Delay = sqrt(CP.PosZ^2+(CP.TxWidth/2)^2)/(c*1e-3) ...
  
  WF_mat_sign = sign(WF_mat); % l'aixplorer code sur 3 niveaux [-1,0,1]
 
-figure(470);
-imagesc((0:pitch:CP.TxWidth)-CP.TxWidth/2,1:N_T, WF_mat);
-grid on
-title('input waveform');
-xlabel('position x');
-ylabel('offset num ??');
+% figure(470);
+% imagesc((0:pitch:TxWidth)-TxWidth/2,1:N_T, WF_mat);
+% grid on
+% title('input waveform');
+% xlabel('position x');
+% ylabel('offset num ??');
 
 % ======================================================================= %
 %% Arbitrary definition of US events
@@ -110,52 +104,53 @@ ylabel('offset num ??');
 % % Elusev
 
 % 
- FC = remote.fc('Bandwidth', CP.FIRBandwidth , 0);
- RX = remote.rx('fcId', 1, 'RxFreq', CP.RxFreq, 'QFilter', 2, 'RxElemts', 0, 0);
+ FC = remote.fc('Bandwidth', FIRBandwidth , 0);
+ RX = remote.rx('fcId', 1, 'RxFreq', RxFreq, 'QFilter', 2, 'RxElemts', 0, 0);
 
-    if round((CP.PosX+CP.ScanLength)/system.probe.Pitch) > system.probe.NbElemts
-
+    if round((X0+ScanLength)/pitch) > NbElemts
         warning('Scan length too long, set to maximum value');
-        CP.ScanLength=system.probe.NbElemts*system.probe.Pitch-CP.PosX;
+        ScanLength = NbElemts*pitch-X0;
 
     end
 
-for nbs = 1:round(CP.ScanLength/system.probe.Pitch)
+for Nloop = 1:round(ScanLength/pitch)
     
-    PosX     = CP.PosX + (nbs-1)*system.probe.Pitch; % center position for the line
-    EvtDur   = ceil(0.5*CP.NbHcycle/CP.TwFreq + max(Delay) + 1/CP.PRF);
+    PosX     = X0 + (Nloop-1)*pitch; % center position for the line in mm
+    % EvDur = exciting pulse duration + law law + scan line duration
+    % PropagationTime , in \mu s
+    EvtDur   = ceil( pulseDuration + max(Delay) + PropagationTime );
 
-    MedElmt  = round(PosX/system.probe.Pitch);
+    MedElmt  = round(PosX/pitch);
     
-    TxElemts = MedElmt-round(CP.TxWidth/(2*system.probe.Pitch)):...
-        MedElmt+floor(CP.TxWidth/(2*system.probe.Pitch));
+    TxElemts = MedElmt-round(TxWidth/(2*pitch)):...
+               MedElmt+floor(TxWidth/(2*pitch));
     
-    WFtmp    = WF_mat_sign( : , ( TxElemts>0 & TxElemts<=system.probe.NbElemts ) );
+    WFtmp    = WF_mat_sign( : , ( TxElemts>0 & TxElemts<= NbElemts ) );
     
     %     figure(471)
     %     imagesc(WFtmp)
     %     drawnow
     
     % Flat TX
-    TXList{nbs} = remote.tx_arbitrary('txClock180MHz', 1,'twId',nbs,'Delays',0);
+    TXList{Nloop} = remote.tx_arbitrary('txClock180MHz', 1,'twId',Nloop,'Delays',0);
     
     % Arbitrary TW
-    TWList{nbs} = remote.tw_arbitrary( ...
+    TWList{Nloop} = remote.tw_arbitrary( ...
         'Waveform',WFtmp', ...
         'RepeatCH', 0, ...
         'repeat',0 , ...
         'repeat256', 0, ...
         'ApodFct', 'none', ...
-        'TxElemts',TxElemts( TxElemts>0 & TxElemts<=system.probe.NbElemts ), ...
-        'DutyCycle', CP.DutyCycle, ...
+        'TxElemts',TxElemts( TxElemts>0 & TxElemts <= NbElemts ), ...
+        'DutyCycle', 1, ... % duty cycle [0, 1]
         0);
     
     
     % Event
-    EVENTList{nbs} = remote.event( ...
-        'txId', nbs, ...
+    EVENTList{Nloop} = remote.event( ...
+        'txId', Nloop, ...
         'rxId', 1, ...
-        'noop', CP.Pause, ...
+        'noop', Pause, ...
         'numSamples', 128, ...
         'skipSamples', 0, ... 128, ...
         'duration', EvtDur, ...
@@ -173,9 +168,9 @@ ELUSEV = elusev.elusev( ...
     'rx',           RX,...
     'fc',           FC,...
     'event',        EVENTList, ...
-    'TrigOut',      CP.TrigOut, ... 0,...
+    'TrigOut',      TrigOut, ... 0,...
     'TrigIn',       0,...% trigged sequence 
-    'TrigAll',      1, ...% 0: sends output trigger at first emission 
+    'TrigAll',      0, ...% 0: sends output trigger at first emission 
     'TrigOutDelay', 0, ...
     0);
 
@@ -197,15 +192,15 @@ ACMO = acmo.acmo( ...
  
 % % Probe Param
 TPC = remote.tpc( ...
-    'imgVoltage', CP.ImgVoltage, ...
-    'imgCurrent', CP.ImgCurrent, ...
+    'imgVoltage', Volt, ...
+    'imgCurrent', 1, ...% security limit for imaging current [A]
     0);
 % 
 % % USSE for the sequence
 SEQ = usse.usse( ...
     'TPC', TPC, ...
     'acmo', ACMOList, ...    'Loopidx',1, ...
-    'Repeat', CP.Repeat+1, ...    'Popup',0, ...
+    'Repeat', NTrig, ...    'Popup',0, ...
     'DropFrames', 0, ...
     'Loop', 0, ...
     'DataFormat', 'FF', ...
@@ -235,37 +230,9 @@ SEQ = usse.usse( ...
  SEQ = SEQ.loadSequence();
  display('Load OK');
  
- 
-% % Set output variables
-% 
-% to be erased :
 
+ SEQ = SEQ.startSequence();
 
-  varargout{1}   = SEQ;  % loaded sequence 
-  varargout{2}   = CP;   % Structure containing the Parameters
-
-  
-% % ======================================================================= %
-% %% Save the Sequence
-% % ======================================================================= %
-
-SEQfilename=['D:\Codes Matlab\AcoustoOptique\SEQdir\SEQ' ...
-    '_Foc_'    num2str(CP.PosZ) ...
-    '_Volt_'   num2str(CP.ImgVoltage) ...
-    '_Freq_'   num2str(CP.TwFreq) ...
-    '_NbHem_'  num2str(CP.NbHcycle) ...
-    '_X0_'     num2str(fix(CP.PosX)) 'p' num2str(round(abs(CP.PosX-fix(CP.PosX))*100)) ...
-    '_Length_' num2str(fix(CP.ScanLength)) 'p' num2str(round(abs(CP.ScanLength-fix(CP.ScanLength))*100)) ...
-    '_Prof_'   num2str(fix(CP.Prof)) 'p' num2str(round(abs(CP.Prof-fix(CP.Prof))*100)) ...
-    '_NTrig_'  num2str(CP.Repeat) ...
-    '_NoOp_'   num2str(CP.NoOp) ...
-    '.mat'];
-
-
-if ~exist(SEQfilename,'file');
-    save(SEQfilename,'CP', 'SEQ');
-    display('Sequence saved');
-end
-
-
+%SEQ = SEQ.stopSequence( 'Wait', 1 );
+%SEQ = SEQ.quitRemote();
 disp('-------------Ready to use-------------------- ')

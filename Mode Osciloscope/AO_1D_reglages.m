@@ -26,7 +26,7 @@ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 %=======================  US Parameters =====================
 
 Volt        = 50; % V
-FreqSonde   = 6;  % MHz
+FreqSonde   = 4;  % MHz
 NbHemicycle = 10;
 X0          = 15; % mm
 Foc         = 25; % mm
@@ -41,40 +41,25 @@ Nloop = 1000;
 %----------------------------------------------------------------------
 Range = 1; % V
 SampleRate = 10; % MHz
-TriggerSatus = 'on'; % 'on' or 'off' 
+GageActive = 'off'; % 'on' or 'off' 
 
 
 
 
-[ret,Hgage] = InitOscilloGage(NTrig,Prof,SampleRate,Range,TriggerSatus);
-
-[ret, acqInfo] = CsMl_QueryAcquisition(Hgage);
-CsMl_ErrorHandler(ret, 1, Hgage);
-
-[ret, sysinfo] = CsMl_GetSystemInfo(Hgage); % Get card infos
-CsMl_ErrorHandler(ret, 1, Hgage);
-
-CsMl_ResetTimeStamp(Hgage);
-
+[ret,Hgage,acqInfo,sysinfo] = InitOscilloGage(NTrig,Prof,SampleRate,Range,GageActive);
 
 % Set transfer parameters
 transfer.Mode           = CsMl_Translate('Default', 'TxMode');
 transfer.Start          = 0;
 transfer.Length         = acqInfo.SegmentSize;
 transfer.Channel        = 1;
-% sysinfo : uncomment to get board information
-%MaskedMode              = bitand(acqInfo.Mode, 15); % Check acq. mode
-%ChannelSkip             = ChannelsPerBoard / MaskedMode; % number of channels that are skipped during
-% the transfer step.
-
-
 
 %% Initialize Gage Acquisition card
 % %% Sequence execution
 % % ============================================================================ %
  SEQ = InitOscilloSequence(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc , X0 , NTrig);
  SEQ = SEQ.loadSequence();
-c = common.constants.SoundSpeed ; % sound velocity in m/s
+ c = common.constants.SoundSpeed ; % sound velocity in m/s
 
 %%========================================== Acquire data==================
 % Possible return values for status are:
@@ -84,7 +69,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
 %   3 = Data transfer is in progress
 
 clear MyMeasurement
-MyMeasurement = oscilloTrace(acqInfo.Depth,acqInfo.SegmentCount,SampleRate*1e6,c) ;
+MyMeasurement = oscilloTrace(acqInfo.Depth,acqInfo.SegmentCount,acqInfo.SampleRate,c) ;
     raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     
 for k = 1:Nloop
@@ -114,13 +99,12 @@ for k = 1:Nloop
         
        % MyMeasurement = MyMeasurement.Addline(actual.ActualStart,actual.ActualLength,datatmp,LineNumber);
        MyMeasurement.Lines((1+actual.ActualStart):actual.ActualLength,LineNumber) = datatmp' ;
-
-%        data = data + (1/NTrig)*datatmp';
-%        raw(:,ii) = datatmp';
         
     end
 
-    
+%        y = sum(MyMeasurement.Lines')/NTrig;
+%        n = round(length(y)*0.66);
+%        Err= std(y(n:end))
     CsMl_ErrorHandler(ret, 1, Hgage);
     
     
