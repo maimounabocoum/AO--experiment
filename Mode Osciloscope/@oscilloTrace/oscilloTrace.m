@@ -199,6 +199,7 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
               set(obj.Hgui.axes2, 'YScale','linear')   ;
               end
             
+              drawnow
         end
 
 

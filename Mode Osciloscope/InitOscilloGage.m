@@ -85,7 +85,14 @@ acqInfo.Depth           = ceil((acqInfo.SampleRate*1e-6*ceil(Prof/(common.consta
 acqInfo.ExtClock        = 0;
 acqInfo.Mode            = 1;%CsMl_Translate('Single', 'Mode');% Use only one channel
 acqInfo.SegmentSize     = acqInfo.Depth; % Must be a multiple of 32
-acqInfo.TriggerTimeout  = 3e3; % in µs
+
+switch TriggerSatus   
+    case 'on'
+acqInfo.TriggerTimeout  = 3e3; % in ms
+    case 'off'
+acqInfo.TriggerTimeout  = 1; % in ms : set to natural Rep Rate of 2kHz       
+end
+
 acqInfo.TriggerHoldoff  = 0; % Number of points during which the card ignores trigs
 acqInfo.TriggerDelay    = 0; % Number of points
 acqInfo.TimeStampConfig = 1; % Get the time at which each waveform was acquired

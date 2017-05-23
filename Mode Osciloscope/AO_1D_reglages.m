@@ -42,7 +42,7 @@ Nloop = 1000;
 Range = 1; % V
 SampleRate = 10; % MHz
 GageActive = 'off'; % 'on' or 'off' 
-
+AIXPLORER_Active = 'off'; % 'on' or 'off' 
 
 
 
@@ -57,8 +57,11 @@ transfer.Channel        = 1;
 %% Initialize Gage Acquisition card
 % %% Sequence execution
 % % ============================================================================ %
+switch AIXPLORER_Active
+    case 'on'
  SEQ = InitOscilloSequence(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc , X0 , NTrig);
  SEQ = SEQ.loadSequence();
+end
  c = common.constants.SoundSpeed ; % sound velocity in m/s
 
 %%========================================== Acquire data==================
@@ -70,15 +73,20 @@ transfer.Channel        = 1;
 
 clear MyMeasurement
 MyMeasurement = oscilloTrace(acqInfo.Depth,acqInfo.SegmentCount,acqInfo.SampleRate,c) ;
-    raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     
 for k = 1:Nloop
   tic    
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
    
+    switch AIXPLORER_Active
+    case 'on'
     SEQ = SEQ.startSequence('Wait',0);
     close;
+    end
+    
+    CsMl_ForceCapture(Hgage);
+
   
     status = CsMl_QueryStatus(Hgage);
     
@@ -92,12 +100,10 @@ for k = 1:Nloop
 
     for LineNumber = 1:acqInfo.SegmentCount
         
-        transfer.Segment       = LineNumber;                        % number of the memory segment to be read
+        transfer.Segment       = LineNumber ;                       % number of the memory segment to be read
         [ret, datatmp, actual] = CsMl_Transfer(Hgage, transfer);    % transfer
                                                                     % actual contains the actual length of the acquisition that may be
                                                                     % different from the requested one.
-        
-       % MyMeasurement = MyMeasurement.Addline(actual.ActualStart,actual.ActualLength,datatmp,LineNumber);
        MyMeasurement.Lines((1+actual.ActualStart):actual.ActualLength,LineNumber) = datatmp' ;
         
     end
@@ -110,7 +116,10 @@ for k = 1:Nloop
     
    MyMeasurement.ScreenAquisition();
    
+   switch AIXPLORER_Active
+   case 'on'
    SEQ = SEQ.stopSequence('Wait', 0);  
+   end
    
 if MyMeasurement.IsRunning == 0
     break;
@@ -121,7 +130,7 @@ toc
 end
 
 %% command line to force a trigger on Gage :
-%CsMl_ForceCapture(Hgage);
+
 
 
 % saving datas:
