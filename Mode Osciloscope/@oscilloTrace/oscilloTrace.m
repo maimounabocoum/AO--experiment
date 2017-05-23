@@ -90,14 +90,15 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
         function [] = ScreenAquisition(obj)
             % does the figue handle exist :
             %   set figure properties :
-            Nav = str2double( get(obj.Hgui.Nav,'string') );          
             
-            if isnan(Nav)
-            set(obj.Hgui.Nav,'string','1')
-            Nav = 1;
-            end
-            Nav = min(Nav,obj.Nlines);
-            set(obj.Hgui.Nav,'string',num2str(Nav));
+            %% number of average to screen out :
+            Nav = str2double( get(obj.Hgui.Nav,'string') );           
+                    if isnan(Nav)
+                    set(obj.Hgui.Nav,'string','1')
+                    Nav = 1;
+                    end
+                    Nav = min(Nav,obj.Nlines);
+                    set(obj.Hgui.Nav,'string',num2str(Nav));
             
             if get(obj.Hgui.unwrap,'value')
             LineAverage = obj.Lines(:) ;
@@ -106,22 +107,25 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
             end
             
 
-            Fs              = obj.SampleRate;
-            N               = length(LineAverage);
-            xdft            = fftshift( fft(LineAverage) ) ;
-            freq            = (-N/2:N/2-1)*Fs/N;
+%             Fs              = obj.SampleRate;
+%             N               = length(LineAverage);
+%             xdft            = fftshift( fft(LineAverage) ) ;
+%             freq            = (-N/2:N/2-1)*Fs/N;
             % get cursors cut off
-            f_highpass = str2double( get(obj.Hgui.highPass,'string') );
-            f_lowwpass = str2double( get(obj.Hgui.LowPass,'string') );
+%             f_highpass = str2double( get(obj.Hgui.highPass,'string') );
+%             f_lowwpass = str2double( get(obj.Hgui.LowPass,'string') );
             
-            xdft(abs(freq) < f_lowwpass) = 0 ;
-            xdft(abs(freq) > f_highpass) = 0 ;
-            LineAverage_filtered = ifft(ifftshift(xdft)) ;
+%             xdft(abs(freq) < f_lowwpass) = 0 ;
+%             xdft(abs(freq) > f_highpass) = 0 ;
+            %LineAverage_filtered = ifft(ifftshift(xdft)) ;
             
-            xdft            = xdft(N/2+1:end);
-            psdx            = 2*(1/Fs)^2 * (abs(xdft).^2/trapz(obj.t(1:length(LineAverage)),LineAverage.^2));
-            freq            = (0:N/2-1)*Fs/N;
+           % xdft            = xdft(N/2+1:end);
+            xdft           = obj.fourier(obj.Lines(:));
+            psdx = abs(xdft).^2 ;
+            %psdx            = 2*(1/Fs)^2 * (abs(xdft).^2/trapz(obj.t(1:length(LineAverage)),LineAverage.^2));
             
+            %freq            = (0:N/2-1)*Fs/N;
+
 
             
 
@@ -139,8 +143,7 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
 %                 xdft_filtered = xdft_filtered(1:N/2+1);
 %                 psdx_filtered = (1/(Fs*N)) * abs(xdft_filtered).^2;
 %                 psdx_filtered(2:end-1) = 2*psdx_filtered(2:end-1);
-            
-              
+
               % edit axes 1 :
               axesHandlesToChildObjects = findobj(obj.Hgui.axes1, 'Type', 'line');
                 if ~isempty(axesHandlesToChildObjects)
@@ -153,7 +156,7 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
                 switch xchoiceList{xchoice}
                     case 'z ( mm )'
               line(obj.z(1:length(LineAverage))*1e3,LineAverage,'parent',obj.Hgui.axes1)
-              line(obj.z(1:length(LineAverage))*1e3,LineAverage_filtered,'parent',obj.Hgui.axes1,'color','red')
+            %  line(obj.z(1:length(LineAverage))*1e3,LineAverage_filtered,'parent',obj.Hgui.axes1,'color','red')
               xlabel('parent',obj.Hgui.axes1,'z(mm)')
               ylabel('parent',obj.Hgui.axes1,'Volt')
                     case 't ( us )'
@@ -174,20 +177,26 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
               switch xchoiceList{xchoice}
               
                   case 'wavelength'
-                   
-              lambda = 1540./freq(2:end);
-             % trapz(lambda,psdx(2:end)./(lambda'.^2)*1540)
-              line(lambda*1e3,psdx(2:end)./(lambda'.^2)*1540,'parent',obj.Hgui.axes2)
+                      
+              line(obj.l*1e3,psdx./(obj.l'.^2)*1540,'parent',obj.Hgui.axes2)
               xlabel('parent',obj.Hgui.axes2,'\lambda (mm)')
-              set(obj.Hgui.axes2, 'XScale','log') % 'log'
+              set(obj.Hgui.axes2, 'XScale','log') ;
+
                   case 'frequency'
                       
               %trapz(freq*1e-6,psdx*1e6)
-              line(freq*1e-6,psdx*1e6,'parent',obj.Hgui.axes2)
+              line(obj.f*1e-6,psdx*1e6,'parent',obj.Hgui.axes2)
               xlabel('parent',obj.Hgui.axes2,'f (MHz)')
               ylabel('parent',obj.Hgui.axes2,'PSD(energy/MHz)')
               set(obj.Hgui.axes2, 'XScale','linear')
-              end            
+              end   
+              
+              % set scale for y axis :
+              if get(obj.Hgui.logy,'value') == 1
+              set(obj.Hgui.axes2, 'YScale','log') ;
+              else
+              set(obj.Hgui.axes2, 'YScale','linear')   ;
+              end
             
         end
 

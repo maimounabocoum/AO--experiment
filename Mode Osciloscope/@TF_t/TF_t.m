@@ -36,7 +36,7 @@ classdef TF_t < handle
             
             obj.N = N;
             obj.dt = 1/Fmax; % in m
-            obj.t = (-N/2:1:N/2-1)*obj.dt;
+            obj.t = (0:1:N-1)*obj.dt;%(-N/2:1:N/2-1)*obj.dt;
             obj.tRange = (N-1)*obj.dt;
             obj.df = 1/obj.tRange;
             obj.f = (-N/2:1:N/2-1)*obj.df;
