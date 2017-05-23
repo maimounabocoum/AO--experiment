@@ -56,6 +56,7 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
             S.Nlines      = obj.Nlines ;
             S.Lines       = obj.Lines  ;
             S.SampleRate  = obj.SampleRate ;
+            S.param       = str2double( get(obj.Hgui.param,'string') );
             
             save(savingfolder,'S');
         end
@@ -217,6 +218,7 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
         end
         
         function obj = save_Callback(obj, ~, ~)
+            
             foldername = get(obj.Hgui.foldername,'string');
             filename = get(obj.Hgui.filename,'string');
             if ~isdir(foldername)
@@ -225,10 +227,25 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
                set(obj.Hgui.foldername,'string',foldername);
                end
             end
-            if exist([foldername,'\',filename,'.mat']) > 0
-               filename(end)
+            
+            % get all files with that name :
+            MyFileInfo = dir([foldername,'\',filename,'*.mat']);
+            if isempty(MyFileInfo)
+                FileIndex = 0 ;
+            else
+                
+            SortedNames = sort({MyFileInfo.name});
+            % get index of last data saved :
+            %regexprep(x, '"', '')
+            FileIndex = regexprep(SortedNames{end},[filename,'_'], '');
+            FileIndex = str2double( regexprep(FileIndex,'.mat', '') ) + 1 ;
+            
+            
+            %exist([foldername,'\',filename,'.mat']) 
+
             end
-            obj.saveobj([foldername,'\',filename,'.mat']);
+             sprintf('saving : %s_%d','filename',FileIndex)
+             obj.saveobj([foldername,'\',filename,'_',num2str(FileIndex),'.mat']);
                 
              
             
