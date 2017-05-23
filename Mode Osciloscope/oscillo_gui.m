@@ -22,7 +22,7 @@ function varargout = oscillo_gui(varargin)
 
 % Edit the above text to modify the response to help oscillo_gui
 
-% Last Modified by GUIDE v2.5 22-May-2017 21:26:30
+% Last Modified by GUIDE v2.5 23-May-2017 13:27:04
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -261,6 +261,29 @@ function LowPass_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function LowPass_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to LowPass (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function param_Callback(hObject, eventdata, handles)
+% hObject    handle to param (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of param as text
+%        str2double(get(hObject,'String')) returns contents of param as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function param_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to param (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 

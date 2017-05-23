@@ -1,10 +1,9 @@
-classdef oscilloTrace < handle 
+classdef oscilloTrace < handle & TF_t
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
     
     properties
         %% oscilloscope properties
-        t
         z
         Nlines
         Lines
@@ -13,27 +12,29 @@ classdef oscilloTrace < handle
         %% GUI handle 
         IsRunning
         Hgui
+        param
     end
     
     methods
         function obj = oscilloTrace(Npoints,Nlines,SampleRate,c)
                 % Transfer data to Matlab
-                dt             = 1/(SampleRate) ;
+                obj@TF_t(Nlines*Npoints,SampleRate);
+                %dt             = 1/(SampleRate) ;
                 obj.Nlines     = Nlines ;
                 obj.SampleRate = SampleRate;    
                 % by default, indexation in Gage starts at 0
                 obj.Lines      = zeros(Npoints,Nlines);
                % data  = zeros(Npoints,1);
-                obj.t          = (0:(Nlines*Npoints-1))*dt;
+                %obj.t          = (0:(Nlines*Npoints-1))*dt;
                 obj.z          = c*(obj.t);
                 
             %% initialize GUI
             obj.IsRunning = 1 ;
             obj.Hgui = guihandles(oscillo_gui);
 %% define callback functions inside the current class :
-set(obj.Hgui.stop,   'callback', @(src, event) stop_Callback(obj, src, event));
-set(obj.Hgui.update, 'callback', @(src, event) update_Callback(obj, src, event));
-set(obj.Hgui.save, 'callback', @(src, event) save_Callback(obj, src, event));
+set(obj.Hgui.stop,    'callback', @(src, event) stop_Callback(obj, src, event));
+set(obj.Hgui.update,  'callback', @(src, event) update_Callback(obj, src, event));
+set(obj.Hgui.save,    'callback', @(src, event) save_Callback(obj, src, event));
 set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event));
 
 % sets the figure close function. This lets the class know that

@@ -1,4 +1,4 @@
-classdef TF_t
+classdef TF_t < handle
     %TFSpace: Creates an object with all the related variables in the time
     %frequency space
     
