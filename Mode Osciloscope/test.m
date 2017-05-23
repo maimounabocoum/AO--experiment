@@ -1,6 +1,6 @@
 %% test sheet %%
 clearvars;
-Nloop = 100 ;
+Nloop = 10 ;
 MyMeasurement = oscilloTrace(100,200,10e6,1540) ;
 %mygui = oscilloGUI();
 

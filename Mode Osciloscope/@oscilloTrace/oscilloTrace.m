@@ -1,4 +1,4 @@
-classdef oscilloTrace < handle
+classdef oscilloTrace < handle 
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -39,7 +39,7 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
 % sets the figure close function. This lets the class know that
 % the figure wants to close and thus the class should cleanup in memory as
 % well :
-set(obj.Hgui.figure1,'closerequestfcn', @(src,event) Close_fcn(obj, src, event));
+%set(obj.Hgui.figure1,'closerequestfcn', @(src,event) Close_fcn(obj, src, event));
     
         end
         
@@ -89,7 +89,7 @@ set(obj.Hgui.figure1,'closerequestfcn', @(src,event) Close_fcn(obj, src, event))
         function [] = ScreenAquisition(obj)
             % does the figue handle exist :
             %   set figure properties :
-            Nav = str2double( get(obj.Hgui.Nav,'string') );
+            Nav = str2double( get(obj.Hgui.Nav,'string') );          
             
             if isnan(Nav)
             set(obj.Hgui.Nav,'string','1')
@@ -104,12 +104,31 @@ set(obj.Hgui.figure1,'closerequestfcn', @(src,event) Close_fcn(obj, src, event))
             LineAverage = sum(obj.Lines(:,1:Nav),2)/Nav;
             end
             
-                Fs              = obj.SampleRate;
-                N               = length(LineAverage);
-                xdft            = fftshift( fft(LineAverage) ) ;
-                xdft            = xdft(N/2+1:end);
-                psdx            = 2*(1/Fs)^2 * (abs(xdft).^2/trapz(obj.t(1:length(LineAverage)),LineAverage.^2));
-                freq            = (0:N/2-1)*Fs/N;
+
+            Fs              = obj.SampleRate;
+            N               = length(LineAverage);
+            xdft            = fftshift( fft(LineAverage) ) ;
+            freq            = (-N/2:N/2-1)*Fs/N;
+            % get cursors cut off
+            f_highpass = str2double( get(obj.Hgui.highPass,'string') );
+            f_lowwpass = str2double( get(obj.Hgui.LowPass,'string') );
+            
+            xdft(abs(freq) < f_lowwpass) = 0 ;
+            xdft(abs(freq) > f_highpass) = 0 ;
+            LineAverage_filtered = ifft(ifftshift(xdft)) ;
+            
+            xdft            = xdft(N/2+1:end);
+            psdx            = 2*(1/Fs)^2 * (abs(xdft).^2/trapz(obj.t(1:length(LineAverage)),LineAverage.^2));
+            freq            = (0:N/2-1)*Fs/N;
+            
+
+            
+
+            %% filter signal :
+            %LineAverage_filtered = ifft([xdft , xdft(end:-1:2)]) ;
+            %LineAverage_filtered = spectralFiltering(freq,xdft);        
+    
+                
                 % (-N/2:N/2-1)*Fs/N; % freq(N/2+1)
 %                 n_smooth = 7;
 %                 b = (1/n_smooth)*ones(1,n_smooth);
@@ -133,6 +152,7 @@ set(obj.Hgui.figure1,'closerequestfcn', @(src,event) Close_fcn(obj, src, event))
                 switch xchoiceList{xchoice}
                     case 'z ( mm )'
               line(obj.z(1:length(LineAverage))*1e3,LineAverage,'parent',obj.Hgui.axes1)
+              line(obj.z(1:length(LineAverage))*1e3,LineAverage_filtered,'parent',obj.Hgui.axes1,'color','red')
               xlabel('parent',obj.Hgui.axes1,'z(mm)')
               ylabel('parent',obj.Hgui.axes1,'Volt')
                     case 't ( us )'
@@ -212,6 +232,8 @@ set(obj.Hgui.figure1,'closerequestfcn', @(src,event) Close_fcn(obj, src, event))
             ymin = str2double( get(obj.Hgui.min_fft,'string') );
             ymax = str2double( get(obj.Hgui.max_fft,'string') );
             set(obj.Hgui.axes2,'ylim',[ymin ymax])
+            
+            % set cursors
             
         end
         
