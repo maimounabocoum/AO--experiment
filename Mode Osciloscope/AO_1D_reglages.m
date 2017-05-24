@@ -26,23 +26,23 @@ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 %=======================  US Parameters =====================
 
 Volt        = 50; % V
-FreqSonde   = 4;  % MHz
+FreqSonde   = 2;  % MHz
 NbHemicycle = 10;
 X0          = 15; % mm
-Foc         = 25; % mm
-NTrig       = 1000; %1000
-Prof        = 70; % mm
+Foc         = 28; % mm
+NTrig       = 5000; %1000
+Prof        = 50; % mm
 
 %%====================== Parameters loop
-Nloop = 1;
+Nloop = 1000;
 
 %-----------------------------------------------------------
 %% Gage Init parmaters
 %----------------------------------------------------------------------
 Range = 1; % V
 SampleRate = 10; % MHz
-GageActive = 'off'; % 'on' or 'off' 
-AIXPLORER_Active = 'off'; % 'on' or 'off' 
+GageActive = 'on'; % 'on' or 'off' 
+AIXPLORER_Active = 'on'; % 'on' or 'off' 
 
 
 

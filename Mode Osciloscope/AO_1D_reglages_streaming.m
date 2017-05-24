@@ -57,6 +57,7 @@ ds.TransferLength   = acqInfo.SegmentSize;
 ds.RecordStart      = 1;
 ds.RecordCount      = acqInfo.SegmentCount;
 ds.AcqCount         = 1;
+
 [ret, filecount] = CsMl_InitializeDiskStream(Hgage, 'Signal Files' , 1 , ds);
 CsMl_ErrorHandler(ret, 1, Hgage);
 
