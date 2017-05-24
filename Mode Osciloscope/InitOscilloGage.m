@@ -64,7 +64,6 @@ disp(s);
 
 acqInfo.SampleRate      = SamplingRate*1e6;%Max = 50 MHz, must be divider of 50;
 acqInfo.SegmentCount    = NTrig; % Number of memory segments 
-%acqInfo.Depth           = ceil((acqInfo.SampleRate*1e-3*Prof/(common.constants.SoundSpeed))/32)*32; % Must be a multiple of 32
 acqInfo.Depth           = ceil((acqInfo.SampleRate*1e-6*ceil(Prof/(common.constants.SoundSpeed*1e-3)))/32)*32; % Must be a multiple of 32
 
 
