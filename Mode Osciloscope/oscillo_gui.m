@@ -22,7 +22,7 @@ function varargout = oscillo_gui(varargin)
 
 % Edit the above text to modify the response to help oscillo_gui
 
-% Last Modified by GUIDE v2.5 21-May-2017 17:56:36
+% Last Modified by GUIDE v2.5 23-May-2017 13:50:31
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -223,3 +223,81 @@ function loading_Callback(hObject, eventdata, handles)
 % hObject    handle to loading (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+
+function highPass_Callback(hObject, eventdata, handles)
+% hObject    handle to highPass (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of highPass as text
+%        str2double(get(hObject,'String')) returns contents of highPass as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function highPass_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to highPass (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function LowPass_Callback(hObject, eventdata, handles)
+% hObject    handle to LowPass (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of LowPass as text
+%        str2double(get(hObject,'String')) returns contents of LowPass as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function LowPass_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to LowPass (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function param_Callback(hObject, eventdata, handles)
+% hObject    handle to param (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of param as text
+%        str2double(get(hObject,'String')) returns contents of param as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function param_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to param (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in logy.
+function logy_Callback(hObject, eventdata, handles)
+% hObject    handle to logy (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of logy

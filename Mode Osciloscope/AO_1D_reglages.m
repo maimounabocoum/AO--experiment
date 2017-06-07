@@ -26,12 +26,12 @@ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 %=======================  US Parameters =====================
 
 Volt        = 50; % V
-FreqSonde   = 6;  % MHz
+FreqSonde   = 2;  % MHz
 NbHemicycle = 10;
 X0          = 15; % mm
-Foc         = 25; % mm
-NTrig       = 1000; %1000
-Prof        = 70; % mm
+Foc         = 28; % mm
+NTrig       = 5000; %1000
+Prof        = 50; % mm
 
 %%====================== Parameters loop
 Nloop = 1000;
@@ -41,40 +41,28 @@ Nloop = 1000;
 %----------------------------------------------------------------------
 Range = 1; % V
 SampleRate = 10; % MHz
-TriggerSatus = 'on'; % 'on' or 'off' 
+GageActive = 'on'; % 'on' or 'off' 
+AIXPLORER_Active = 'on'; % 'on' or 'off' 
 
 
 
-
-[ret,Hgage] = InitOscilloGage(NTrig,Prof,SampleRate,Range,TriggerSatus);
-
-[ret, acqInfo] = CsMl_QueryAcquisition(Hgage);
-CsMl_ErrorHandler(ret, 1, Hgage);
-
-[ret, sysinfo] = CsMl_GetSystemInfo(Hgage); % Get card infos
-CsMl_ErrorHandler(ret, 1, Hgage);
-
-CsMl_ResetTimeStamp(Hgage);
-
+[ret,Hgage,acqInfo,sysinfo] = InitOscilloGage(NTrig,Prof,SampleRate,Range,GageActive);
 
 % Set transfer parameters
 transfer.Mode           = CsMl_Translate('Default', 'TxMode');
 transfer.Start          = 0;
 transfer.Length         = acqInfo.SegmentSize;
 transfer.Channel        = 1;
-% sysinfo : uncomment to get board information
-%MaskedMode              = bitand(acqInfo.Mode, 15); % Check acq. mode
-%ChannelSkip             = ChannelsPerBoard / MaskedMode; % number of channels that are skipped during
-% the transfer step.
-
-
 
 %% Initialize Gage Acquisition card
 % %% Sequence execution
 % % ============================================================================ %
+switch AIXPLORER_Active
+    case 'on'
  SEQ = InitOscilloSequence(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc , X0 , NTrig);
  SEQ = SEQ.loadSequence();
-c = common.constants.SoundSpeed ; % sound velocity in m/s
+end
+ c = common.constants.SoundSpeed ; % sound velocity in m/s
 
 %%========================================== Acquire data==================
 % Possible return values for status are:
@@ -84,17 +72,20 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
 %   3 = Data transfer is in progress
 
 clear MyMeasurement
-MyMeasurement = oscilloTrace(acqInfo.Depth,acqInfo.SegmentCount,SampleRate*1e6,c) ;
-    raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
+MyMeasurement = oscilloTrace(acqInfo.Depth,acqInfo.SegmentCount,acqInfo.SampleRate,c) ;
     
 for k = 1:Nloop
   tic    
-    ret = CsMl_Capture(Hgage);
-    CsMl_ErrorHandler(ret, 1, Hgage);
+     ret = CsMl_Capture(Hgage);
+     CsMl_ErrorHandler(ret, 1, Hgage);
    
+    switch AIXPLORER_Active
+    case 'on'
     SEQ = SEQ.startSequence('Wait',0);
     close;
+    end
   
+    
     status = CsMl_QueryStatus(Hgage);
     
     while status ~= 0
@@ -107,26 +98,26 @@ for k = 1:Nloop
 
     for LineNumber = 1:acqInfo.SegmentCount
         
-        transfer.Segment       = LineNumber;                        % number of the memory segment to be read
+        transfer.Segment       = LineNumber ;                       % number of the memory segment to be read
         [ret, datatmp, actual] = CsMl_Transfer(Hgage, transfer);    % transfer
                                                                     % actual contains the actual length of the acquisition that may be
                                                                     % different from the requested one.
-        
-       % MyMeasurement = MyMeasurement.Addline(actual.ActualStart,actual.ActualLength,datatmp,LineNumber);
        MyMeasurement.Lines((1+actual.ActualStart):actual.ActualLength,LineNumber) = datatmp' ;
-
-%        data = data + (1/NTrig)*datatmp';
-%        raw(:,ii) = datatmp';
         
     end
 
-    
+%        y = sum(MyMeasurement.Lines')/NTrig;
+%        n = round(length(y)*0.66);
+%        Err= std(y(n:end))
     CsMl_ErrorHandler(ret, 1, Hgage);
     
     
-   MyMeasurement.ScreenAquisition();
+  MyMeasurement.ScreenAquisition();
    
+   switch AIXPLORER_Active
+   case 'on'
    SEQ = SEQ.stopSequence('Wait', 0);  
+   end
    
 if MyMeasurement.IsRunning == 0
     break;
@@ -137,7 +128,7 @@ toc
 end
 
 %% command line to force a trigger on Gage :
-%CsMl_ForceCapture(Hgage);
+
 
 
 % saving datas:

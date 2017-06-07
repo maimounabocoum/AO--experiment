@@ -1,4 +1,4 @@
-classdef TF_t
+classdef TF_t < handle
     %TFSpace: Creates an object with all the related variables in the time
     %frequency space
     
@@ -36,7 +36,7 @@ classdef TF_t
             
             obj.N = N;
             obj.dt = 1/Fmax; % in m
-            obj.t = (-N/2:1:N/2-1)*obj.dt;
+            obj.t = (0:1:N-1)*obj.dt;%(-N/2:1:N/2-1)*obj.dt;
             obj.tRange = (N-1)*obj.dt;
             obj.df = 1/obj.tRange;
             obj.f = (-N/2:1:N/2-1)*obj.df;

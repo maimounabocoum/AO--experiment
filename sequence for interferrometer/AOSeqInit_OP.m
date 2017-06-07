@@ -5,7 +5,7 @@
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
 
  clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
- AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 
 
 %% parameter for plane wave sequence :

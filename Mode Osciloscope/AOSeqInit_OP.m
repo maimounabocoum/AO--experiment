@@ -3,8 +3,22 @@
 % ATTENTION !! Même si la séquence US n'écoute pas, il faut quand même
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
-function SEQ = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , NTrig)
+
  clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
+ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
+
+
+%% parameter for plane wave sequence :
+% ======================================================================= %
+        Volt        = 20;
+        f0          = 15;
+        NbHemicycle = 4;
+        AlphaM      = 0;
+        dA          = 0;
+        X0          = 0;
+        ScanLength  = 38.5;
+        NTrig       = 1000;
+        Prof        = 40;
     
 % creation of vector for scan:       
 if dA > 0
@@ -177,7 +191,8 @@ display('Build OK')
 SEQ = SEQ.initializeRemote('IPaddress',AixplorerIP);
 display('Remote OK')
 
-end
+% Load sequequence :
+SEQ = SEQ.loadSequence();
 
 
 

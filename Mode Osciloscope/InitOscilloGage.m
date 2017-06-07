@@ -1,4 +1,4 @@
-function [ret,handle] = InitOscilloGage(NTrig,Prof,SamplingRate,Range,TriggerSatus)
+function [ret,handle,acqInfo,sysinfo] = InitOscilloGage(NTrig,Prof,SamplingRate,Range,TriggerSatus)
 % Set the acquisition, channel and trigger parameters for the system and
 % commit the parameters to the driver.
 % AO     = structure with the different parameters
@@ -64,7 +64,6 @@ disp(s);
 
 acqInfo.SampleRate      = SamplingRate*1e6;%Max = 50 MHz, must be divider of 50;
 acqInfo.SegmentCount    = NTrig; % Number of memory segments 
-%acqInfo.Depth           = ceil((acqInfo.SampleRate*1e-3*Prof/(common.constants.SoundSpeed))/32)*32; % Must be a multiple of 32
 acqInfo.Depth           = ceil((acqInfo.SampleRate*1e-6*ceil(Prof/(common.constants.SoundSpeed*1e-3)))/32)*32; % Must be a multiple of 32
 
 
@@ -85,7 +84,14 @@ acqInfo.Depth           = ceil((acqInfo.SampleRate*1e-6*ceil(Prof/(common.consta
 acqInfo.ExtClock        = 0;
 acqInfo.Mode            = 1;%CsMl_Translate('Single', 'Mode');% Use only one channel
 acqInfo.SegmentSize     = acqInfo.Depth; % Must be a multiple of 32
-acqInfo.TriggerTimeout  = 3e3; % in µs
+
+switch TriggerSatus   
+    case 'on'
+acqInfo.TriggerTimeout  = 3e3; % in ms
+    case 'off'
+acqInfo.TriggerTimeout  = 1; % in ms : set to natural Rep Rate of 2kHz       
+end
+
 acqInfo.TriggerHoldoff  = 0; % Number of points during which the card ignores trigs
 acqInfo.TriggerDelay    = 0; % Number of points
 acqInfo.TimeStampConfig = 1; % Get the time at which each waveform was acquired
@@ -155,5 +161,13 @@ CsMl_ErrorHandler(ret, 1, handle);
 
 ret = CsMl_Commit(handle);
 CsMl_ErrorHandler(ret, 1, handle);
+
+[ret, acqInfo] = CsMl_QueryAcquisition(handle);
+CsMl_ErrorHandler(ret, 1, handle);
+
+[ret, sysinfo] = CsMl_GetSystemInfo(handle); % Get card infos
+CsMl_ErrorHandler(ret, 1, handle);
+
+CsMl_ResetTimeStamp(handle);
 
 ret = 1;
