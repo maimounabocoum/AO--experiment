@@ -6,7 +6,8 @@ MyMeasurement = oscilloTrace(100,200,10e6,1540) ;
 
 %MyMeasurement = MyMeasurement.Addline(actual.ActualStart,actual.ActualLength,datatmp,LineNumber);
 for i = 1:Nloop
-MyMeasurement.Lines = repmat(exp(-(MyMeasurement.t(1:100)'-3e-6).^2/(1e-6)^2),1,200) + 0*rand(100,200);
+MyMeasurement.Lines = repmat(exp(-(MyMeasurement.t(1:100)'-3e-6).^2/(1e-6)^2),1,200) + 20*rand(100,200);
+
 MyMeasurement.ScreenAquisition();
 
 %  [U,S,V] = svd(cov(MyMeasurement.Lines));

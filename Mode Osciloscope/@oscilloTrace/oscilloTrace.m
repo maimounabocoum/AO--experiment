@@ -5,6 +5,7 @@ classdef oscilloTrace < handle & TF_t
     properties
         %% oscilloscope properties
         z
+        Npoints
         Nlines
         Lines
         SampleRate
@@ -20,6 +21,7 @@ classdef oscilloTrace < handle & TF_t
                 % Transfer data to Matlab
                 obj@TF_t(Nlines*Npoints,SampleRate);
                 %dt             = 1/(SampleRate) ;
+                obj.Npoints    = Npoints ;
                 obj.Nlines     = Nlines ;
                 obj.SampleRate = SampleRate;    
                 % by default, indexation in Gage starts at 0
@@ -107,29 +109,28 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
             LineAverage = sum(obj.Lines(:,1:Nav),2)/Nav;
             end
             
-
-%             Fs              = obj.SampleRate;
-%             N               = length(LineAverage);
-%             xdft            = fftshift( fft(LineAverage) ) ;
-%             freq            = (-N/2:N/2-1)*Fs/N;
-            % get cursors cut off
-%             f_highpass = str2double( get(obj.Hgui.highPass,'string') );
-%             f_lowwpass = str2double( get(obj.Hgui.LowPass,'string') );
-            
-%             xdft(abs(freq) < f_lowwpass) = 0 ;
-%             xdft(abs(freq) > f_highpass) = 0 ;
-            %LineAverage_filtered = ifft(ifftshift(xdft)) ;
-            
-           % xdft            = xdft(N/2+1:end);
             xdft           = obj.fourier(obj.Lines(:));
             psdx = abs(xdft).^2 ;
-            %psdx            = 2*(1/Fs)^2 * (abs(xdft).^2/trapz(obj.t(1:length(LineAverage)),LineAverage.^2));
             
-            %freq            = (0:N/2-1)*Fs/N;
-
-
+            %% filtering in the fourier domaine
+            filters = [-0.6 -0.5 -0.4 -0.3 -0.2 -0.1 0 0.1 0.2 0.3 0.4 0.5 0.6]*1e6 ;
+            with = 0.2e5;
+            xdft_filtered = 0*xdft;
+            for filtNum = 1:length(filters)
+            xdft_filtered(abs( obj.f - filters(filtNum)) < with) =...
+            xdft(abs( obj.f - filters(filtNum)) < with);          
+            end
+            psdx_filtered = abs(xdft_filtered).^2;
             
-
+            Lines_filtered = obj.ifourier(xdft_filtered);
+            Lines_filtered = reshape(Lines_filtered,obj.Npoints,obj.Nlines);
+            
+            if get(obj.Hgui.unwrap,'value')
+            LineAverage_filtered = Lines_filtered(:) ;
+            else
+            LineAverage_filtered = sum(Lines_filtered(:,1:Nav),2)/Nav;
+            size(LineAverage_filtered)
+            end
             %% filter signal :
             %LineAverage_filtered = ifft([xdft , xdft(end:-1:2)]) ;
             %LineAverage_filtered = spectralFiltering(freq,xdft);        
@@ -157,7 +158,7 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
                 switch xchoiceList{xchoice}
                     case 'z ( mm )'
               line(obj.z(1:length(LineAverage))*1e3,LineAverage,'parent',obj.Hgui.axes1)
-            %  line(obj.z(1:length(LineAverage))*1e3,LineAverage_filtered,'parent',obj.Hgui.axes1,'color','red')
+              line(obj.z(1:length(LineAverage))*1e3,LineAverage_filtered,'parent',obj.Hgui.axes1,'color','red')
               xlabel('parent',obj.Hgui.axes1,'z(mm)')
               ylabel('parent',obj.Hgui.axes1,'Volt')
                     case 't ( us )'
@@ -187,6 +188,7 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
                       
               %trapz(freq*1e-6,psdx*1e6)
               line(obj.f*1e-6,psdx*1e6,'parent',obj.Hgui.axes2)
+              line(obj.f*1e-6,psdx_filtered*1e6,'parent',obj.Hgui.axes2,'color','red')
               xlabel('parent',obj.Hgui.axes2,'f (MHz)')
               ylabel('parent',obj.Hgui.axes2,'PSD(energy/MHz)')
               set(obj.Hgui.axes2, 'XScale','linear')
@@ -201,6 +203,7 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
             
               drawnow
         end
+        
 
 
     
