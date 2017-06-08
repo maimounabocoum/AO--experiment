@@ -7,9 +7,9 @@
 
 % ============================== Init program ======================
 
-%  clear all; close all; clc
-%  w = instrfind; if ~isempty(w) fclose(w); delete(w); end
-%  clear all;
+ clear all; close all; clc
+ w = instrfind; if ~isempty(w) fclose(w); delete(w); end
+ clear all;
 
  %=================== indicate location of LEGAL folder
  %addpath('D:\legHAL\')
@@ -26,7 +26,7 @@ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 % SEQ = remoteGetUserSequence(SRV);
 %=======================  US Parameters =====================
 
-Volt        = 50; % V
+Volt        = 20; % V
 FreqSonde   = 4;  % MHz
 NbHemicycle = 10;
 X0          = 15; % mm
@@ -86,70 +86,19 @@ end
 
 clear MyMeasurement
 %MyMeasurement = oscilloTrace(acqInfo.Depth,acqInfo.SegmentCount,acqInfo.SampleRate,c) ;
-    
-for k = 1:Nloop
-  tic      
-    switch AIXPLORER_Active
-    case 'on'
-    SEQ = SEQ.startSequence('Wait',0);
-    close;
-    end
-    
-    filecount = filecount * ds.ChannelCount;
-    CsMl_StartDiskStream(Hgage);
-    while (0 == CsMl_GetDiskStreamStatus(Hgage, 500))
-		% The following code can be used to moniter the acquisition and write status
-		% of the driver.  To optimize performance you would probably want to remove the
-		% lines of code below.  Because the acquisition and write routines are 
-		% seperate threads, the counts will often appear to jump instead of increment by
-		% one each time.
-        ac = CsMl_GetDiskStreamAcqCount(Hgage);
-        wc = CsMl_GetDiskStreamWriteCount(Hgage);
-        s = sprintf('Acq Count: %d out of %d \tWrite Count: %d out of %d',...
-                                ac, ds.AcqCount, wc, filecount);
-        disp(s);
-    end;
-   
-    CsMl_StopDiskStream(Hgage); 
-    ret = CsMl_GetDiskStreamError(Hgage);
-    if ret ~= 1
-	    if  ret == -9999
-	        disp('File or directory error. See event log more more details.');
-        else
-            disp(CsMl_GetErrorString(errmsg));
-        end;
-    end;
-    %[ret,upData] = Mex_StartStreaming(Hgage,false);  
-    %CsMl_ErrorHandler(ret, 1, Hgage);
-    
-
-    % Transfer data to Matlab
-    % loop over segment counts:
-
-%     for LineNumber = 1:acqInfo.SegmentCount
-%         
-%         transfer.Segment       = LineNumber ;                       % number of the memory segment to be read
-%         [ret, datatmp, actual] = CsMl_Transfer(Hgage, transfer);    % transfer
-%                                                                     % actual contains the actual length of the acquisition that may be
-%                                                                     % different from the requested one.
-%        MyMeasurement.Lines((1+actual.ActualStart):actual.ActualLength,LineNumber) = datatmp' ;
-%         
-%     end
-
-   %MyMeasurement.ScreenAquisition();
-   
-   switch AIXPLORER_Active
-   case 'on'
-   SEQ = SEQ.stopSequence('Wait', 0);  
-   end
-   
-% if MyMeasurement.IsRunning == 0
-%     break;
+ 
+% for k = 1:Nloop
+%  
 % end
-   
-    
-toc
+parfor i = 1:2
+    if i == 1
+      a = 1
+    else
+      b = 1
+    end
 end
+
+
 
 %% command line to force a trigger on Gage :
 

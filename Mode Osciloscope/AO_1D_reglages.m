@@ -29,9 +29,9 @@ Volt        = 50; % V
 FreqSonde   = 2;  % MHz
 NbHemicycle = 10;
 X0          = 15; % mm
-Foc         = 28; % mm
-NTrig       = 5000; %1000
-Prof        = 50; % mm
+Foc         = 40; % mm
+NTrig       = 1000; %1000
+Prof        = 70; % mm
 
 %%====================== Parameters loop
 Nloop = 1000;
