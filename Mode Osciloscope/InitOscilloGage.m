@@ -64,7 +64,8 @@ disp(s);
 
 acqInfo.SampleRate      = SamplingRate*1e6;%Max = 50 MHz, must be divider of 50;
 acqInfo.SegmentCount    = NTrig; % Number of memory segments 
-acqInfo.Depth           = ceil((acqInfo.SampleRate*1e-6*ceil(Prof/(common.constants.SoundSpeed*1e-3)))/32)*32; % Must be a multiple of 32
+
+acqInfo.Depth           = ceil(( acqInfo.SampleRate*1e-6*ceil(Prof/(common.constants.SoundSpeed*1e-3)))/32)*32; % Must be a multiple of 32
 
 
 %====================== The acqInfo fields can include:
@@ -159,7 +160,16 @@ end
 [ret] = CsMl_ConfigureTrigger(handle, trig); % config Trig parameters
 CsMl_ErrorHandler(ret, 1, handle);
 
-ret = CsMl_Commit(handle);
+% The varargin parameter is optional. 
+% Coerce   = 1, invalid parameters are coerced to valid ones
+% Coerce   = 0, an error is returned in the event of invalid parameters.
+% OnChange = 1, CsMl_Commit only send values if they have changed
+% OnChange = 0, the values are sent regardless of whether they have changed
+% default values : Coerce = 0 ,OnChange = 1
+
+flags.Coerce = 1;
+flags.OnChange = 1;
+ret = CsMl_Commit(handle, flags);
 CsMl_ErrorHandler(ret, 1, handle);
 
 [ret, acqInfo] = CsMl_QueryAcquisition(handle);

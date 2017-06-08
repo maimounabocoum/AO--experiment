@@ -25,16 +25,16 @@ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 % SEQ = remoteGetUserSequence(SRV);
 %=======================  US Parameters =====================
 
-Volt        = 50; % V
+Volt        = 20; % V
 FreqSonde   = 2;  % MHz
 NbHemicycle = 10;
 X0          = 15; % mm
 Foc         = 40; % mm
-NTrig       = 1000; %1000
-Prof        = 70; % mm
+NTrig       = 3; %1000
+Prof        = 400; % mm
 
 %%====================== Parameters loop
-Nloop = 1000;
+Nloop = 1;
 
 %-----------------------------------------------------------
 %% Gage Init parmaters
@@ -47,10 +47,11 @@ AIXPLORER_Active = 'on'; % 'on' or 'off'
 
 
 [ret,Hgage,acqInfo,sysinfo] = InitOscilloGage(NTrig,Prof,SampleRate,Range,GageActive);
+fprintf(' Segments last %4.2f us \n\r',1e6*acqInfo.SegmentSize/acqInfo.SampleRate);
 
 % Set transfer parameters
 transfer.Mode           = CsMl_Translate('Default', 'TxMode');
-transfer.Start          = 0;
+transfer.Start          = -acqInfo.TriggerHoldoff;
 transfer.Length         = acqInfo.SegmentSize;
 transfer.Channel        = 1;
 
@@ -72,7 +73,7 @@ end
 %   3 = Data transfer is in progress
 
 clear MyMeasurement
-MyMeasurement = oscilloTrace(acqInfo.Depth,acqInfo.SegmentCount,acqInfo.SampleRate,c) ;
+MyMeasurement = oscilloTrace(acqInfo.SegmentSize,acqInfo.SegmentCount,acqInfo.SampleRate,c) ;
     
 for k = 1:Nloop
   tic    
@@ -97,11 +98,15 @@ for k = 1:Nloop
     % loop over segment counts:
 
     for LineNumber = 1:acqInfo.SegmentCount
-        
-        transfer.Segment       = LineNumber ;                       % number of the memory segment to be read
-        [ret, datatmp, actual] = CsMl_Transfer(Hgage, transfer);    % transfer
-                                                                    % actual contains the actual length of the acquisition that may be
-                                                                    % different from the requested one.
+        % number of the memory segment to be read
+        % transfer
+        % actual contains the actual length of the acquisition that may be
+        % different from the requested one.
+        transfer.Segment       = LineNumber ;                       
+        [ret, datatmp, actual] = CsMl_Transfer(Hgage, transfer);    
+                                                                    
+       
+       actual                                                            
        MyMeasurement.Lines((1+actual.ActualStart):actual.ActualLength,LineNumber) = datatmp' ;
         
     end
