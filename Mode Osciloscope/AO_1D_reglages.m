@@ -64,7 +64,7 @@ switch AIXPLORER_Active
 end
  c = common.constants.SoundSpeed ; % sound velocity in m/s
 
-%%========================================== Acquire data==================
+%% ========================================== Acquire data==================
 % Possible return values for status are:
 %   0 = Ready for acquisition or data transfer
 %   1 = Waiting for trigger event
@@ -131,7 +131,15 @@ end
 
 
 
-% saving datas:
-%MyMeasurement.saveobj(['','ms.mat'])
+ %% ================================ saving datas:========================================%%
+%save('foldername','MyMeasurement');
 clear MyMeasurement
-%SEQ = SEQ.quitRemote();
+
+%% ================================= quite remote ===========================================%%
+%               SEQ = SEQ.quitRemote();
+
+
+
+
+
+

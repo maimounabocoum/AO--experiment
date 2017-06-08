@@ -5,6 +5,7 @@ classdef oscilloTrace < handle & TF_t
     properties
         %% oscilloscope properties
         z
+        Npoints
         Nlines
         Lines
         SampleRate
@@ -19,12 +20,12 @@ classdef oscilloTrace < handle & TF_t
         function obj = oscilloTrace(Npoints,Nlines,SampleRate,c)
                 % Transfer data to Matlab
                 obj@TF_t(Nlines*Npoints,SampleRate);
-                %dt             = 1/(SampleRate) ;
+                obj.Npoints    = Npoints ;
                 obj.Nlines     = Nlines ;
                 obj.SampleRate = SampleRate;    
                 % by default, indexation in Gage starts at 0
                 obj.Lines      = zeros(Npoints,Nlines);
-               % data  = zeros(Npoints,1);
+                %data  = zeros(Npoints,1);
                 %obj.t          = (0:(Nlines*Npoints-1))*dt;
                 obj.z          = c*(obj.t);
                 
@@ -40,7 +41,7 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
 % sets the figure close function. This lets the class know that
 % the figure wants to close and thus the class should cleanup in memory as
 % well :
-%set(obj.Hgui.figure1,'closerequestfcn', @(src,event) Close_fcn(obj, src, event));
+% set(obj.Hgui.figure1,'closerequestfcn', @(src,event) Close_fcn(obj, src, event));
     
         end
         
@@ -50,7 +51,7 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
             
         end
         
-        function S = saveobj(obj,savingfolder)
+        function S   = saveobj(obj,savingfolder)
             S.t           = obj.t   ;
             S.z           = obj.z ;
             S.Nlines      = obj.Nlines ;
@@ -69,8 +70,10 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
                 newObj.t = S.t;
                 newObj.z = S.z;
                 newObj.Nlines = S.Nlines;
+                newObj.Nlines = S.Npoints;
                 newObj.Lines = S.Lines;
                 newObj.SampleRate = S.SampleRate;
+                newObj.param = S.param;
                 obj = newObj;
                
            else
@@ -107,43 +110,31 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
             LineAverage = sum(obj.Lines(:,1:Nav),2)/Nav;
             end
             
-
-%             Fs              = obj.SampleRate;
-%             N               = length(LineAverage);
-%             xdft            = fftshift( fft(LineAverage) ) ;
-%             freq            = (-N/2:N/2-1)*Fs/N;
-            % get cursors cut off
-%             f_highpass = str2double( get(obj.Hgui.highPass,'string') );
-%             f_lowwpass = str2double( get(obj.Hgui.LowPass,'string') );
-            
-%             xdft(abs(freq) < f_lowwpass) = 0 ;
-%             xdft(abs(freq) > f_highpass) = 0 ;
-            %LineAverage_filtered = ifft(ifftshift(xdft)) ;
-            
-           % xdft            = xdft(N/2+1:end);
             xdft           = obj.fourier(obj.Lines(:));
             psdx = abs(xdft).^2 ;
-            %psdx            = 2*(1/Fs)^2 * (abs(xdft).^2/trapz(obj.t(1:length(LineAverage)),LineAverage.^2));
             
-            %freq            = (0:N/2-1)*Fs/N;
-
-
+            %% filtering in the fourier domaine
+            filters = [-0.6 -0.5 -0.4 -0.3 -0.2 -0.1 0 0.1 0.2 0.3 0.4 0.5 0.6]*1e6 ;
+            with = 0.2e5;
+            xdft_filtered = 0*xdft;
+            for filtNum = 1:length(filters)
+            xdft_filtered(abs( obj.f - filters(filtNum)) < with) =...
+            xdft(abs( obj.f - filters(filtNum)) < with);          
+            end
+            psdx_filtered = abs(xdft_filtered).^2;
             
-
+            Lines_filtered = obj.ifourier(xdft_filtered);
+            Lines_filtered = reshape(Lines_filtered,obj.Npoints,obj.Nlines);
+            
+            if get(obj.Hgui.unwrap,'value')
+            LineAverage_filtered = Lines_filtered(:) ;
+            else
+            LineAverage_filtered = sum(Lines_filtered(:,1:Nav),2)/Nav;
+            size(LineAverage_filtered)
+            end
             %% filter signal :
             %LineAverage_filtered = ifft([xdft , xdft(end:-1:2)]) ;
             %LineAverage_filtered = spectralFiltering(freq,xdft);        
-    
-                
-                % (-N/2:N/2-1)*Fs/N; % freq(N/2+1)
-%                 n_smooth = 7;
-%                 b = (1/n_smooth)*ones(1,n_smooth);
-%                 a = 1;
-%                 LineAverage_filtered = filter(b,a,LineAverage);
-%                 xdft_filtered  = fft(LineAverage_filtered);
-%                 xdft_filtered = xdft_filtered(1:N/2+1);
-%                 psdx_filtered = (1/(Fs*N)) * abs(xdft_filtered).^2;
-%                 psdx_filtered(2:end-1) = 2*psdx_filtered(2:end-1);
 
               % edit axes 1 :
               axesHandlesToChildObjects = findobj(obj.Hgui.axes1, 'Type', 'line');
@@ -157,7 +148,7 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
                 switch xchoiceList{xchoice}
                     case 'z ( mm )'
               line(obj.z(1:length(LineAverage))*1e3,LineAverage,'parent',obj.Hgui.axes1)
-            %  line(obj.z(1:length(LineAverage))*1e3,LineAverage_filtered,'parent',obj.Hgui.axes1,'color','red')
+              line(obj.z(1:length(LineAverage))*1e3,LineAverage_filtered,'parent',obj.Hgui.axes1,'color','red')
               xlabel('parent',obj.Hgui.axes1,'z(mm)')
               ylabel('parent',obj.Hgui.axes1,'Volt')
                     case 't ( us )'
@@ -187,6 +178,7 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
                       
               %trapz(freq*1e-6,psdx*1e6)
               line(obj.f*1e-6,psdx*1e6,'parent',obj.Hgui.axes2)
+              line(obj.f*1e-6,psdx_filtered*1e6,'parent',obj.Hgui.axes2,'color','red')
               xlabel('parent',obj.Hgui.axes2,'f (MHz)')
               ylabel('parent',obj.Hgui.axes2,'PSD(energy/MHz)')
               set(obj.Hgui.axes2, 'XScale','linear')
@@ -201,6 +193,7 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
             
               drawnow
         end
+        
 
 
     
