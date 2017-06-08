@@ -14,14 +14,14 @@
 
 lambda=780;
 
-concAgar=0.0135;
-concIntralipid=0.1269;
-concInkSolution=0;
+% concAgar=0.0135;
+% concIntralipid=0.1269;
+% concInkSolution=0;
 
 Youngmodulus=60;
-mu_sprime= 0;
+mu_sprime= 10;
 mu_a=0;
-massGel=200;
+massGel=98;
 
 
 
