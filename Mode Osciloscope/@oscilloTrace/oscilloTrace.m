@@ -114,7 +114,7 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
             psdx = abs(xdft).^2 ;
             
             %% filtering in the fourier domaine
-            filters = [-0.6 -0.5 -0.4 -0.3 -0.2 -0.1 0 0.1 0.2 0.3 0.4 0.5 0.6]*1e6 ;
+            filters = [-0.1 -0.08 -0.06 -0.04 -0.02 0 0.02 0.04 0.06 0.08 0.1]*1e6 ;
             with = 0.2e5;
             xdft_filtered = 0*xdft;
             for filtNum = 1:length(filters)
