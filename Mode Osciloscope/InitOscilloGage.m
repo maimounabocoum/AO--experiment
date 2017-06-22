@@ -88,7 +88,7 @@ acqInfo.SegmentSize     = acqInfo.Depth; % Must be a multiple of 32
 
 switch TriggerSatus   
     case 'on'
-acqInfo.TriggerTimeout  = 3e3; % in ms
+acqInfo.TriggerTimeout  = 3e12; % in ms
     case 'off'
 acqInfo.TriggerTimeout  = 1; % in ms : set to natural Rep Rate of 2kHz       
 end

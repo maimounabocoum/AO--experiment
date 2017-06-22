@@ -28,7 +28,8 @@ classdef oscilloTrace < handle & TF_t
                 %data  = zeros(Npoints,1);
                 %obj.t          = (0:(Nlines*Npoints-1))*dt;
                 obj.z          = c*(obj.t);
-                
+        end
+        function obj = InitGUI(obj)
             %% initialize GUI
             obj.IsRunning = 1 ;
             obj.Hgui = guihandles(oscillo_gui);
