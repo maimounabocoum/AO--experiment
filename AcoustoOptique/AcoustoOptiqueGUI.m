@@ -1,5 +1,5 @@
-clear all; close all; clc
-w = instrfind; if ~isempty(w) fclose(w); delete(w); end
+% clear all; close all; clc
+% w = instrfind; if ~isempty(w) fclose(w); delete(w); end
 
 %% parameter for plane wave sequence :
 % ======================================================================= %
@@ -16,7 +16,7 @@ w = instrfind; if ~isempty(w) fclose(w); delete(w); end
         X0          = 0;
         X1          = 38 ;
         NTrig       = 200;
-        Prof        = 70;
+        Prof        = 200;
         TypeOfSequence = 'OF';
         SaveData = 0 ; % set to 1 to save data
 
@@ -64,8 +64,9 @@ transfer.Channel        = 1;
     CsMl_ErrorHandler(ret, 1, Hgage);
  
     %% ======================== start acquisition =============================
+    tic 
     SEQ = SEQ.startSequence('Wait',0);
-    close;
+    
   
     status = CsMl_QueryStatus(Hgage);
     
@@ -77,6 +78,9 @@ transfer.Channel        = 1;
     % Z  = linspace(0,Prof,acqInfo.Depth); 
     % loop over segment counts:
 
+    toc
+    
+    tic 
     for SegmentNumber = 1:acqInfo.SegmentCount
         
         transfer.Segment       = SegmentNumber;                     % number of the memory segment to be read
@@ -86,7 +90,8 @@ transfer.Channel        = 1;
        raw((1+actual.ActualStart):actual.ActualLength,SegmentNumber) = datatmp' ;
         
     end
-
+    toc
+    
     CsMl_ErrorHandler(ret, 1, Hgage);
     
     Datas = RetreiveDatas(raw,NTrig,Nlines);
@@ -98,8 +103,8 @@ transfer.Channel        = 1;
     imagesc(x,z,1e3*Datas)
     xlabel('x (mm)')
     ylabel('z (mm)')
-    axis equal
-    axis tight
+%     axis equal
+%     axis tight
     title('Averaged raw datas')
     cb = colorbar;
     ylabel(cb,'AC tension (mV)')

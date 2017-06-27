@@ -36,7 +36,7 @@ TxWidth       = Foc/2;           % mm : effective width for focus line
 PropagationTime = (Prof)/(c)*1e3 ; % duration for one line in \mu s
 
 
-NoOp         = 500;             % µs minimum time between two US pulses, (5 by default ??)
+NoOp         = 20000;             % µs minimum time between two US pulses, (5 by default ??)
 FIRBandwidth = 90;            % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
 RxFreq       = 6;                % Receiving center frequency MHz , ??
 
