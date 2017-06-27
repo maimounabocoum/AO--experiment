@@ -93,6 +93,10 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
         end
         
         function [] = ScreenAquisition(obj)
+                    %% update mean values and standard deviation
+        set( obj.Hgui.mean,'string',num2str(1000*mean(obj.Lines(:))) ); % final value in mV
+        set( obj.Hgui.standardDev,'string',num2str(1000*std(obj.Lines(:))) ); % final value in mV
+        
             % does the figue handle exist :
             %   set figure properties :
             

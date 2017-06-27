@@ -33,7 +33,7 @@ NbHemicycle = 10;
 X0          = 15; % mm
 Foc         = 23; % mm
 NTrig       = 1000; %1000
-Prof        = 70; % mm
+Prof        = 60; % mm
 
 %%====================== Parameters loop
 Nloop = 1000;

@@ -2,14 +2,14 @@ close all
 clearvars
 %% parameter for plane wave sequence :
 % ======================================================================= %
-        Volt        = 20;
+        Volt        = 50;
         f0          = 6;
-        NbHemicycle = 2;
+        NbHemicycle = 10;
         AlphaM      = 20;
         dA          = 1;
         X0          = 0;
         ScanLength  = 38.5;
-        NTrig       = 1;
+        NTrig       = 500;
         Prof        = 40;
 
 %% Definition of window
