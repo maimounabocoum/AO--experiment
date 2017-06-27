@@ -1,7 +1,7 @@
 % Sequence AO Foc JB 01-04-15 ( d'apres 03-03-2015 Marc) modified by
 % Maïmouna Bocoum 26 - 02 -2017
 %% Init program
-function SEQ = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , Foc, X0 , X1 , Prof ,NTrig)
+function [SEQ,MedElmtList] = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , Foc, X0 , X1 , Prof ,NTrig)
 
 clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
@@ -36,7 +36,7 @@ TxWidth       = Foc/2;           % mm : effective width for focus line
 PropagationTime = (Prof)/(c)*1e3 ; % duration for one line in \mu s
 
 
-NoOp         = 20000;         % µs minimum time between two US pulses, (5 by default ??)
+NoOp         = 500;         % µs minimum time between two US pulses, (5 by default ??)
 FIRBandwidth = 90;            % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
 RxFreq       = 6;             % Receiving center frequency MHz , ??
 
@@ -102,16 +102,27 @@ DelayLaw = sqrt(Foc^2+(TxWidth/2)^2)/(c*1e-3) ...
         ScanLength = NbElemts*pitch-X0;
 
     end
-
-for Nloop = 1:round(ScanLength/pitch)
     
-    PosX     = X0 + (Nloop-1)*pitch; % center position for the line in mm
-    % EvDur = exciting pulse duration + law law + scan line duration
-    % PropagationTime , in \mu s
-    EvtDur   = ceil( pulseDuration + max(DelayLaw) + PropagationTime );
-
-    MedElmt  = round(PosX/pitch);
     
+% EvDur = exciting pulse duration + law law + scan line duration
+% PropagationTime , in \mu s    
+EvtDur   = ceil( pulseDuration + max(DelayLaw) + PropagationTime );    
+% index of element used for the scan :    
+
+MedElmtList = 1:round(ScanLength/pitch) ;  
+%MedElmtList = randperm(round(ScanLength/pitch)) ;  
+
+% % ======================================================================= %
+% %% EVENT INITIALISATION
+% % ======================================================================= %
+
+for Nloop = 1:length(MedElmtList)
+    
+    %PosX     = X0 + (MedElmtList(Nloop)-1)*pitch; % unit to mm
+
+    MedElmt  = MedElmtList(Nloop); %round(PosX/pitch);
+       
+    % actual active element
     TxElemts = MedElmt-round(TxWidth/(2*pitch)):...
                MedElmt+floor(TxWidth/(2*pitch));
     
@@ -159,7 +170,7 @@ ELUSEV = elusev.elusev( ...
     'fc',           FC,...
     'event',        EVENTList, ...
     'TrigOut',      TrigOut, ... 0,...
-    'TrigIn',       0,...% trigged sequence 
+    'TrigIn',       0,... % trigged sequence 
     'TrigAll',      1, ...% 0: sends output trigger at first emission 
     'TrigOutDelay', 0, ...
     0);

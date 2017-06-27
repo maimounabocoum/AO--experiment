@@ -16,7 +16,7 @@
         X0          = 0;
         X1          = 38 ;
         NTrig       = 200;
-        Prof        = 10;
+        Prof        = 200;
         TypeOfSequence = 'OF';
         SaveData = 0 ; % set to 1 to save data
 
@@ -29,7 +29,7 @@
 
 switch TypeOfSequence
     case 'OF'
-SEQ = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
+[SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
     case 'OP'
 %SEQ = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc , X0 , NTrig);
 end
@@ -93,8 +93,10 @@ transfer.Channel        = 1;
     toc
     
     CsMl_ErrorHandler(ret, 1, Hgage);
+    SEQ = SEQ.stopSequence('Wait', 0);  
     
-    Datas = RetreiveDatas(raw,NTrig,Nlines);
+    %% ======================== data post processing =============================
+    Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
     Hf = figure;
     
     set(Hf,'WindowStyle','docked');
@@ -112,7 +114,7 @@ transfer.Channel        = 1;
     set(findall(Hf,'-property','FontSize'),'FontSize',15) 
 
    
-   SEQ = SEQ.stopSequence('Wait', 0);  
+ 
    
 %% save datas :
 if SaveData == 1
@@ -123,16 +125,6 @@ FileName       = generateSaveName(SaveFolderName,'Volt',Volt);
 save('MyDatas','Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
               ,'X0','X1','NTrig','Prof');
 
-        Volt        = 30;
-        FreqSonde   = 10;
-        NbHemicycle = 10;
-        Foc         = 23;
-        AlphaM      = 20;
-        dA          = 1;
-        X0          = 0;
-        X1          = 38 ;
-        NTrig       = 200;
-        Prof        = 40;
 end
 
 %% ================================= command line to force a trigger on Gage :
