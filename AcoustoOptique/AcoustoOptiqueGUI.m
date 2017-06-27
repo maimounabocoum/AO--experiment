@@ -16,7 +16,7 @@
         X0          = 0;
         X1          = 38 ;
         NTrig       = 200;
-        Prof        = 200;
+        Prof        = 10;
         TypeOfSequence = 'OF';
         SaveData = 0 ; % set to 1 to save data
 
