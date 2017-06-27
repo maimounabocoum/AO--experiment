@@ -7,16 +7,16 @@ w = instrfind; if ~isempty(w) fclose(w); delete(w); end
  addpath('D:\legHAL');
  addPathLegHAL();
  
-        Volt        = 30;
-        FreqSonde   = 10;
+        Volt        = 50;
+        FreqSonde   = 3;
         NbHemicycle = 10;
         Foc         = 23;
         AlphaM      = 20;
         dA          = 1;
         X0          = 0;
         X1          = 38 ;
-        NTrig       = 20;
-        Prof        = 40;
+        NTrig       = 200;
+        Prof        = 70;
         TypeOfSequence = 'OF';
         SaveData = 0 ; % set to 1 to save data
 
@@ -91,13 +91,20 @@ transfer.Channel        = 1;
     
     Datas = RetreiveDatas(raw,NTrig,Nlines);
     Hf = figure;
+    
     set(Hf,'WindowStyle','docked');
     z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
     x = (1:Nlines)*system.probe.Pitch;
-    imagesc(x,z,Datas)
+    imagesc(x,z,1e3*Datas)
     xlabel('x (mm)')
     ylabel('z (mm)')
-    title('averaged raw datas')
+    axis equal
+    axis tight
+    title('Averaged raw datas')
+    cb = colorbar;
+    ylabel(cb,'AC tension (mV)')
+    colormap(parula)
+    set(findall(Hf,'-property','FontSize'),'FontSize',15) 
 
    
    SEQ = SEQ.stopSequence('Wait', 0);  
