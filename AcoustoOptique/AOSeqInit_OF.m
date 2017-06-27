@@ -1,14 +1,11 @@
 % Sequence AO Foc JB 01-04-15 ( d'apres 03-03-2015 Marc) modified by
 % Maïmouna Bocoum 26 - 02 -2017
 %% Init program
-clear all; close all; clc
-w = instrfind; if ~isempty(w) fclose(w); delete(w); end
+function SEQ = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , Foc, X0 , X1 , Prof ,NTrig)
 
 clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
- AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
- addpath('D:\legHAL');
- addPathLegHAL();
+
  
  % get loaded sequence :
  %srv = remoteDefineServer('extern',AixplorerIP, 9999);
@@ -21,15 +18,8 @@ clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
 
 % user defined parameters :
-    Volt            = 50; % Volts
-    f0              = 10;  % MHz
-    NbHemicycle     = 8;  % number of have cycles
-    X0              = 15;  % mm : position of min actuator for the scan
-    Foc             = 35; % mm
-    ScanLength      = 0.2; % mm
-    NTrig           = 200000; % number of repetition
-    Z1              = 10;   % mm
-    Z2              = 70;   % mm
+
+    ScanLength      = X1 - X0; % mm
 
 
 %% System parameters import :
@@ -43,14 +33,14 @@ MinNoop =     system.hardware.MinNoop ;
 %% Focusing parameters
 % ======================================================================= %
 TxWidth       = Foc/2;           % mm : effective width for focus line
-PropagationTime = (Z2)/(c)*1e3 ; % duration for one line in \mu s
+PropagationTime = (Prof)/(c)*1e3 ; % duration for one line in \mu s
 
 
 NoOp         = 500;             % µs minimum time between two US pulses, (5 by default ??)
 FIRBandwidth = 90;            % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
 RxFreq       = 6;                % Receiving center frequency MHz , ??
 
-TrigOut    = ceil(PropagationTime) + 20;  % µs
+TrigOut    = 50;  % µs
 Pause      = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause duration in µs
 
 % ======================================================================= %
@@ -170,7 +160,7 @@ ELUSEV = elusev.elusev( ...
     'event',        EVENTList, ...
     'TrigOut',      TrigOut, ... 0,...
     'TrigIn',       0,...% trigged sequence 
-    'TrigAll',      0, ...% 0: sends output trigger at first emission 
+    'TrigAll',      1, ...% 0: sends output trigger at first emission 
     'TrigOutDelay', 0, ...
     0);
 
@@ -228,11 +218,8 @@ SEQ = usse.usse( ...
  % status :
  display('Loading sequence to Hardware');
  SEQ = SEQ.loadSequence();
- display('Load OK');
+ disp('-------------Ready to use-------------------- ')
  
-
- SEQ = SEQ.startSequence();
-
-%SEQ = SEQ.stopSequence( 'Wait', 1 );
-%SEQ = SEQ.quitRemote();
-disp('-------------Ready to use-------------------- ')
+ 
+ 
+end

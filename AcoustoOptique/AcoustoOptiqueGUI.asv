@@ -18,7 +18,7 @@ w = instrfind; if ~isempty(w) fclose(w); delete(w); end
         NTrig       = 20;
         Prof        = 40;
         TypeOfSequence = 'OF';
-        SaveData = 0 ; % set to 1 to save data
+
 
 
                  
@@ -103,11 +103,9 @@ transfer.Channel        = 1;
    SEQ = SEQ.stopSequence('Wait', 0);  
    
 %% save datas :
-if SaveData == 1
-MainFolderName = 'D:\Data\mai';
-%SubFolderName  = generateSubFolderName();
-FileName       = generateSaveName(SaveFolderName,'Volt',Volt);
+SaveFolderName = 'D:\Data\mai';
 
+generateSaveName(SaveFolderName,Volt)
 save('MyDatas','Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
               ,'X0','X1','NTrig','Prof');
 
@@ -119,9 +117,9 @@ save('MyDatas','Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
         dA          = 1;
         X0          = 0;
         X1          = 38 ;
-        NTrig       = 200;
+        NTrig       = 20;
         Prof        = 40;
-end
+
 
 %% ================================= command line to force a trigger on Gage :
 %  CsMl_ForceCapture(Hgage);
