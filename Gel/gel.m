@@ -21,7 +21,7 @@ lambda=780;
 Youngmodulus=60;
 mu_sprime= 10;
 mu_a=0;
-massGel=98;
+massGel=125;
 
 
 
