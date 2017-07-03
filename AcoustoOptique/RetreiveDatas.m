@@ -15,7 +15,7 @@ fprintf('For current processed data : \r Nlines = %d , Ntrig = %d \r\n',Nlines, 
 [Isorted,Iposition] = sort(MedElmtList);
 
 datas = reshape(raw,size(raw,1),Nlines, Ntrig);
-%datas(:,Isorted,:) = datas(:,Iposition,:);
+datas(:,Isorted,:) = datas(:,Iposition,:);
 datas = mean(datas,3);
 end
 
