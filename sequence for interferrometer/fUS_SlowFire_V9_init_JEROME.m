@@ -3,6 +3,7 @@
 
 
  clearvars
+
 %  clear all
 % Sequence = usse.usse; Sequence = Sequence.selectProbe
 %% Parameters definition
@@ -20,7 +21,7 @@ else
 end
 
 % System parameters (parametres ajustables)
-AixplorerIP    = 'local'; % IP address of the Aixplorer device
+AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 
 ImagingVoltage = 50;             % imaging voltage [V]
 ImagingCurrent = 1;              % security current limit [A] %%%% NE PAS MODIFIER %%%%%
@@ -242,8 +243,12 @@ AcmoList{1}=ACMO1;
 
 % USSE for the sequence
 Sequence= usse.usse( ...
-    'Loopidx',3,'TPC', remote.tpc('imgVoltage', ImagingVoltage, 'imgCurrent', ImagingCurrent), ...
-    'acmo', AcmoList,'Popup',0,'DropFrames',0,'Repeat' ,UF.Repeat_sequence, ...
+    'Loop',0,...
+    'TPC', remote.tpc('imgVoltage', ImagingVoltage, 'imgCurrent', ImagingCurrent), ...
+    'acmo', AcmoList,...
+    'Popup',0,...
+    'DropFrames',0,...
+    'Repeat' ,UF.Repeat_sequence, ...
     0);
 
 [Sequence NbAcqRx] = Sequence.buildRemote();
