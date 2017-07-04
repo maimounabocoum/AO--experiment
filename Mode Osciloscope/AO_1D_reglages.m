@@ -12,33 +12,33 @@
  clear all;
  
  %=================== indicate location of LEGAL folder
- addpath('D:\legHAL\')
- addPathLegHAL;
+ %addpath('D:\legHAL\')
+ %addPathLegHAL;
  %==================== indicate location for Gage Drivers
- addpath(genpath('D:\drivers\CompuScope MATLAB SDK\'))
+ %addpath(genpath('D:\drivers\CompuScope MATLAB SDK\'))
  
  
 
 %%====================== Set Aixplorer parameters
- % jussieu : '192.168.1.16'
- % bastille : '192.168.0.20'
-AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
+AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 % SRV = remoteDefineServer( 'extern' ,AixplorerIP,'9999');
 % SEQ = remoteGetUserSequence(SRV);
 %=======================  US Parameters =====================
 
-Volt        = 50; % V
-FreqSonde   = 3;  % MHz
+Volt        = 60; % V
+FreqSonde   = 2.5;  % MHz
 NbHemicycle = 10;
 X0          = 15; % mm
-Foc         = 23; % mm
+Foc         = 30; % mm
 NTrig       = 1000; %1000
 Prof        = 60; % mm
 
 %%====================== Parameters loop
-Nloop = 1000;
+Nloop = 100;
 
-%--------------Gage Init parmaters -------------------------------------------------------
+%-----------------------------------------------------------
+%% Gage Init parmaters
+%----------------------------------------------------------------------
 Range = 1; % V
 SampleRate = 10; % MHz
 GageActive = 'on'; % 'on' or 'off' 
@@ -74,7 +74,6 @@ end
 
 clear MyMeasurement
 MyMeasurement = oscilloTrace(acqInfo.SegmentSize,acqInfo.SegmentCount,acqInfo.SampleRate,c) ;
-MyMeasurement = MyMeasurement.InitGUI() ;
     
 for k = 1:Nloop
   tic    
