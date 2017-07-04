@@ -1,5 +1,6 @@
 % clear all; close all; clc
 % w = instrfind; if ~isempty(w) fclose(w); delete(w); end
+% restoredefaultpath % restaure original path
 
 %% parameter for plane wave sequence :
 % ======================================================================= %
@@ -9,9 +10,12 @@
 
 
  AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
+ addpath('sequences');
+ addpath('subfunctions');
  addpath('D:\legHAL');
  addPathLegHAL();
  
+        TypeOfSequence = 'OP';
         Volt        = 30;
         FreqSonde   = 3;
         NbHemicycle = 4;
@@ -22,7 +26,6 @@
         X1          = 38 ;
         NTrig       = 500;
         Prof        = 200;
-        TypeOfSequence = 'OP';
         SaveData = 1 ; % set to 1 to save data
 
 
@@ -150,9 +153,9 @@ transfer.Channel        = 1;
    
 %% save datas :
 if SaveData == 1
-MainFolderName = 'D:\Data\mai\2017-07-01\';
-%SubFolderName  = generateSubFolderName();
-%FileName       = generateSaveName(SaveFolderName,'Volt',Volt);
+MainFolderName = 'D:\Data\mai\';
+SubFolderName  = generateSubFolderName(MainFolderName);
+%FileName      = generateSaveName(SaveFolderName,'Volt',Volt);
 FileName       = 'PVA6cyclesHoledOrth_TuyauIntralipide_5x5x4cm_OP30V_4hc_3mhz';
 
 save([MainFolderName,FileName],'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
@@ -166,3 +169,7 @@ end
 %% ================================= quite remote ===========================================%%
 %               SEQ = SEQ.quitRemote();
 
+%%======================================== remove search paths =======
+rmpath('D:\legHAL');
+rmpath('subfunctions');
+rmpath('sequences');
