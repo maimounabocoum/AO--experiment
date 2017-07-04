@@ -7,18 +7,18 @@
  addpath('D:\legHAL');
  addPathLegHAL();
  
-        Volt        = 15;
+        Volt        = 30;
         FreqSonde   = 3;
-        NbHemicycle = 10;
+        NbHemicycle = 4;
         Foc         = 23;
         AlphaM      = 20;
-        dA          = 1;
+        dA          = 0.5;
         X0          = 0;
         X1          = 38 ;
-        NTrig       = 1000;
+        NTrig       = 500;
         Prof        = 200;
         TypeOfSequence = 'OP';
-        SaveData = 0 ; % set to 1 to save data
+        SaveData = 1 ; % set to 1 to save data
 
 
                  
@@ -31,7 +31,7 @@ switch TypeOfSequence
     case 'OF'
 [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
     case 'OP'
-[SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
+[SEQ,MedElmtList,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
 end
 
 
@@ -109,22 +109,38 @@ transfer.Channel        = 1;
     ylabel('z (mm)')
 %     axis equal
 %     axis tight
-        case 'OP'
-    Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
-    z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
-    x = AlphaM;
-    imagesc(x,z,1e3*Datas)
-    xlabel('angle (°)')
-    ylabel('z (mm)')
-    end
-
     title('Averaged raw datas')
     cb = colorbar;
     ylabel(cb,'AC tension (mV)')
     colormap(parula)
     set(findall(Hf,'-property','FontSize'),'FontSize',15) 
+        case 'OP'
+    Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
+    z = (1:actual.ActualLength)*(c/(1e6*SampleRate));
+    imagesc(Alphas,z*1e3,1e3*Datas)
+    xlabel('angle (°)')
+    ylabel('z (mm)')
+    title('Averaged raw datas')
+    cb = colorbar;
+    ylabel(cb,'AC tension (mV)')
+    colormap(parula)
+    set(findall(Hf,'-property','FontSize'),'FontSize',15) 
+    
+    %% Radon inversion :
+    currentFolder = pwd ;
+    % path to radon inversion folder
+    cd('D:\GIT\AO---softwares-and-developpement\radon inversion')
+       
+       Iradon = OPinversionFunction(Alphas*pi/180,z,Datas,SampleRate*1e6,c);
+       %RetroProj_cleaned(Alphas,Datas,SampleRate*1e6);
+    % back to original folder 
+    cd(currentFolder)
+    %%
+    end
 
-   % ylim([0 50])
+
+
+    ylim([0 50])
  
    
 %% save datas :
@@ -132,10 +148,10 @@ if SaveData == 1
 MainFolderName = 'D:\Data\mai\2017-07-01\';
 %SubFolderName  = generateSubFolderName();
 %FileName       = generateSaveName(SaveFolderName,'Volt',Volt);
-FileName       = 'AGAR_5x5x4cm_OP';
+FileName       = 'PVA6cyclesHoledOrth_TuyauIntralipide_5x5x4cm_OP30V_4hc_3mhz';
 
 save([MainFolderName,FileName],'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
-              ,'X0','X1','NTrig','Prof','MedElmtList','raw');
+              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate');
 savefig(Hf,[MainFolderName,FileName]);
 saveas(Hf,[MainFolderName,FileName],'png')
 end
