@@ -10,18 +10,22 @@
  addpath('D:\legHAL');
  addPathLegHAL();
  
-        Volt        = 15;
-        FreqSonde   = 3;
-        NbHemicycle = 10;
-        Foc         = 23;
-        AlphaM      = 20;
-        dA          = 1;
-        X0          = 0;
-        X1          = 38 ;
-        NTrig       = 100;
-        Prof        = 50;
-        TypeOfSequence = 'JM';
-        SaveData = 0 ; % set to 1 to save data
+       TypeOfSequence = 'OF'; % 'OF' , 'OP' , 'JM'
+ 
+        Volt        = 15;   % 'OF' , 'OP' , 'JM'
+        FreqSonde   = 3;    % 'OF' , 'OP' , 'JM'
+        NbHemicycle = 10;   % 'OF' , 'OP' , 'JM'
+        Foc         = 23;   % 'OF' 
+        AlphaM      = 20;   % 'OP' 
+        dA          = 1;    % 'OP' 
+        X0          = 0;    % 'OF' , 'OP' 
+        X1          = 38 ;  % 'OF' , 'OP' 
+        NTrig       = 100;  % 'OF' , 'OP' , 'JM'
+        Prof        = 50;   % 'OF' , 'OP' , 'JM'
+        NbZ      = 1;       % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX      = 20;      % 20 Nb de composantes de Fourier en X, 'JM'
+        
+        SaveData = 0 ;      % set to 1 to save data
 
 
                  
@@ -36,7 +40,7 @@ switch TypeOfSequence
     case 'OP'
 [SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'JM'
-[SEQ,MedElmtList,AlphaM] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
+[SEQ,MedElmtList,AlphaM] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig);
 
 end
 
@@ -53,8 +57,10 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
      Range         =   1;
      GageActive = 'on' ; % on to activate external trig, off : will trig on timout value
      
- Nlines = length(SEQ.InfoStruct.event);    
+ Nlines = length(SEQ.InfoStruct.event);   
+ 
 [ret,Hgage,acqInfo,sysinfo] = InitOscilloGage(NTrig*Nlines,Prof,SampleRate,Range,GageActive);
+
 fprintf(' Segments last %4.2f us \n\r',1e6*acqInfo.SegmentSize/acqInfo.SampleRate);
 
 % Set transfer parameters
@@ -130,11 +136,47 @@ transfer.Channel        = 1;
     colormap(parula)
     set(findall(Hf,'-property','FontSize'),'FontSize',15) 
 
+
    % ylim([0 50])
    
    case 'JM'
-       
-       
+        % Calcul composante de Fourier
+        z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
+        XLambda = durationWaveform*CP.u;
+        CalcDelay = 2*XLambda;
+        IntDelay = 3*XLambda;
+          
+%         dx = (c/(1e6*SampleRate));
+%         N = size(MyMeasurement.Lines,1);
+%         X =(1:N)*dx;
+%         
+        
+        tDum = [];
+
+        nbs = 1;
+   Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);   
+        for iZ = 1:NbZ;
+            for iX = -NbX:NbX;
+                
+            ExpFunc                         =  exp(2*1i*z*iZ*pi/XLambda);
+            ExpFunc(z<=CalcDelay)           =   0;
+            ExpFunc(z>(CalcDelay+IntDelay)) =   0;    
+            
+                F = MyMeasurement.Lines(:,nbs);
+                nbs=nbs+1;
+                
+                plot(z,F/max(F));
+                hold;
+                plot(z,real(ExpFunc),'r');
+                pause(0.2);
+                tR = ExpFunc*F;
+                tDum = [tDum t];
+            end
+        end
+               
+        DecalZ=0.5;
+        NtF=32;
+       [I X Y]=Reconstruct(tDum,CP,SampleRate,DecalZ,NtF);   
     
     
     
@@ -150,7 +192,7 @@ MainFolderName = 'D:\Data\mai\2017-07-01\';
 FileName       = 'AGAR_5x5x4cm_OP';
 
 save([MainFolderName,FileName],'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
-              ,'X0','X1','NTrig','Prof','MedElmtList','raw');
+              ,'X0','X1','NbX','NbZ','NTrig','Prof','MedElmtList','raw');
 savefig(Hf,[MainFolderName,FileName]);
 saveas(Hf,[MainFolderName,FileName],'png')
 end
