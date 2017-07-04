@@ -3,8 +3,11 @@
 % ATTENTION !! Même si la séquence US n'écoute pas, il faut quand même
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
-function SEQ = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , NTrig)
+function [SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig)
  clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
+% user defined parameters :
+
+    ScanLength      = X1 - X0; % mm
     
 % creation of vector for scan:       
 if dA > 0
@@ -13,20 +16,19 @@ end
 
 %% System parameters import :
 % ======================================================================= %
-c           = common.constants.SoundSpeed ; %[m/s]
-SampFreq    = system.hardware.ClockFreq; %NE PAS MODIFIER % emitted signal sampling = 180 in [MHz]
+c           = common.constants.SoundSpeed ; % [m/s]
+SampFreq    = system.hardware.ClockFreq;    % NE PAS MODIFIER % emitted signal sampling = 180 in [MHz]
 NbElemts    = system.probe.NbElemts ; 
-pitch       = system.probe.Pitch ; % in mm
+pitch       = system.probe.Pitch ;          % in mm
 MinNoop     = system.hardware.MinNoop;
 
 NoOp       = 500;             % µs minimum time between two US pulses
 
 % ======================================================================= %
 
-PropagationTime        = Prof/c*1e3 ;  % 1 / pulse frequency repetition [us]
-TrigOut                = ceil(Prof/(c*1e-3));  %µs
-Repeat                 = NTrig ;              % a voir
-Pause                  = max( NoOp-ceil(PropagationTime) , MinNoop ); % pause duration in µs
+PropagationTime        = Prof/c*1e3 ;   % 1 / pulse frequency repetition [us]
+TrigOut                = 10;            % µs
+Pause                  = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause duration in µs
 
 % ======================================================================= %
 %% Codage en arbitrary : delay matrix and waveform
@@ -85,6 +87,7 @@ RX = remote.rx('fcId', 1, 'RxFreq', 60 , 'QFilter', 2, 'RxElemts', 0, 0);
 
 
 FirstElmt  = max( round(X0/pitch),1);
+MedElmtList = 1:length(AlphaM); % list of shot ordering for angle scan (used to reconstruct image)
 
 for nbs = 1:length(AlphaM)
     
@@ -161,7 +164,7 @@ TPC = remote.tpc( ...
 SEQ = usse.usse( ...
     'TPC', TPC, ...
     'acmo', ACMOList, ...    'Loopidx',1, ...
-    'Repeat', Repeat+1, ...  'Popup',0, ...
+    'Repeat', NTrig+1, ...  'Popup',0, ...
     'DropFrames', 0, ...
     'Loop', 0, ...
     'DataFormat', 'FF', ...
@@ -169,13 +172,25 @@ SEQ = usse.usse( ...
     0);
 
 [SEQ NbAcq] = SEQ.buildRemote();
-display('Build OK')
+ display('Build OK')
+ 
+%%%    Do NOT CHANGE - Sequence execution 
+%%%    Initialize remote on systems
+ SEQ = SEQ.initializeRemote('IPaddress',AixplorerIP);
+ %SEQ.Server
+ %SEQ.InfoStruct.event
+ 
+% remoteGetUserSequence(SEQ.Server)
+% remoteGetStatus(SEQ.Server)
 
-%% Do NOT CHANGE - Sequence execution
+ 
+ display('Remote OK');
 
-% Initialize remote on systems
-SEQ = SEQ.initializeRemote('IPaddress',AixplorerIP);
-display('Remote OK')
+ % status :
+ display('Loading sequence to Hardware');
+ SEQ = SEQ.loadSequence();
+ disp('-------------Ready to use-------------------- ')
+ 
 
 end
 

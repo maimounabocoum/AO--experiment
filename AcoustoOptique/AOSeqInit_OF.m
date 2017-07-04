@@ -1,14 +1,11 @@
 % Sequence AO Foc JB 01-04-15 ( d'apres 03-03-2015 Marc) modified by
 % Maïmouna Bocoum 26 - 02 -2017
 %% Init program
-clear all; close all; clc
-w = instrfind; if ~isempty(w) fclose(w); delete(w); end
+function [SEQ,MedElmtList] = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , Foc, X0 , X1 , Prof ,NTrig)
 
 clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
- AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
- addpath('D:\legHAL');
- addPathLegHAL();
+
  
  % get loaded sequence :
  %srv = remoteDefineServer('extern',AixplorerIP, 9999);
@@ -21,15 +18,8 @@ clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
 
 % user defined parameters :
-    Volt            = 50; % Volts
-    f0              = 10;  % MHz
-    NbHemicycle     = 8;  % number of have cycles
-    X0              = 15;  % mm : position of min actuator for the scan
-    Foc             = 35; % mm
-    ScanLength      = 0.2; % mm
-    NTrig           = 200000; % number of repetition
-    Z1              = 10;   % mm
-    Z2              = 70;   % mm
+
+    ScanLength      = X1 - X0; % mm
 
 
 %% System parameters import :
@@ -42,51 +32,51 @@ MinNoop =     system.hardware.MinNoop ;
 
 %% Focusing parameters
 % ======================================================================= %
-TxWidth       = Foc/2;           % mm : effective width for focus line
-PropagationTime = (Z2)/(c)*1e3 ; % duration for one line in \mu s
+TxWidth         = Foc/2;           % mm : effective width for focus line
+PropagationTime = (Prof)/(c)*1e3 ; % duration for one line in \mu s
 
 
-NoOp         = 500;             % µs minimum time between two US pulses, (5 by default ??)
-FIRBandwidth = 90;            % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
-RxFreq       = 6;                % Receiving center frequency MHz , ??
+NoOp         = 500;         % µs minimum time between two US pulses, (5 by default ??)
+FIRBandwidth = 90;          % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
+RxFreq       = 6;           % Receiving center frequency MHz , ??
 
-TrigOut    = ceil(PropagationTime) + 20;  % µs
+TrigOut    = 50;              % trigger duration µs
 Pause      = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause duration in µs
 
 % ======================================================================= %
-%% Codage en arbitrary : delay matrix and waveform
+%% Codage en arbitrary : DelayLaw matrix and waveform
 dt_s = 1/(SampFreq);      % unit us
 pulseDuration = NbHemicycle*(0.5/f0); % US inital pulse duration in us
 
 
-%% Delay Law [us]
+%% DelayLaw Law [us]
 % ======================================================================= %
 % c[m/s] -> [mm/us] ; eg factor 1e-3 in the above expression
-Delay = sqrt(Foc^2+(TxWidth/2)^2)/(c*1e-3) ...
+DelayLaw = sqrt(Foc^2+(TxWidth/2)^2)/(c*1e-3) ...
         - 1/(c*1e-3)*sqrt(Foc^2+((0:pitch:TxWidth)-TxWidth/2).^2);
      
 %   figure;
-%   plot(Delay,'r')
+%   plot(DelayLaw,'r')
 %   xlabel('actuator')
-%   ylabel('delays (\mu s)')
+%   ylabel('DelayLaws (\mu s)')
 
 % number of steps offset dt_s for each actuators position : 
- DlySmpl = round(Delay/dt_s); 
+ DlySmpl = round(DelayLaw/dt_s); 
 
  % common waveform for emission, square envoppe - non apodized:
  T_Wf = 0:dt_s:0.5*NbHemicycle/f0;
  Wf = sin(2*pi*f0*T_Wf); 
  
- % number of time-points necessary = points in waveform + maximum delay
- % offset
+ % number of time-points necessary = points in waveform + maximum DelayLaw
+ % offset necessary for DelayLaw law
  N_T = length(Wf) + max(DlySmpl); 
 
-%%% construction of a delay matrix : one column / actuator
- WF_mat = zeros(N_T,length(Delay));
+%%% construction of a DelayLaw matrix : one column / actuator
+ WF_mat = zeros(N_T,length(DelayLaw));
 
- for j = 1:length(Delay)
+ for j = 1:length(DelayLaw)
      % offset for each actuator + normal waveform init
-     WF_mat(DlySmpl(j)+(1:length(Wf)),j) = Wf;
+     WF_mat( DlySmpl(j)+(1:length(Wf)) , j ) = Wf;
  end
  
  WF_mat_sign = sign(WF_mat); % l'aixplorer code sur 3 niveaux [-1,0,1]
@@ -112,16 +102,27 @@ Delay = sqrt(Foc^2+(TxWidth/2)^2)/(c*1e-3) ...
         ScanLength = NbElemts*pitch-X0;
 
     end
-
-for Nloop = 1:round(ScanLength/pitch)
     
-    PosX     = X0 + (Nloop-1)*pitch; % center position for the line in mm
-    % EvDur = exciting pulse duration + law law + scan line duration
-    % PropagationTime , in \mu s
-    EvtDur   = ceil( pulseDuration + max(Delay) + PropagationTime );
-
-    MedElmt  = round(PosX/pitch);
     
+% EvDur = exciting pulse duration + law law + scan line duration
+% PropagationTime , in \mu s    
+EvtDur   = ceil( pulseDuration + max(DelayLaw) + PropagationTime );    
+% index of element used for the scan :    
+
+MedElmtList = 1:round(ScanLength/pitch) ;  
+%MedElmtList = randperm(round(ScanLength/pitch)) ;  
+
+% % ======================================================================= %
+% %% EVENT INITIALISATION
+% % ======================================================================= %
+
+for Nloop = 1:length(MedElmtList)
+    
+    %PosX     = X0 + (MedElmtList(Nloop)-1)*pitch; % unit to mm
+
+    MedElmt  = MedElmtList(Nloop); %round(PosX/pitch);
+       
+    % actual active element
     TxElemts = MedElmt-round(TxWidth/(2*pitch)):...
                MedElmt+floor(TxWidth/(2*pitch));
     
@@ -169,8 +170,8 @@ ELUSEV = elusev.elusev( ...
     'fc',           FC,...
     'event',        EVENTList, ...
     'TrigOut',      TrigOut, ... 0,...
-    'TrigIn',       0,...% trigged sequence 
-    'TrigAll',      0, ...% 0: sends output trigger at first emission 
+    'TrigIn',       0,... % trigged sequence 
+    'TrigAll',      1, ...% 0: sends output trigger at first emission 
     'TrigOutDelay', 0, ...
     0);
 
@@ -228,11 +229,8 @@ SEQ = usse.usse( ...
  % status :
  display('Loading sequence to Hardware');
  SEQ = SEQ.loadSequence();
- display('Load OK');
+ disp('-------------Ready to use-------------------- ')
  
-
- SEQ = SEQ.startSequence();
-
-%SEQ = SEQ.stopSequence( 'Wait', 1 );
-%SEQ = SEQ.quitRemote();
-disp('-------------Ready to use-------------------- ')
+ 
+ 
+end

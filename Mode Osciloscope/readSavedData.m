@@ -2,15 +2,55 @@
 
 
 % open file to read :
+clearvars;
+[filename,foldername] = uigetfile('D:\Data\mai\2017-06-14\1D data - water flow - 1000av','MultiSelect', 'on');
 
-[filename,foldername] = uigetfile('D:\Data\Mai\2017-04-14\1D oscilloscope')
+for Nselection = 1:length(filename)
+    
+        S{Nselection} = load([foldername,filename{Nselection}]);
+        if isequal(filename,0)
+           disp('User selected Cancel')
+        else
+           disp(['User selected ', fullfile(foldername, filename{Nselection})])
+        end
+end
 
-load([foldername,filename]);
-SData = oscilloTrace(size(S.Lines,1),S.Nlines,S.SampleRate,1540) ;
-SData.Lines = S.Lines;
-SData.z = S.z;
-SData.t = S.t;
+%% create trace :
+for Nselection = 1:length(filename)
+    
+        SData{Nselection} = oscilloTrace(size(S{Nselection}.S.Lines,1),S{Nselection}.S.Nlines,S{Nselection}.S.SampleRate,1540) ;
+        SData{Nselection}.Lines = S{Nselection}.S.Lines;
+        SData{Nselection}.z = S{Nselection}.S.z;
+        SData{Nselection}.t = S{Nselection}.S.t;
 
+        LineAverage{Nselection} = sum(SData{Nselection}.Lines(:,1:SData{Nselection}.Nlines),2)/SData{Nselection}.Nlines ;
+        xdft{Nselection}    = SData{Nselection}.fourier(SData{Nselection}.Lines(:));
+        psdx{Nselection}    = abs(xdft{Nselection}).^2 ;
+end
 
+%% plot all inidividual averages
+for Nselection = 1:length(filename)
+figure(1)
 hold on
-plot(SData.z*1e3,mean(SData.Lines,2)*1e3)
+plot(SData{Nselection}.z(1:length(LineAverage{Nselection}))*1e3,LineAverage{Nselection})
+legend(filename)
+end
+
+%% plot average
+average = 0*LineAverage{1} ;
+for Nselection = 1:length(filename)
+figure(1)
+average = average + LineAverage{Nselection}/length(filename) ;
+hold on
+plot(SData{Nselection}.z(1:length(LineAverage{Nselection}))*1e3,LineAverage{Nselection})
+legend(filename)
+end
+plot(SData{Nselection}.z(1:length(LineAverage{Nselection}))*1e3,average,'--','linewidth', 2)
+
+
+%% plot all indivualual ffts
+for Nselection = 1:length(filename)
+figure(2)
+hold on
+semilogy(SData{Nselection}.f*1e-6,psdx{Nselection}*1e6)
+end
