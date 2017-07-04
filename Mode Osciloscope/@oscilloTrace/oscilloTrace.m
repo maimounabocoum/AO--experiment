@@ -28,7 +28,8 @@ classdef oscilloTrace < handle & TF_t
                 %data  = zeros(Npoints,1);
                 %obj.t          = (0:(Nlines*Npoints-1))*dt;
                 obj.z          = c*(obj.t);
-                
+        end
+        function obj = InitGUI(obj)
             %% initialize GUI
             obj.IsRunning = 1 ;
             obj.Hgui = guihandles(oscillo_gui);
@@ -92,6 +93,10 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
         end
         
         function [] = ScreenAquisition(obj)
+                    %% update mean values and standard deviation
+        set( obj.Hgui.mean,'string',num2str(1000*mean(obj.Lines(:))) ); % final value in mV
+        set( obj.Hgui.standardDev,'string',num2str(1000*std(obj.Lines(:))) ); % final value in mV
+        
             % does the figue handle exist :
             %   set figure properties :
             
@@ -114,7 +119,7 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
             psdx = abs(xdft).^2 ;
             
             %% filtering in the fourier domaine
-            filters = [-0.6 -0.5 -0.4 -0.3 -0.2 -0.1 0 0.1 0.2 0.3 0.4 0.5 0.6]*1e6 ;
+            filters = [-0.1 -0.08 -0.06 -0.04 -0.02 0 0.02 0.04 0.06 0.08 0.1]*1e6 ;
             with = 0.2e5;
             xdft_filtered = 0*xdft;
             for filtNum = 1:length(filters)

@@ -1,5 +1,5 @@
-% clear all; close all; clc
-% w = instrfind; if ~isempty(w) fclose(w); delete(w); end
+clear all; close all; clc
+w = instrfind; if ~isempty(w) fclose(w); delete(w); end
 
 %% parameter for plane wave sequence :
 % ======================================================================= %
@@ -7,18 +7,18 @@
  addpath('D:\legHAL');
  addPathLegHAL();
  
-        Volt        = 50;
-        FreqSonde   = 3;
+        Volt        = 30;
+        FreqSonde   = 10;
         NbHemicycle = 10;
         Foc         = 23;
         AlphaM      = 20;
         dA          = 1;
         X0          = 0;
         X1          = 38 ;
-        NTrig       = 200;
-        Prof        = 200;
+        NTrig       = 20;
+        Prof        = 40;
         TypeOfSequence = 'OF';
-        SaveData = 0 ; % set to 1 to save data
+
 
 
                  
@@ -29,7 +29,7 @@
 
 switch TypeOfSequence
     case 'OF'
-[SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
+SEQ = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
     case 'OP'
 %SEQ = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc , X0 , NTrig);
 end
@@ -64,9 +64,8 @@ transfer.Channel        = 1;
     CsMl_ErrorHandler(ret, 1, Hgage);
  
     %% ======================== start acquisition =============================
-    tic 
     SEQ = SEQ.startSequence('Wait',0);
-    
+    close;
   
     status = CsMl_QueryStatus(Hgage);
     
@@ -78,9 +77,6 @@ transfer.Channel        = 1;
     % Z  = linspace(0,Prof,acqInfo.Depth); 
     % loop over segment counts:
 
-    toc
-    
-    tic 
     for SegmentNumber = 1:acqInfo.SegmentCount
         
         transfer.Segment       = SegmentNumber;                     % number of the memory segment to be read
@@ -90,42 +86,40 @@ transfer.Channel        = 1;
        raw((1+actual.ActualStart):actual.ActualLength,SegmentNumber) = datatmp' ;
         
     end
-    toc
-    
+
     CsMl_ErrorHandler(ret, 1, Hgage);
-    SEQ = SEQ.stopSequence('Wait', 0);  
     
-    %% ======================== data post processing =============================
-    Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
+    Datas = RetreiveDatas(raw,NTrig,Nlines);
     Hf = figure;
-    
     set(Hf,'WindowStyle','docked');
     z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
     x = (1:Nlines)*system.probe.Pitch;
-    imagesc(x,z,1e3*Datas)
+    imagesc(x,z,Datas)
     xlabel('x (mm)')
     ylabel('z (mm)')
-%     axis equal
-%     axis tight
-    title('Averaged raw datas')
-    cb = colorbar;
-    ylabel(cb,'AC tension (mV)')
-    colormap(parula)
-    set(findall(Hf,'-property','FontSize'),'FontSize',15) 
+    title('averaged raw datas')
 
    
- 
+   SEQ = SEQ.stopSequence('Wait', 0);  
    
 %% save datas :
-if SaveData == 1
-MainFolderName = 'D:\Data\mai';
-%SubFolderName  = generateSubFolderName();
-FileName       = generateSaveName(SaveFolderName,'Volt',Volt);
+SaveFolderName = 'D:\Data\mai';
 
+generateSaveName(SaveFolderName,Volt)
 save('MyDatas','Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
               ,'X0','X1','NTrig','Prof');
 
-end
+        Volt        = 30;
+        FreqSonde   = 10;
+        NbHemicycle = 10;
+        Foc         = 23;
+        AlphaM      = 20;
+        dA          = 1;
+        X0          = 0;
+        X1          = 38 ;
+        NTrig       = 20;
+        Prof        = 40;
+
 
 %% ================================= command line to force a trigger on Gage :
 %  CsMl_ForceCapture(Hgage);

@@ -29,7 +29,7 @@ mu_sprime=mu_sprimeuncorrected*mu_agarfactor;
 
 %équation d'absorption  Linear absorption. Stock solution equation obtained
 %by curve-fitting on absorption spectrum of the stock solution:
-mu_astocksolution=12.18; %log10(1.97*10^(7)*lambda^(-1.889)+45);
+mu_astocksolution= 12.18; %log10(1.97*10^(7)*lambda^(-1.889)+45);
 
 mu_a=concInkSolution*mu_astocksolution;
 
