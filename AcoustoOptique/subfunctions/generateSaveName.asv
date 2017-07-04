@@ -1,0 +1,30 @@
+function filenameOUT = generateSaveName( varargin )
+
+% study the input vargin struture :
+mod(nargin,2)
+% check for an uneven number of input
+if mod(nargin,2)~= 1 && nargin > 0
+    
+    filenameOUT = 'NoName' ;
+    
+else
+    
+ SubFolderName = varargin{1} ; 
+ filenameOUT   = SubFolderName 
+ 
+ 
+ 
+
+% get curent date
+
+
+strdate = datestr( now,'HH_MM') ; 
+newStr = strrep(strdate,'_','')   
+%filenameOUT = strcat( filenameOUT, strdate );
+
+
+end
+
+
+end
+

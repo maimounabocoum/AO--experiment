@@ -153,10 +153,11 @@ transfer.Channel        = 1;
    
 %% save datas :
 if SaveData == 1
-MainFolderName = 'D:\Data\mai\';
+MainFolderName = 'D:\Data\mai';
 SubFolderName  = generateSubFolderName(MainFolderName);
-%FileName      = generateSaveName(SaveFolderName,'Volt',Volt);
-FileName       = 'PVA6cyclesHoledOrth_TuyauIntralipide_5x5x4cm_OP30V_4hc_3mhz';
+CommentName    = 'PVA6';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Volt',Volt,'AlphaM',AlphaM)
+
 
 save([MainFolderName,FileName],'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate');
@@ -169,7 +170,7 @@ end
 %% ================================= quite remote ===========================================%%
 %               SEQ = SEQ.quitRemote();
 
-%%======================================== remove search paths =======
+%% ======================================== remove search paths =======
 rmpath('D:\legHAL');
 rmpath('subfunctions');
 rmpath('sequences');
