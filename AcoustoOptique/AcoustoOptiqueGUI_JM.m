@@ -204,16 +204,21 @@ transfer.Channel        = 1;
  
    
 %% save datas :
+%% save datas :
 if SaveData == 1
-MainFolderName = 'D:\Data\mai\2017-07-01\';
-%SubFolderName  = generateSubFolderName();
-%FileName       = generateSaveName(SaveFolderName,'Volt',Volt);
-FileName       = 'AGAR_5x5x4cm_OP';
+MainFolderName = 'D:\Data\mai';
+SubFolderName  = generateSubFolderName(MainFolderName);
+CommentName    = 'PVA';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Volt',Volt,'AlphaM',AlphaM);
 
-save([MainFolderName,FileName],'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
-              ,'X0','X1','NbX','NbZ','NTrig','Prof','MedElmtList','raw');
+
+save([MainFolderName,FileName],'Volt','FreqSonde','NbHemicycle','Foc','DurationWaveform','NbZ','NbX',...
+               'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
 savefig(Hf,[MainFolderName,FileName]);
-saveas(Hf,[MainFolderName,FileName],'png')
+saveas(Hf,[MainFolderName,FileName],'png');
+
+fprintf('Data has been saved under : \r %s \r\n',FileName);
+
 end
 
 %% ================================= command line to force a trigger on Gage :

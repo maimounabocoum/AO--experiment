@@ -156,13 +156,16 @@ if SaveData == 1
 MainFolderName = 'D:\Data\mai';
 SubFolderName  = generateSubFolderName(MainFolderName);
 CommentName    = 'PVA6';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Volt',Volt,'AlphaM',AlphaM)
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Volt',Volt,'AlphaM',AlphaM);
 
 
 save([MainFolderName,FileName],'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
-              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate');
+              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
 savefig(Hf,[MainFolderName,FileName]);
-saveas(Hf,[MainFolderName,FileName],'png')
+saveas(Hf,[MainFolderName,FileName],'png');
+
+fprintf('Data has been saved under : \r %s \r\n',FileName);
+
 end
 
 %% ================================= command line to force a trigger on Gage :
