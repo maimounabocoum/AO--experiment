@@ -46,22 +46,25 @@ Xs       = (0:NbPixels-1)*pitch;    % Echelle de graduation en X
 %u        = 1.54;                    % vitesse de propagation en mm/us
 
 
-freq0 = 1e6/DurationWaveform;                  % Pas fréquentiel de la modulation de phase (en Hz)
-nuX0 = 1.0/(NbPixels*pitch);    % Pas fréquence spatiale en X (en mm-1)
+freq0 = 1e6/DurationWaveform;     % Pas fréquentiel de la modulation de phase (en Hz)
+nuX0 = 1.0/(NbPixels*pitch);      % Pas fréquence spatiale en X (en mm-1)
 
 [NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
 Nfrequencymodes = length(NBX(:));
 
 for nbs = 1:Nfrequencymodes
     
-        f   = NBZ(nbs)*freq0; % fréquence de modulation de phase (en Hz) 
-        nuX = NBX(nbs)*nuX0; % fréquence spatiale (en mm-1)
-        Waveform = CalcMatHole(f0,f,nuX,Xs); % Calculer la matrice
-       % Arbitrary.Waveform = zeros(50,192);
+        fz   = NBZ(nbs)*freq0; % fréquence de modulation de phase (en Hz) 
+        nuX  = NBX(nbs)*nuX0;  % fréquence spatiale (en mm-1)
+        
+        % f0 : MHz
+        % fz : 
+        % nuX : en mm-1
+        Waveform = CalcMatHole(f0,fz,nuX,Xs); % Calculer la matrice
        
 %       fprintf('waveform is lasting %4.2f us \n\r',size(Waveform,1)/SampFreq)
-%         imagesc(Waveform);
-%         pause(0.1);
+%       imagesc(Waveform);
+%       pause(0.1);
         
     EvtDur   = ceil(pulseDuration + PropagationTime);   
     

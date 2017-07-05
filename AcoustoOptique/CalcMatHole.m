@@ -2,7 +2,7 @@ function Mat = CalcMatHole(f0,f,nuX,X);
 % f0 (en MHz) est la fréquence de porteuse,  f (en Hz) la fréquence de modulation de phase
 
 Tmax = 20.1;  % durée maximale d'un cycle élémentaire (en us)
-Fe = 180; % Fréquence d'échantillonnage en MHz
+Fe = 180;     % Fréquence d'échantillonnage en MHz
 
 T = 1e6/f;
 if (T>Tmax) % si la période de la modulation de phase est plus grande que Tmax --> Manip impossible
