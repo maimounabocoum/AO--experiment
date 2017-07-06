@@ -44,14 +44,12 @@ set(obj.Hgui.loading, 'callback', @(src, event) loading_Callback(obj, src, event
 % well :
 % set(obj.Hgui.figure1,'closerequestfcn', @(src,event) Close_fcn(obj, src, event));
     
-        end
-        
+        end        
         function obj = Addline(obj,Nmin,Nmax,datatmp,lineNumber)
 
             obj.Lines((1+Nmin):Nmax,lineNumber) = datatmp(:)' ;
             
-        end
-        
+        end      
         function S   = saveobj(obj,savingfolder)
             S.t           = obj.t   ;
             S.z           = obj.z ;

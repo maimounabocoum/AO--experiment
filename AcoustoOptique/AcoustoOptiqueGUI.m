@@ -15,18 +15,18 @@
  addpath('D:\legHAL');
  addPathLegHAL();
  
-        TypeOfSequence = 'OP';
-        Volt        = 30;
+        TypeOfSequence = 'OF';
+        Volt        = 50;
         FreqSonde   = 3;
-        NbHemicycle = 4;
+        NbHemicycle = 10;
         Foc         = 23;
-        AlphaM      = 20;
-        dA          = 0.5;
+        AlphaM      = 10;
+        dA          = 1;
         X0          = 0;
-        X1          = 38 ;
+        X1          = 38;
         NTrig       = 500;
         Prof        = 200;
-        SaveData = 1 ; % set to 1 to save data
+        SaveData    = 1 ; % set to 1 to save data
 
 
                  
@@ -135,13 +135,13 @@ transfer.Channel        = 1;
     set(findall(Hf,'-property','FontSize'),'FontSize',15) 
     
     %% Radon inversion :
-    currentFolder = pwd ;
-    % path to radon inversion folder
-    cd('D:\GIT\AO---softwares-and-developpement\radon inversion')
-       
-       Iradon = OPinversionFunction(Alphas*pi/180,z,Datas,SampleRate*1e6,c);
-       %RetroProj_cleaned(Alphas,Datas,SampleRate*1e6);
-    % back to original folder 
+%     currentFolder = pwd ;
+%     % path to radon inversion folder
+%     cd('D:\GIT\AO---softwares-and-developpement\radon inversion')
+%        
+%        Iradon = OPinversionFunction(Alphas*pi/180,z,Datas,SampleRate*1e6,c);
+%        %RetroProj_cleaned(Alphas,Datas,SampleRate*1e6);
+%     % back to original folder 
     cd(currentFolder)
     %%
     end
@@ -153,16 +153,16 @@ transfer.Channel        = 1;
    
 %% save datas :
 if SaveData == 1
-MainFolderName = 'D:\Data\mai';
+MainFolderName = 'D:\Data\mai\2017-07-06';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'PVA6';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Volt',Volt,'AlphaM',AlphaM);
+CommentName    = 'AOinstalledNOmodulastion';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Volt',Volt,'hc',NbHemicycle,'wavelength',765);
 
 
-save([MainFolderName,FileName],'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
+save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
-savefig(Hf,[MainFolderName,FileName]);
-saveas(Hf,[MainFolderName,FileName],'png');
+savefig(Hf,FileName);
+saveas(Hf,FileName,'png');
 
 fprintf('Data has been saved under : \r %s \r\n',FileName);
 
