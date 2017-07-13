@@ -4,9 +4,12 @@
 clear all; close all; clc
 w = instrfind; if ~isempty(w) fclose(w); delete(w); end
 
+% adresse Bastille : '192.168.0.20'
+% adresse Jussieu : '192.168.1.16'
+
 clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
- AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
  addpath('D:\legHAL');
  addPathLegHAL();
  
@@ -21,13 +24,13 @@ clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
 
 % user defined parameters :
-    Volt            = 30; % Volts
+    Volt            = 20; % Volts
     f0              = 10;  % MHz
     NbHemicycle     = 8;  % number of have cycles
     X0              = 15;  % mm : position of min actuator for the scan
     Foc             = 35; % mm
     ScanLength      = 0.2; % mm
-    NTrig           = 5000; % number of repetition
+    NTrig           = 50000; % number of repetition
     Z1              = 10;   % mm
     Z2              = 70;   % mm
 
@@ -233,6 +236,6 @@ SEQ = usse.usse( ...
 
  SEQ = SEQ.startSequence();
 
-%SEQ = SEQ.stopSequence( 'Wait', 1 );
+SEQ = SEQ.stopSequence( 'Wait', 1 );
 %SEQ = SEQ.quitRemote();
 disp('-------------Ready to use-------------------- ')

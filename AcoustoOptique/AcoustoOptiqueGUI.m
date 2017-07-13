@@ -12,20 +12,21 @@
  AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
  addpath('sequences');
  addpath('subfunctions');
+ addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
  addpath('D:\legHAL');
  addPathLegHAL();
  
         TypeOfSequence = 'OF';
         Volt        = 50;
         FreqSonde   = 3;
-        NbHemicycle = 10;
+        NbHemicycle = 4;
         Foc         = 23;
         AlphaM      = 10;
         dA          = 1;
         X0          = 0;
         X1          = 38;
-        NTrig       = 500;
-        Prof        = 200;
+        NTrig       = 1000;
+        Prof        = 80;
         SaveData    = 1 ; % set to 1 to save data
 
 
@@ -34,7 +35,7 @@
 %% ============================   Initialize AIXPLORER
 % %% Sequence execution
 % % ============================================================================ %
-
+clear SEQ
 switch TypeOfSequence
     case 'OF'
 [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
@@ -53,7 +54,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
 %   3 = Data transfer is in progress
      SampleRate    =   10;
      Range         =   1;
-     GageActive = 'on' ; % on to activate external trig, off : will trig on timout value
+     GageActive = 'on' ; % 'on' to activate external trig, 'off' : will trig on timout value
      
  Nlines = length(SEQ.InfoStruct.event);    
 [ret,Hgage,acqInfo,sysinfo] = InitOscilloGage(NTrig*Nlines,Prof,SampleRate,Range,GageActive);
@@ -153,10 +154,10 @@ transfer.Channel        = 1;
    
 %% save datas :
 if SaveData == 1
-MainFolderName = 'D:\Data\mai\2017-07-06';
+MainFolderName = 'D:\Data\mai\2017-07-12\imageAO 2D';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'AOinstalledNOmodulastion';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Volt',Volt,'hc',NbHemicycle,'wavelength',765);
+CommentName    = 'NorlasePVATuyau_intralipide';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'hc',NbHemicycle,'wavelength',783,'NTrig',NTrig);
 
 
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
