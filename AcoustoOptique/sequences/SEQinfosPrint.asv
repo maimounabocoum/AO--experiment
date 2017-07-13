@@ -1,4 +1,4 @@
-function DurationTotal = SEQinfosPrint( SEQ )
+function [  ] = SEQinfosPrint( SEQ )
 % this functions returns ifnformation of the current sequence :
 % created by maimouna bocoum 13-07-2017
 
@@ -14,8 +14,7 @@ function DurationTotal = SEQinfosPrint( SEQ )
  for Nevent = 1:length(SEQ.InfoStruct.event)
  DurationTotal  = DurationTotal  + SEQ.InfoStruct.event(Nevent).duration ;
  end
-
- fprintf('The sequence is about %f us long\r\n',DurationTotal)
+ fprintf('')
  
 % SEQ.InfoStruct.event.TrigOutDelay
 % SEQ.InfoStruct.event.numSamples

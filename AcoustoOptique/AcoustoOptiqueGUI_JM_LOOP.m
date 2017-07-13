@@ -25,8 +25,8 @@
         X1          = 38 ;   % 'OF' , 'OP' 
         NTrig       = 3;   % 'OF' , 'OP' , 'JM'
         Prof        = 200;   % 'OF' , 'OP' , 'JM'
-        NbZ         = 2;     % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 2;     % 20 Nb de composantes de Fourier en X, 'JM'
+        NbZ         = 1;     % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = 1;     % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;
         
         SaveData = 0 ;      % set to 1 to save data
@@ -46,7 +46,7 @@ switch TypeOfSequence
 [SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'JM'
 Volt = min(Volt,15) ; 
-[SEQ] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
+[SEQ] = AOSeqInit_OJML(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
 
 end
 
@@ -81,34 +81,27 @@ transfer.Channel        = 1;
     
 
     %% ======================== start acquisition =============================
-     tic
-     SEQ = SEQ.loadSequence();
 
-     fprintf('Sequence has loaded in %f s \n\r',toc)
-     display('--------ready to use -------------');
- 
-     
+    SEQinfosPrint( SEQ )        % printout SEQ infos
+
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
     
 
-    SEQinfosPrint( SEQ )        % printout SEQ infos
+    
 
     %SEQ = StartMySequence(SEQ);
     SEQ = SEQ.startSequence('Wait',0);
-    SEQinfosPrint( SEQ )        % printout SEQ infos 
-    
-    
-%     % retreive received RF data 
-%     buffer = SEQ.getData('Realign', 1);
-%     figure
-%     imagesc(double(mean(buffer.data,3)))
+    SequenceDuration_us = SEQinfosPrint( SEQ ) ;        % printout SEQ infos 
     
     tic
     status = CsMl_QueryStatus(Hgage);
-    
-    while status ~= 0
-        status = CsMl_QueryStatus(Hgage);
+    tasks2execute = 0;
+    while status ~= 0 && tasks2execute < NTrig*(SequenceDuration_us/50)*200000
+
+        status = CsMl_QueryStatus(Hgage) ;
+        tasks2execute = tasks2execute + 1;
+       
     end
 
     fprintf('Aquisition lasted %f s \n\r',toc);

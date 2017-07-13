@@ -156,11 +156,12 @@ SEQ = usse.usse( ...
 
  % status :
  display('Begin loading sequence to Hardware');
-%  tic
-%  SEQ = SEQ.loadSequence();
-%  
-%  fprintf('Sequence has loaded in %f s \n\r',toc)
-%  display('--------ready to use -------------');
+     tic
+     SEQ = SEQ.loadSequence();
+     
+     
+     fprintf('Sequence has loaded in %f s \n\r',toc)
+     display('--------ready to use -------------');
 end
 
 

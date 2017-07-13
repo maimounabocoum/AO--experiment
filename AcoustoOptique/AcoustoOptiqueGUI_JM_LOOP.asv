@@ -46,7 +46,7 @@ switch TypeOfSequence
 [SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'JM'
 Volt = min(Volt,15) ; 
-[SEQ] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
+[SEQ] = AOSeqInit_OJML(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
 
 end
 
@@ -83,32 +83,29 @@ transfer.Channel        = 1;
     %% ======================== start acquisition =============================
      tic
      SEQ = SEQ.loadSequence();
-
+     SEQinfosPrint( SEQ )        % printout SEQ infos
+     
      fprintf('Sequence has loaded in %f s \n\r',toc)
      display('--------ready to use -------------');
- 
-     
+
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
     
 
-    SEQinfosPrint( SEQ )        % printout SEQ infos
+    
 
     %SEQ = StartMySequence(SEQ);
     SEQ = SEQ.startSequence('Wait',0);
     SEQinfosPrint( SEQ )        % printout SEQ infos 
     
-    
-%     % retreive received RF data 
-%     buffer = SEQ.getData('Realign', 1);
-%     figure
-%     imagesc(double(mean(buffer.data,3)))
-    
     tic
     status = CsMl_QueryStatus(Hgage);
-    
-    while status ~= 0
-        status = CsMl_QueryStatus(Hgage);
+    tasks2execute = 0;
+    while status ~= 0 && tasks2execute < 10000000
+
+        status = CsMl_QueryStatus(Hgage) ;
+        tasks2execute = tasks2execute + 1;
+       
     end
 
     fprintf('Aquisition lasted %f s \n\r',toc);
