@@ -6,33 +6,34 @@
 % adresse Jussieu : '192.168.1.16'
 % adresse Bastille : '192.168.0.20'
 
- AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
  addpath('sequences');
  addpath('subfunctions');
  addpath('D:\legHAL');
+ addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
  addPathLegHAL();
  
        TypeOfSequence = 'JM'; % 'OF' , 'OP' , 'JM'
  
-        Volt        = 10;   % 'OF' , 'OP' , 'JM'
-        FreqSonde   = 2;    % 'OF' , 'OP' , 'JM'
-        NbHemicycle = 450;   % 'OF' , 'OP' , 'JM'
-        Foc         = 23;   % 'OF' 
-        AlphaM      = 20;   % 'OP' 
-        dA          = 1;    % 'OP' 
-        X0          = 0;    % 'OF' , 'OP' 
-        X1          = 38 ;  % 'OF' , 'OP' 
-        NTrig       = 500;  % 'OF' , 'OP' , 'JM'
+        Volt        = 9;     % 'OF' , 'OP' , 'JM'
+        FreqSonde   = 2;     % 'OF' , 'OP' , 'JM'
+        NbHemicycle = 250;   % 'OF' , 'OP' , 'JM'
+        Foc         = 23;    % 'OF' 
+        AlphaM      = 20;    % 'OP' 
+        dA          = 1;     % 'OP' 
+        X0          = 0;     % 'OF' , 'OP' 
+        X1          = 38 ;   % 'OF' , 'OP' 
+        NTrig       = 3;   % 'OF' , 'OP' , 'JM'
         Prof        = 200;   % 'OF' , 'OP' , 'JM'
-        NbZ         = 3;       % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 2;      % 20 Nb de composantes de Fourier en X, 'JM'
+        NbZ         = 2;     % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = 2;     % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;
         
         SaveData = 0 ;      % set to 1 to save data
 
 
- % estiation of loading time 
- fprintf('Loading should take about %d seconds\n\r',NbX*NbZ*3);
+ % estimation of loading time 
+ fprintf('%i events, loading should take about %d seconds\n\r',(2*NbX+1)*NbZ,(2*NbX+1)*NbZ*3);
 
 %% ============================   Initialize AIXPLORER
 % %% Sequence execution
@@ -44,7 +45,7 @@ switch TypeOfSequence
     case 'OP'
 [SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'JM'
-Volt = min(Volt,20) ; 
+Volt = min(Volt,15) ; 
 [SEQ] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
 
 end
@@ -82,13 +83,24 @@ transfer.Channel        = 1;
     %% ======================== start acquisition =============================
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
-     
+    
+     tic
+     SEQ = SEQ.loadSequence();
+
+     fprintf('Sequence has loaded in %f s \n\r',toc)
+     display('--------ready to use -------------');
+ 
+    SEQinfosPrint( SEQ )        % printout SEQ infos
+
+    %SEQ = StartMySequence(SEQ);
+    SEQ = SEQ.startSequence('Wait',0);
     SEQinfosPrint( SEQ )        % printout SEQ infos 
     
-    SEQ = StartMySequence(SEQ);
-    %SEQ = SEQ.startSequence('Wait',0);
-    SEQinfosPrint( SEQ )        % printout SEQ infos 
     
+%     % retreive received RF data 
+%     buffer = SEQ.getData('Realign', 1);
+%     figure
+%     imagesc(double(mean(buffer.data,3)))
     
     tic
     status = CsMl_QueryStatus(Hgage);
@@ -115,10 +127,13 @@ transfer.Channel        = 1;
        raw((1+actual.ActualStart):actual.ActualLength,SegmentNumber) = datatmp' ;
         
     end
+    CsMl_ErrorHandler(ret, 1, Hgage);
     
     fprintf('Data Transfer lasted %f s \n\r',toc);
     
-    CsMl_ErrorHandler(ret, 1, Hgage);
+
+    
+    
     SEQ = SEQ.stopSequence('Wait', 0);  
     
     

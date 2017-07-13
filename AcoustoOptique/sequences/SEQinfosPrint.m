@@ -14,7 +14,7 @@ function [  ] = SEQinfosPrint( SEQ )
 % SEQ.InfoStruct.event.numSamples
 
 %  SEQ.InfoStruct
-% SEQ.InfoStruct.rx
+ SEQ.InfoStruct.rx
 % SEQ.InfoStruct.mode
 
 %SEQ.InfoStruct.tx
