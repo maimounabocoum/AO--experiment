@@ -1,0 +1,12 @@
+function [  ] = SEQinfosPrint( SEQ )
+% this functions returns ifnformation of the current sequence :
+% created by maimouna bocoum 13-07-2017
+
+
+SEQ.Server     ;
+SEQ.InfoStruct
+
+
+
+end
+

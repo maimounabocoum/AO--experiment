@@ -25,7 +25,7 @@
         NTrig       = 500;  % 'OF' , 'OP' , 'JM'
         Prof        = 200;   % 'OF' , 'OP' , 'JM'
         NbZ         = 3;       % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 2;      % 20 Nb de composantes de Fourier en X, 'JM'
+        NbX         = 5;      % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;
         
         SaveData = 0 ;      % set to 1 to save data
@@ -77,17 +77,17 @@ transfer.Channel        = 1;
 
     raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     
-
-    %% ======================== start acquisition =============================
+   
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
+ 
+    %% ======================== start acquisition =============================
+ 
      
-    SEQinfosPrint( SEQ )        % printout SEQ infos 
     
     SEQ = StartMySequence(SEQ);
-    %SEQ = SEQ.startSequence('Wait',0);
+    %SEQ.startSequence('Wait',0);
     SEQinfosPrint( SEQ )        % printout SEQ infos 
-    
     
     tic
     status = CsMl_QueryStatus(Hgage);
@@ -96,7 +96,7 @@ transfer.Channel        = 1;
         status = CsMl_QueryStatus(Hgage);
     end
 
-    fprintf('Aquisition lasted %f s \n\r',toc);
+    fprintf('aquisition lastes %d s ',toc);
     
     % Transfer data to Matlab
     % Z  = linspace(0,Prof,acqInfo.Depth); 
@@ -114,22 +114,19 @@ transfer.Channel        = 1;
        raw((1+actual.ActualStart):actual.ActualLength,SegmentNumber) = datatmp' ;
         
     end
-    
-    fprintf('Data Transfer lasted %f s \n\r',toc);
+    toc
     
     CsMl_ErrorHandler(ret, 1, Hgage);
     SEQ = SEQ.stopSequence('Wait', 0);  
     
     
     
-%% ======================== data post processing =============================
+   % ======================== data post processing =============================
     Hf = figure;
     set(Hf,'WindowStyle','docked');
     
     switch TypeOfSequence
-        
         case 'OF'
-            
     Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
     z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
     x = (1:Nlines)*system.probe.Pitch;
@@ -138,15 +135,15 @@ transfer.Channel        = 1;
     ylabel('z (mm)')
 %     axis equal
 %     axis tight
-
         case 'OP'
-            
     Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
     z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
     x = AlphaM;
     imagesc(x,z,1e3*Datas)
     xlabel('angle (°)')
     ylabel('z (mm)')
+    
+
     title('Averaged raw datas')
     cb = colorbar;
     ylabel(cb,'AC tension (mV)')
@@ -157,12 +154,10 @@ transfer.Channel        = 1;
    % ylim([0 50])
    
    case 'JM'
-       
         Datas = RetreiveDatas(raw,NTrig,Nlines,1:Nlines);
         % Calcul composante de Fourier
         z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
         x = (1:Nlines)*system.probe.Pitch;
-        
             imagesc(x,z,1e3*Datas)
             xlabel('lines Nbx, Nbz')
             ylabel('z (mm)')    
@@ -179,7 +174,7 @@ transfer.Channel        = 1;
         tDum = [];
 
         nbs = 1;
-  
+   Datas = RetreiveDatas(raw,NTrig,Nlines,1:Nlines);   
    [NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
    Nfrequencymodes = length(NBX(:));
 
@@ -189,13 +184,13 @@ transfer.Channel        = 1;
             ExpFunc(z<=CalcDelay)           =   0;
             ExpFunc(z>(CalcDelay+IntDelay)) =   0;    
             
-            F = Datas(:,nbs);
+                F = Datas(:,nbs);
                 
-                %plot(z,F/max(F));
-                %hold;
-                %plot(z,real(ExpFunc),'r');
-            tR = ExpFunc*F;
-            tDum = [tDum tR];
+                plot(z,F/max(F));
+                hold;
+                plot(z,real(ExpFunc),'r');
+                tR = ExpFunc*F;
+                tDum = [tDum tR];
       
    end
                
