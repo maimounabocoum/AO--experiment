@@ -177,6 +177,7 @@ transfer.Channel        = 1;
         Nfrequencymodes = length(NBX(:));
    
         z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
+        Z = repmat(z,length(NBZ(:)),1);
         x = (1:Nlines);
         
             imagesc(x,z,1e3*Datas)
@@ -191,21 +192,26 @@ transfer.Channel        = 1;
         XLambda = (DurationWaveform*1e-6)*1e3*c;
         CalcDelay = 2*XLambda;
         IntDelay  = 3*XLambda;
-                               
+                  
+        tDum = [];   
+
+   for nbs = 1:Nfrequencymodes
+                
             %ExpFunc                         =  exp(2*1i*z*NBZ(nbs)*pi/XLambda);
-            ExpFunc                                                      =  exp(2*1i*pi*(NBZ(:).*z)/XLambda);
-            ExpFunc( : , z <= CalcDelay || z > (CalcDelay+IntDelay))     =   0;
+            ExpFunc                                                 =  exp(2*1i*pi*(NBZ(:).*z)/XLambda);
+            ExpFunc( Z <= CalcDelay || Z > (CalcDelay+IntDelay))    =   0;
  
-            imagesc(z,1:Nfrequencymodes,ExpFunc);
-            %   tR = ExpFunc*Datas(:,nbs) ;
-            %   tDum = [tDum tR];
-            %   tR = ExpFunc*Datas(:,nbs) ;
-            tDum = diag(ExpFunc*Datas)' ;
-   
+                imagesc(z,F/max(F));
+                %hold;
+                %plot(z,real(ExpFunc),'r');
+            tR = ExpFunc*Datas(:,nbs) ;
+            tDum = [tDum tR];
+      
+   end
                
-        DecalZ  =   0.5;
-        NtF     =   32;
-       [I X Y] = Reconstruct(tDum,NbX,NbZ,SampleRate,DecalZ,NtF,DurationWaveform,c);   
+        DecalZ=0.5;
+        NtF=32;
+       [I X Y] = Reconstruct2(tDum,NbX,NbZ,SampleRate,DecalZ,NtF,DurationWaveform,c);   
 
        Hfinal = figure(100);
        set(Hfinal,'WindowStyle','docked');
