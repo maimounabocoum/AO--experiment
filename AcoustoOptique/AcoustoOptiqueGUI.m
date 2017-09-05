@@ -1,24 +1,33 @@
 % clear all; close all; clc
 % w = instrfind; if ~isempty(w) fclose(w); delete(w); end
+% restoredefaultpath % restaure original path
 
 %% parameter for plane wave sequence :
 % ======================================================================= %
+
+% adresse Bastille : '192.168.0.20'
+% adresse Jussieu : '192.168.1.16'
+
+
  AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
+ addpath('sequences');
+ addpath('subfunctions');
+ addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
  addpath('D:\legHAL');
  addPathLegHAL();
  
-        Volt        = 15;
+        TypeOfSequence = 'OF';
+        Volt        = 50;
         FreqSonde   = 3;
-        NbHemicycle = 10;
+        NbHemicycle = 4;
         Foc         = 23;
-        AlphaM      = 20;
+        AlphaM      = 10;
         dA          = 1;
         X0          = 0;
-        X1          = 38 ;
+        X1          = 38;
         NTrig       = 1000;
-        Prof        = 200;
-        TypeOfSequence = 'OP';
-        SaveData = 0 ; % set to 1 to save data
+        Prof        = 80;
+        SaveData    = 1 ; % set to 1 to save data
 
 
                  
@@ -26,12 +35,12 @@
 %% ============================   Initialize AIXPLORER
 % %% Sequence execution
 % % ============================================================================ %
-
+clear SEQ
 switch TypeOfSequence
     case 'OF'
 [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
     case 'OP'
-[SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
+[SEQ,MedElmtList,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
 end
 
 
@@ -45,7 +54,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
 %   3 = Data transfer is in progress
      SampleRate    =   10;
      Range         =   1;
-     GageActive = 'on' ; % on to activate external trig, off : will trig on timout value
+     GageActive = 'on' ; % 'on' to activate external trig, 'off' : will trig on timout value
      
  Nlines = length(SEQ.InfoStruct.event);    
 [ret,Hgage,acqInfo,sysinfo] = InitOscilloGage(NTrig*Nlines,Prof,SampleRate,Range,GageActive);
@@ -109,35 +118,55 @@ transfer.Channel        = 1;
     ylabel('z (mm)')
 %     axis equal
 %     axis tight
-        case 'OP'
-    Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
-    z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
-    x = AlphaM;
-    imagesc(x,z,1e3*Datas)
-    xlabel('angle (°)')
-    ylabel('z (mm)')
-    end
-
     title('Averaged raw datas')
     cb = colorbar;
     ylabel(cb,'AC tension (mV)')
     colormap(parula)
     set(findall(Hf,'-property','FontSize'),'FontSize',15) 
+        case 'OP'
+    Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
+    z = (1:actual.ActualLength)*(c/(1e6*SampleRate));
+    imagesc(Alphas,z*1e3,1e3*Datas)
+    xlabel('angle (°)')
+    ylabel('z (mm)')
+    title('Averaged raw datas')
+    cb = colorbar;
+    ylabel(cb,'AC tension (mV)')
+    colormap(parula)
+    set(findall(Hf,'-property','FontSize'),'FontSize',15) 
+    
+    %% Radon inversion :
+%     currentFolder = pwd ;
+%     % path to radon inversion folder
+%     cd('D:\GIT\AO---softwares-and-developpement\radon inversion')
+%        
+%        Iradon = OPinversionFunction(Alphas*pi/180,z,Datas,SampleRate*1e6,c);
+%        %RetroProj_cleaned(Alphas,Datas,SampleRate*1e6);
+%     % back to original folder 
+    cd(currentFolder)
+    %%
+    end
 
-   % ylim([0 50])
+
+
+    ylim([0 50])
  
    
 %% save datas :
 if SaveData == 1
-MainFolderName = 'D:\Data\mai\2017-07-01\';
-%SubFolderName  = generateSubFolderName();
-%FileName       = generateSaveName(SaveFolderName,'Volt',Volt);
-FileName       = 'AGAR_5x5x4cm_OP';
+MainFolderName = 'D:\Data\mai\2017-07-12\imageAO 2D';
+SubFolderName  = generateSubFolderName(MainFolderName);
+CommentName    = 'NorlasePVATuyau_intralipide';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'hc',NbHemicycle,'wavelength',783,'NTrig',NTrig);
 
-save([MainFolderName,FileName],'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
-              ,'X0','X1','NTrig','Prof','MedElmtList','raw');
-savefig(Hf,[MainFolderName,FileName]);
-saveas(Hf,[MainFolderName,FileName],'png')
+
+save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
+              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
+savefig(Hf,FileName);
+saveas(Hf,FileName,'png');
+
+fprintf('Data has been saved under : \r %s \r\n',FileName);
+
 end
 
 %% ================================= command line to force a trigger on Gage :
@@ -145,3 +174,7 @@ end
 %% ================================= quite remote ===========================================%%
 %               SEQ = SEQ.quitRemote();
 
+%% ======================================== remove search paths =======
+rmpath('D:\legHAL');
+rmpath('subfunctions');
+rmpath('sequences');
