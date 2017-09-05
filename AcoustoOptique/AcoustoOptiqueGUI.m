@@ -1,4 +1,4 @@
-% clear all; close all; clc
+% clear all; clc
 % w = instrfind; if ~isempty(w) fclose(w); delete(w); end
 % restoredefaultpath % restaure original path
 
@@ -6,7 +6,7 @@
 % ======================================================================= %
 
 % adresse Bastille : '192.168.0.20'
-% adresse Jussieu : '192.168.1.16'
+% adresse Jussieu :  '192.168.1.16'
 
 
  AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
@@ -16,18 +16,18 @@
  addpath('D:\legHAL');
  addPathLegHAL();
  
-        TypeOfSequence = 'OF';
-        Volt        = 50;
-        FreqSonde   = 3;
-        NbHemicycle = 4;
-        Foc         = 23;
-        AlphaM      = 10;
-        dA          = 1;
-        X0          = 0;
-        X1          = 38;
-        NTrig       = 1000;
-        Prof        = 80;
-        SaveData    = 1 ; % set to 1 to save data
+        TypeOfSequence  = 'OF';
+        Volt            = 20;
+        FreqSonde       = 4;
+        NbHemicycle     = 10;
+        Foc             = 23;
+        AlphaM          = 10;
+        dA              = 1;
+        X0              = 0;
+        X1              = 38;
+        NTrig           = 10;
+        Prof            = 80;
+        SaveData        = 0 ; % set to 1 to save data
 
 
                  
@@ -35,7 +35,7 @@
 %% ============================   Initialize AIXPLORER
 % %% Sequence execution
 % % ============================================================================ %
-clear SEQ
+clear SEQ MedElmtList
 switch TypeOfSequence
     case 'OF'
 [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
@@ -69,11 +69,16 @@ transfer.Channel        = 1;
     raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     
    
-    ret = CsMl_Capture(Hgage);
-    CsMl_ErrorHandler(ret, 1, Hgage);
+
  
     %% ======================== start acquisition =============================
+    SEQinfosPrint( SEQ )        % printout SEQ infos
+    
+    ret = CsMl_Capture(Hgage);
+    CsMl_ErrorHandler(ret, 1, Hgage);
+    
     tic 
+    SEQ = SEQ.stopSequence('Wait', 0);
     SEQ = SEQ.startSequence('Wait',0);
     
   
@@ -102,6 +107,7 @@ transfer.Channel        = 1;
     toc
     
     CsMl_ErrorHandler(ret, 1, Hgage);
+    
     SEQ = SEQ.stopSequence('Wait', 0);  
     
     %% ======================== data post processing =============================
@@ -135,13 +141,13 @@ transfer.Channel        = 1;
     colormap(parula)
     set(findall(Hf,'-property','FontSize'),'FontSize',15) 
     
-    %% Radon inversion :
-%     currentFolder = pwd ;
+    %%  Radon inversion :
+%       currentFolder = pwd ;
 %     % path to radon inversion folder
-%     cd('D:\GIT\AO---softwares-and-developpement\radon inversion')
+%       cd('D:\GIT\AO---softwares-and-developpement\radon inversion')
 %        
-%        Iradon = OPinversionFunction(Alphas*pi/180,z,Datas,SampleRate*1e6,c);
-%        %RetroProj_cleaned(Alphas,Datas,SampleRate*1e6);
+%     Iradon = OPinversionFunction(Alphas*pi/180,z,Datas,SampleRate*1e6,c);
+%     % RetroProj_cleaned(Alphas,Datas,SampleRate*1e6);
 %     % back to original folder 
     cd(currentFolder)
     %%
@@ -149,15 +155,15 @@ transfer.Channel        = 1;
 
 
 
-    ylim([0 50])
+    ylim([0 40])
  
    
 %% save datas :
 if SaveData == 1
-MainFolderName = 'D:\Data\mai\2017-07-12\imageAO 2D';
+MainFolderName = 'D:\Data\mai\';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'NorlasePVATuyau_intralipide';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'hc',NbHemicycle,'wavelength',783,'NTrig',NTrig);
+CommentName    = 'SacherPVAtuyauMain91mV_x2';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'wavelength',764);
 
 
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
@@ -173,8 +179,8 @@ end
 %  CsMl_ForceCapture(Hgage);
 %% ================================= quite remote ===========================================%%
 %               SEQ = SEQ.quitRemote();
-
+%               ret = CsMl_FreeAllSystems;
 %% ======================================== remove search paths =======
-rmpath('D:\legHAL');
-rmpath('subfunctions');
-rmpath('sequences');
+% rmpath('D:\legHAL');
+% rmpath('subfunctions');
+% rmpath('sequences');

@@ -40,7 +40,7 @@ NoOp         = 500;         % 탎 minimum time between two US pulses, (5 by defau
 FIRBandwidth = 90;          % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
 RxFreq       = 6;           % Receiving center frequency MHz , ??
 
-TrigOut    = 50;              % trigger duration 탎
+TrigOut    = 30;              % trigger duration 탎
 Pause      = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause duration in 탎
 
 % ======================================================================= %
