@@ -5,10 +5,14 @@
 % Created by Clement on 10/06/2015
 % Last modified : maimouna bocoum
 
-% ============================== Init program ======================
+%============================== Init program ======================
 
 %  clear all; close all; clc
 %  w = instrfind; if ~isempty(w) fclose(w); delete(w); end
+%  clear all;
+ 
+%   clear all; clc
+%  w = instrfind; if ~isempty(w) delete(w); end
 %  clear all;
  
  %=================== indicate location of LEGAL folder
@@ -28,16 +32,16 @@ AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
 % SEQ = remoteGetUserSequence(SRV);
 %=======================  US Parameters =====================
 
-Volt        = 50; % V
+Volt        = 30; % V
 FreqSonde   = 3;  % MHz
-NbHemicycle = 10;
-X0          = 15; % mm
-Foc         = 23; % mm
+NbHemicycle = 4;
+X0          = 20; % mm
+Foc         = 20; % mm
 NTrig       = 1000; %1000
-Prof        = 60; % mm
+Prof        = 800; % mm 800 gain
 
 %%====================== Parameters loop
-Nloop = 100;
+Nloop = 500;
 
 %-----------------------------------------------------------
 %% Gage Init parmaters
@@ -45,7 +49,7 @@ Nloop = 100;
 Range = 1; % V
 SampleRate = 10; % MHz
 GageActive = 'on'; % 'on' or 'off' 
-AIXPLORER_Active = 'on'; % 'on' or 'off' 
+AIXPLORER_Active = 'off'; % 'on' or 'off' 
 
 
 
@@ -124,7 +128,7 @@ for k = 1:Nloop
    
    switch AIXPLORER_Active
    case 'on'
-   SEQ = SEQ.stopSequence('Wait', 0);  
+   SEQ = SEQ.stopSequence('Wait', 1);  
    end
    
 if MyMeasurement.IsRunning == 0

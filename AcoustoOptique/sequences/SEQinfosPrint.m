@@ -28,7 +28,7 @@ function DurationTotal = SEQinfosPrint( SEQ )
 %SEQ.InfoStruct.tx.repeat
 % printout waveform or firt event 
 % figure;
-% imagesc(SEQ.InfoStruct.tx(1).waveform)
+% imagesc(SEQ.InfoStruct.tx(10).waveform)
 % title(['event 1 out of ',num2str( length(SEQ.InfoStruct.tx) )])
 % xlabel('piezo element index')
 % ylabel('Command voltage')

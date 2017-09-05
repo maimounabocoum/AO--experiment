@@ -10,7 +10,7 @@ FrameRate    = 2;         % Hz
 repetition = 1 ;          % repeat sequence [1 inf]
 
 % Voltage parameters
-ImgVoltage  = 60;             % imaging voltage 0V]
+ImgVoltage  = 50;             % imaging voltage 0V]
 ImgCurrent  = 0.1;            % security limit for imaging current [A]
 PushVoltage = 10;             % imaging voltage [V]
 PushCurrent = 5;              % security limit for imaging current [A]
