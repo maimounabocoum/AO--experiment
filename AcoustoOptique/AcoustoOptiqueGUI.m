@@ -7,7 +7,7 @@
  addpath('D:\legHAL');
  addPathLegHAL();
  
-        Volt        = 50;
+        Volt        = 15;
         FreqSonde   = 3;
         NbHemicycle = 10;
         Foc         = 23;
@@ -15,9 +15,9 @@
         dA          = 1;
         X0          = 0;
         X1          = 38 ;
-        NTrig       = 200;
+        NTrig       = 1000;
         Prof        = 200;
-        TypeOfSequence = 'OF';
+        TypeOfSequence = 'OP';
         SaveData = 0 ; % set to 1 to save data
 
 
@@ -31,7 +31,7 @@ switch TypeOfSequence
     case 'OF'
 [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
     case 'OP'
-%SEQ = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc , X0 , NTrig);
+[SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
 end
 
 
@@ -96,10 +96,12 @@ transfer.Channel        = 1;
     SEQ = SEQ.stopSequence('Wait', 0);  
     
     %% ======================== data post processing =============================
-    Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
     Hf = figure;
-    
     set(Hf,'WindowStyle','docked');
+    
+    switch TypeOfSequence
+        case 'OF'
+    Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
     z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
     x = (1:Nlines)*system.probe.Pitch;
     imagesc(x,z,1e3*Datas)
@@ -107,24 +109,35 @@ transfer.Channel        = 1;
     ylabel('z (mm)')
 %     axis equal
 %     axis tight
+        case 'OP'
+    Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
+    z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
+    x = AlphaM;
+    imagesc(x,z,1e3*Datas)
+    xlabel('angle (°)')
+    ylabel('z (mm)')
+    end
+
     title('Averaged raw datas')
     cb = colorbar;
     ylabel(cb,'AC tension (mV)')
     colormap(parula)
     set(findall(Hf,'-property','FontSize'),'FontSize',15) 
 
-   
+   % ylim([0 50])
  
    
 %% save datas :
 if SaveData == 1
-MainFolderName = 'D:\Data\mai';
+MainFolderName = 'D:\Data\mai\2017-07-01\';
 %SubFolderName  = generateSubFolderName();
-FileName       = generateSaveName(SaveFolderName,'Volt',Volt);
+%FileName       = generateSaveName(SaveFolderName,'Volt',Volt);
+FileName       = 'AGAR_5x5x4cm_OP';
 
-save('MyDatas','Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
-              ,'X0','X1','NTrig','Prof');
-
+save([MainFolderName,FileName],'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
+              ,'X0','X1','NTrig','Prof','MedElmtList','raw');
+savefig(Hf,[MainFolderName,FileName]);
+saveas(Hf,[MainFolderName,FileName],'png')
 end
 
 %% ================================= command line to force a trigger on Gage :

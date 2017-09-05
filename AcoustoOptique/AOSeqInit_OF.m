@@ -32,13 +32,13 @@ MinNoop =     system.hardware.MinNoop ;
 
 %% Focusing parameters
 % ======================================================================= %
-TxWidth       = Foc/2;           % mm : effective width for focus line
+TxWidth         = Foc/2;           % mm : effective width for focus line
 PropagationTime = (Prof)/(c)*1e3 ; % duration for one line in \mu s
 
 
 NoOp         = 500;         % µs minimum time between two US pulses, (5 by default ??)
-FIRBandwidth = 90;            % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
-RxFreq       = 6;             % Receiving center frequency MHz , ??
+FIRBandwidth = 90;          % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
+RxFreq       = 6;           % Receiving center frequency MHz , ??
 
 TrigOut    = 50;              % trigger duration µs
 Pause      = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause duration in µs
