@@ -1,7 +1,7 @@
 % Sequence AO Foc JB 01-04-15 ( d'apres 03-03-2015 Marc) modified by
 % Maïmouna Bocoum 26 - 02 -2017
 %% Init program
-function [SEQ,MedElmtList] = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , Foc, X0 , X1 , Prof ,NTrig)
+function [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , f0 , NbHemicycle , Foc, X0 , X1 , Prof ,NTrig)
 
 clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
@@ -40,7 +40,7 @@ NoOp         = 500;         % µs minimum time between two US pulses, (5 by defau
 FIRBandwidth = 90;          % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
 RxFreq       = 6;           % Receiving center frequency MHz , ??
 
-TrigOut    = 30;              % trigger duration µs
+TrigOut    = 10;            % trigger duration µs
 Pause      = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause duration in µs
 
 % ======================================================================= %
@@ -109,7 +109,10 @@ DelayLaw = sqrt(Foc^2+(TxWidth/2)^2)/(c*1e-3) ...
 EvtDur   = ceil( pulseDuration + max(DelayLaw) + PropagationTime );    
 % index of element used for the scan :    
 
-MedElmtList = 1:round(ScanLength/pitch) ;  
+
+ElmtBorns   = [min(NbElemts,max(1,round(X0/pitch))),max(1,min(NbElemts,round(X1/pitch)))];
+ElmtBorns   = sort(ElmtBorns); % in case X0 and X1 are mixed up
+MedElmtList = ElmtBorns(1):ElmtBorns(2);  
 %MedElmtList = randperm(round(ScanLength/pitch)) ;  
 
 % % ======================================================================= %
@@ -163,6 +166,16 @@ end
 % %% ELUSEV and ACMO definition
 % % ======================================================================= %
 
+% adding a pause event as in JB routine : dont know really why but
+% necessary !
+% ELUSEV{1} = elusev.pause( ...
+%     'TrigOut',      0, ...  
+%     'TrigIn',       0,...   % trigged sequence 
+%     'TrigAll',      0, ...  % 0: sends output trigger at first emission 
+%     'TrigOutDelay', 0, ...
+%     'Pause',        5e-3,...% pause in seconds
+%     0);
+
 ELUSEV = elusev.elusev( ...
     'tx',           TXList, ...
     'tw',           TWList, ...
@@ -200,10 +213,10 @@ TPC = remote.tpc( ...
 % % USSE for the sequence
 SEQ = usse.usse( ...
     'TPC', TPC, ...
-    'acmo', ACMOList, ...    'Loopidx',1, ...
+    'acmo', ACMOList, ...     'Loopidx',1, ...
     'Repeat', NTrig, ...    'Popup',0, ...
     'DropFrames', 0, ...
-    'Loop', 0, ...
+    'Loop', 0, ... %    'Loopidx', 2, ...
     'DataFormat', 'FF', ...
     'Popup', 0, ...
     0);

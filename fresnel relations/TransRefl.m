@@ -1,7 +1,7 @@
   %% definition of initial indexes
   
-  n1    = 1.4537 ;
-  n2    = 1.33 ;
+  n1    = 1 ;
+  n2    = 1.4537 ;    % water : 1.33
   theta = 0:0.2:90 ;
   % generation of formulas
   
@@ -22,6 +22,7 @@
     grid on
     xlabel('\theta (°)')
     ylabel('reflexion[%]')
+    set(gca,'Yscale','log')
     title('Averaged raw datas')
     legend('R_p','R_s')
     set(findall(Hf,'-property','FontSize'),'FontSize',15) 

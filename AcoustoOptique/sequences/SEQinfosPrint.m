@@ -8,7 +8,7 @@ function DurationTotal = SEQinfosPrint( SEQ )
 %SEQ.Server     ;
 
 % event informations :
-% SEQ.InfoStruct.event.DMA ??
+ SEQ.InfoStruct.event.duration
 
  DurationTotal = 0 ; % us
  for Nevent = 1:length(SEQ.InfoStruct.event)
@@ -21,7 +21,7 @@ function DurationTotal = SEQinfosPrint( SEQ )
 % SEQ.InfoStruct.event.numSamples
 
 %  SEQ.InfoStruct
- SEQ.InfoStruct.rx
+% SEQ.InfoStruct.rx
 % SEQ.InfoStruct.mode
 
 %SEQ.InfoStruct.tx

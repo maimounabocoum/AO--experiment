@@ -13,23 +13,20 @@
  addpath('sequences');
  addpath('subfunctions');
  addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
-addpath('D:\_legHAL_Marc')
-addPathLegHAL;
+ addpath('D:\legHAL');
+ addPathLegHAL();
  
         TypeOfSequence  = 'OF';
         Volt            = 40;
         FreqSonde       = 4;
         NbHemicycle     = 10;
         Foc             = 23;
-        
         AlphaM          = 10;
         dA              = 1;
-        
-        X0              = 1;
-        X1              = 14;
-        
-        NTrig           = 1000;
-        Prof            = 50;
+        X0              = 0;
+        X1              = 38;
+        NTrig           = 10;
+        Prof            = 80;
         SaveData        = 0 ; % set to 1 to save data
 
 
@@ -76,23 +73,20 @@ transfer.Channel        = 1;
  
     %% ======================== start acquisition =============================
     %SEQinfosPrint( SEQ )        % printout SEQ infos
-    SEQ = SEQ.stopSequence('Wait', 0);
     
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
     
     tic 
+    SEQ = SEQ.stopSequence('Wait', 0);
+    SEQ = SEQ.startSequence('Wait',0);
     
-    SEQ = SEQ.startSequence();
-    
+  
     status = CsMl_QueryStatus(Hgage);
     
     while status ~= 0
         status = CsMl_QueryStatus(Hgage);
     end
-    
-    
-    %SEQ = SEQ.startSequence('Wait',0);
 
     % Transfer data to Matlab
     % Z  = linspace(0,Prof,acqInfo.Depth); 
@@ -161,7 +155,7 @@ transfer.Channel        = 1;
 
 
 
-    %ylim([0 50])
+    ylim([0 80])
  
    
 %% save datas :
