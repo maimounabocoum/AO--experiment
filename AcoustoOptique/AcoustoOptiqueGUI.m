@@ -72,7 +72,7 @@ transfer.Channel        = 1;
 
  
     %% ======================== start acquisition =============================
-    SEQinfosPrint( SEQ )        % printout SEQ infos
+    %SEQinfosPrint( SEQ )        % printout SEQ infos
     
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
