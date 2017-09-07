@@ -13,11 +13,11 @@
  addpath('sequences');
  addpath('subfunctions');
  addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
-addpath('D:\_legHAL_Marc')
-addPathLegHAL;
+ addpath('D:\_legHAL_Marc')
+ addPathLegHAL;
  
-        TypeOfSequence  = 'OF';
-        Volt            = 40;
+        TypeOfSequence  = 'OP';
+        Volt            = 15;
         FreqSonde       = 4;
         NbHemicycle     = 10;
         Foc             = 23;
@@ -28,9 +28,9 @@ addPathLegHAL;
         X0              = 1;
         X1              = 14;
         
-        NTrig           = 1000;
+        NTrig           = 200;
         Prof            = 50;
-        SaveData        = 0 ; % set to 1 to save data
+        SaveData        = 0 ; % set to 1 to save
 
 
                  
@@ -43,7 +43,8 @@ switch TypeOfSequence
     case 'OF'
 [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
     case 'OP'
-[SEQ,MedElmtList,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
+Volt = min(20,Volt); % security for OP routine       
+[SEQ,Delay,MedElmtList,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
 end
 
 
@@ -155,7 +156,7 @@ transfer.Channel        = 1;
 %     Iradon = OPinversionFunction(Alphas*pi/180,z,Datas,SampleRate*1e6,c);
 %     % RetroProj_cleaned(Alphas,Datas,SampleRate*1e6);
 %     % back to original folder 
-    cd(currentFolder)
+%       cd(currentFolder)
     %%
     end
 
@@ -170,10 +171,10 @@ MainFolderName = 'D:\Data\mai\';
 SubFolderName  = generateSubFolderName(MainFolderName);
 CommentName    = 'SacherPVAtuyauMain91mV_x2';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'wavelength',764);
-
-
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
-              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
+              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','Datas','SampleRate','c','Range','TypeOfSequence');
+% save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
+%               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
 savefig(Hf,FileName);
 saveas(Hf,FileName,'png');
 
@@ -184,9 +185,9 @@ end
 %% ================================= command line to force a trigger on Gage :
 %  CsMl_ForceCapture(Hgage);
 %% ================================= quite remote ===========================================%%
-%               SEQ = SEQ.quitRemote();
-%               ret = CsMl_FreeAllSystems;
+%               SEQ = SEQ.quitRemote()      ;
+%               ret = CsMl_FreeAllSystems   ;
 %% ======================================== remove search paths =======
-% rmpath('D:\legHAL');
+% rmpath('D:\legHAL')   ;  
 % rmpath('subfunctions');
-% rmpath('sequences');
+% rmpath('sequences')   ;

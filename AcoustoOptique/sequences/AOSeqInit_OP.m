@@ -3,7 +3,7 @@
 % ATTENTION !! Même si la séquence US n'écoute pas, il faut quand même
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
-function [SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig)
+function [SEQ,Delay,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig)
  clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 % user defined parameters :
 
@@ -17,7 +17,7 @@ end
 %% System parameters import :
 % ======================================================================= %
 c           = common.constants.SoundSpeed ; % [m/s]
-SampFreq    = system.hardware.ClockFreq;    % NE PAS MODIFIER % emitted signal sampling = 180 in [MHz]
+SampFreq    = system.hardware.ClockFreq    % NE PAS MODIFIER % emitted signal sampling = 180 in [MHz]
 NbElemts    = system.probe.NbElemts ; 
 pitch       = system.probe.Pitch ;          % in mm
 MinNoop     = system.hardware.MinNoop;
@@ -48,18 +48,19 @@ Delay = zeros(Nbtot,length(AlphaM)); %(µs)
 
 for i = 1:length(AlphaM)
     
-    Delay(:,i) = sin(pi/180*AlphaM(i))*...
-        (1:size(Delay,1))*pitch/(c/1000);
+%     Delay(:,i) = sin(pi/180*AlphaM(i))*...
+%         (1:size(Delay,1))*pitch/(c/1000); 
     
+    Delay(:,i) = 1000*(1/c)*tan(pi/180*AlphaM(i))*(1:Nbtot)*(pitch); %s
     Delay(:,i) = Delay(:,i) - min(Delay(:,i));
     
 end
 
-for i = 1:length(AlphaM)
-    
-    Delay(:,i) = Delay(:,i) + max(max(Delay(:,:)))-max(Delay(:,i));
-    
-end
+% for i = 1:length(AlphaM)
+%     
+%     Delay(:,i) = Delay(:,i) + max(max(Delay(:,:)))-max(Delay(:,i));
+%     
+% end
 
 
 DlySmpl = round(Delay/dt_s);
@@ -85,8 +86,8 @@ FC = remote.fc('Bandwidth', 90 , 0); %FIR receiving bandwidth [%] - center frequ
 RX = remote.rx('fcId', 1, 'RxFreq', 60 , 'QFilter', 2, 'RxElemts', 0, 0);
 
 
-
 FirstElmt  = max( round(X0/pitch),1);
+
 MedElmtList = 1:length(AlphaM); % list of shot ordering for angle scan (used to reconstruct image)
 
 for nbs = 1:length(AlphaM)
