@@ -17,6 +17,15 @@ function DurationTotal = SEQinfosPrint( SEQ )
 
  fprintf('The sequence is about %f us long\r\n',DurationTotal)
  
+ 
+ % movie on sequences
+ figure;
+ for i = 1:length(SEQ.InfoStruct.tx)
+     imagesc(SEQ.InfoStruct.tx(i).waveform)
+     pause(0.2)
+     drawnow
+ end
+ 
 % SEQ.InfoStruct.event.TrigOutDelay
 % SEQ.InfoStruct.event.numSamples
 

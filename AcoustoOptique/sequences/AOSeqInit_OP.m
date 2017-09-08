@@ -48,8 +48,7 @@ Delay = zeros(Nbtot,length(AlphaM)); %(µs)
 
 for i = 1:length(AlphaM)
     
-%     Delay(:,i) = sin(pi/180*AlphaM(i))*...
-%         (1:size(Delay,1))*pitch/(c/1000); 
+%     Delay(:,i) = 1000*sin(pi/180*AlphaM(i))*(1:Nbtot)*pitch/(c); 
     
     Delay(:,i) = 1000*(1/c)*tan(pi/180*AlphaM(i))*(1:Nbtot)*(pitch); %s
     Delay(:,i) = Delay(:,i) - min(Delay(:,i));
@@ -63,17 +62,20 @@ end
 % end
 
 
-DlySmpl = round(Delay/dt_s);
+DlySmpl = round(Delay/dt_s); % conversion in steps
 
+% waveform
 T_Wf = 0:dt_s:pulseDuration;
 Wf = sin(2*pi*f0*T_Wf);
 
 N_T = length(Wf) + max(max(DlySmpl));
-WF_mat = zeros(N_T,size(Delay,1),size(Delay,2));
+WF_mat = zeros(N_T,Nbtot,length(AlphaM));
 
-for kk = 1:length(AlphaM)
-    for j = 1:size(Delay,1)
-        WF_mat( DlySmpl(j,kk) + (1:length(Wf)),j,kk) = Wf;
+for angle = 1:length(AlphaM)
+    for element = 1:Nbtot
+      WF_mat(:,:,angle) = Wf;  % initialization with zero matrix
+      phase_offset = DlySmpl(element,angle);
+      WF_mat( phase_offset + (1:length(Wf)),element,angle) = Wf;
     end
 end
 

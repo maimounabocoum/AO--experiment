@@ -22,7 +22,8 @@ for i = 1:length(AlphaM)
     
 end
 
-% plot(Delay)
+figure
+ plot(Delay)
 
 % for i = 1:length(AlphaM)
 %     
@@ -47,6 +48,7 @@ for kk = 1:length(AlphaM)
     end
 end
 
-imagesc(squeeze(WF_mat(:,:,10)))
+
+imagesc(squeeze(WF_mat(:,:,15)))
 
 
