@@ -16,8 +16,8 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OP';
-        Volt            = 15;
+        TypeOfSequence  = 'OF';
+        Volt            = 30;
         FreqSonde       = 4;
         NbHemicycle     = 10;
         Foc             = 23;
@@ -25,8 +25,8 @@
         AlphaM          = 10;
         dA              = 1;
         
-        X0              = 1;
-        X1              = 14;
+        X0              = 5;
+        X1              = 30;
         
         NTrig           = 200;
         Prof            = 50;
@@ -38,7 +38,7 @@
 %% ============================   Initialize AIXPLORER
 % %% Sequence execution
 % % ============================================================================ %
-clear SEQ MedElmtList
+clear SEQ MedElmtList raw Datas
 switch TypeOfSequence
     case 'OF'
 [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
@@ -77,7 +77,7 @@ transfer.Channel        = 1;
  
     %% ======================== start acquisition =============================
     %SEQinfosPrint( SEQ )        % printout SEQ infos
-    SEQ = SEQ.stopSequence('Wait', 0);
+    SEQ = SEQ.stopSequence('Wait', 1);
     
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
@@ -92,9 +92,7 @@ transfer.Channel        = 1;
         status = CsMl_QueryStatus(Hgage);
     end
     
-    
-    %SEQ = SEQ.startSequence('Wait',0);
-
+ 
     % Transfer data to Matlab
     % Z  = linspace(0,Prof,acqInfo.Depth); 
     % loop over segment counts:
@@ -115,7 +113,7 @@ transfer.Channel        = 1;
     
     CsMl_ErrorHandler(ret, 1, Hgage);
     
-    SEQ = SEQ.stopSequence('Wait', 0);  
+    SEQ = SEQ.stopSequence('Wait', 1);  
     
     %% ======================== data post processing =============================
     Hf = figure;
@@ -125,7 +123,7 @@ transfer.Channel        = 1;
         case 'OF'
     Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
     z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
-    x = (1:Nlines)*system.probe.Pitch;
+    x = MedElmtList*system.probe.Pitch;
     imagesc(x,z,1e3*Datas)
     xlabel('x (mm)')
     ylabel('z (mm)')
