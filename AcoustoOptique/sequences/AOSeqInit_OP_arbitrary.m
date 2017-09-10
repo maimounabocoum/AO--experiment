@@ -81,7 +81,7 @@ for angle = 1:length(AlphaM)
     end
 end
 
-WF_mat_sign = sign(WF_mat); % l'aixplorer code sur 3 niveaux [-1,0,1]
+WF_mat_sign = sign(WF_mat); % l'aixplorer code sur 2 niveaux [-1,1]
 
 
 % ======================================================================= %
@@ -102,7 +102,7 @@ for nbs = 1:length(AlphaM)
     WFtmp    = squeeze( WF_mat_sign( :, :, nbs ) );
        
     % Flat TX
-    TXList{nbs} = remote.tx_arbitrary('txClock180MHz', 1,'twId',1,'Delays',0);
+    TXList{nbs} = remote.tx_arbitrary('txClock180MHz', 1,'twId',1);
     
     % Arbitrary TW
     TWList{nbs} = remote.tw_arbitrary( ...
@@ -127,8 +127,18 @@ for nbs = 1:length(AlphaM)
         'duration', EvtDur, ...
         0);
     
-    %ELUSEV
-ELUSEV{nbs} = elusev.elusev( ...
+% ELUSEV.arbitrary < elusev.elusev with additional parameters : 
+% Waveform , for each tx elements [-1 1]
+% Delays , for each tx elements (default = 0) [0 1000]
+% Pause, pause duration after arbitrary events [us] [system.hardware.MinNoop 1e6]
+% PauseEnd , pause duration at the end [us] [system.hardware.MinNoop 1e6]
+% ApodFct , {'none' 'bartlett' 'blackman' 'connes' 'cosine' 'gaussian' 'hamming' 'hanning' 'welch'}
+% RxFreq, reception frequency [MHz] [1 60]
+% RxCenter receive center position [mm] [1 100]
+% RxWidth , RxDuration , RxDelay , RxBandwidth , FIRBandwidth
+
+ELUSEV{nbs} = elusev.arbitrary( ...
+    'ARBITRARY' ,   'plane wave with delay matrix ', ...
     'tx',           TXList{nbs}, ...
     'tw',           TWList{nbs}, ...
     'rx',           RX,...

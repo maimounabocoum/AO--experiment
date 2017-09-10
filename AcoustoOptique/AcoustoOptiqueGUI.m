@@ -29,7 +29,7 @@
         X0              = 1;
         X1              = 38;
         
-        NTrig           = 100;
+        NTrig           = 200;
         Prof            = 60;
         SaveData        = 0 ; % set to 1 to save
 

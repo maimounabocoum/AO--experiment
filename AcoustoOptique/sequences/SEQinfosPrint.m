@@ -21,6 +21,7 @@ function DurationTotal = SEQinfosPrint( SEQ )
  % movie on sequences
  figure;
  for i = 1:length(SEQ.InfoStruct.tx)
+     size(SEQ.InfoStruct.tx(i).waveform)
      imagesc(SEQ.InfoStruct.tx(i).waveform)
      pause(0.2)
      drawnow
