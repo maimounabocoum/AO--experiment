@@ -38,23 +38,23 @@ pulseDuration = NbHemicycle*(0.5/f0) ; % US inital pulse duration in us
 
 % ======================================================================= %
 %% Codage en arbitrary : delay matrix and waveform
-if ScanLength==0 || round(ScanLength/pitch)>=NbElemts    
-    Nbtot = NbElemts;
-else  
-    Nbtot = round(ScanLength/pitch);    
-end
+% shooting elements 
+ElmtBorns   = [min(NbElemts,max(1,round(X0/pitch))),max(1,min(NbElemts,round(X1/pitch)))];
+ElmtBorns   = sort(ElmtBorns) ; % in case X0 and X1 are mixed up
 
-Delay = zeros(Nbtot,length(AlphaM)); %(µs)
+
+Nbtot = ElmtBorns(2) - ElmtBorns(1) + 1 ;
+
+
+Delay = zeros(length(AlphaM),NbElemts); %(µs)
 
 for i = 1:length(AlphaM)
-    
-%     Delay(:,i) = 1000*sin(pi/180*AlphaM(i))*(1:Nbtot)*pitch/(c); 
-    
-    Delay(:,i) = 1000*(1/c)*tan(pi/180*AlphaM(i))*(1:Nbtot)*(pitch); %s
-    Delay(:,i) = Delay(:,i) - min(Delay(:,i));
+      
+    Delay(i,:) = 1000*(1/c)*tan(pi/180*AlphaM(i))*(1:NbElemts)'*(pitch); %s
+    Delay(i,:) = Delay(i,:) - min(Delay(i,:));
     
 end
- 
+%  
 % for i = 1:length(AlphaM)
 %     % setting absolute maximum delay for as reference for 0 angle ..?
 %     Delay(:,i) = Delay(:,i) - max(Delay(:,i)); 
@@ -65,23 +65,15 @@ end
 
 DlySmpl = round(Delay/dt_s); % conversion in steps
 
+
+
 % waveform
 T_Wf = 0:dt_s:pulseDuration;
 Wf = sin(2*pi*f0*T_Wf);
-
-N_T = length(Wf) + 0*max(max(DlySmpl));
-
-%WF_mat = repmat(Wf,1,1:length(Nbtot));
-WF_mat = zeros(N_T,Nbtot,length(AlphaM));
-
-for angle = 1:length(AlphaM)
-    for element = 1:Nbtot
-      phase_offset = 0*DlySmpl(element,angle);
-      WF_mat( phase_offset + (1:length(Wf)),element,angle) = Wf;
-    end
-end
-
-WF_mat_sign = sign(WF_mat); % l'aixplorer code sur 3 niveaux [-1,0,1]
+N_T = length(Wf) ;
+    
+WF_mat      = repmat(Wf,Nbtot,1);
+WF_mat_sign =  sign(WF_mat); % l'aixplorer code sur 3 niveaux [-1,0,1]
 
 
 % ======================================================================= %
@@ -90,7 +82,6 @@ FC = remote.fc('Bandwidth', 90 , 0); %FIR receiving bandwidth [%] - center frequ
 RX = remote.rx('fcId', 1, 'RxFreq', 60 , 'QFilter', 2, 'RxElemts', 0, 0);
 
 
-FirstElmt  = max( round(X0/pitch),1);
 
 MedElmtList = 1:length(AlphaM); % list of shot ordering for angle scan (used to reconstruct image)
 
@@ -98,20 +89,28 @@ MedElmtList = 1:length(AlphaM); % list of shot ordering for angle scan (used to 
 for nbs = 1:length(AlphaM)
     
     EvtDur   = ceil(pulseDuration + max(max(Delay)) + PropagationTime);   
-
-    WFtmp    = squeeze( WF_mat_sign( :, :, nbs ) );
        
-    % Flat TX
-    TXList{nbs} = remote.tx_arbitrary('txClock180MHz', 1,'twId',1,'Delays',0);
+    % Flat TX, other parameters : 
+    % 'tof2Focus': time of flight to focal point from the time origin of transmit [us]
+    % 'TxElemts' : 'id of the TX channels' [1 system.probe.NbElemts]
+    % % Delays for each tx elements
+    
+    
+    TXList{nbs} = remote.tx_arbitrary(...
+               'txClock180MHz', 1 ,...   % sampling rate = { 0 ,1 } = > {'90 MHz', '180 MHz'}
+               'twId',1,...             % {0 [1 Inf]} = {'no waveform', 'id of the waveform'},
+               'Delays',Delay(nbs,:),...
+               0);                      
     
     % Arbitrary TW
+
     TWList{nbs} = remote.tw_arbitrary( ...
-        'Waveform',WFtmp', ...
+        'Waveform',WF_mat_sign, ...
         'RepeatCH', 0, ...
         'repeat',0 , ...
         'repeat256', 0, ...
         'ApodFct', 'none', ...
-        'TxElemts',FirstElmt:FirstElmt+Nbtot-1, ...
+        'TxElemts',ElmtBorns(1):ElmtBorns(2), ...
         'DutyCycle', 1, ...
         0);
     

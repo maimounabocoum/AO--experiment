@@ -38,11 +38,14 @@ pulseDuration = NbHemicycle*(0.5/f0) ; % US inital pulse duration in us
 
 % ======================================================================= %
 %% Codage en arbitrary : delay matrix and waveform
-if ScanLength==0 || round(ScanLength/pitch)>=NbElemts    
-    Nbtot = NbElemts;
-else  
-    Nbtot = round(ScanLength/pitch);    
-end
+% if ScanLength==0 || round(ScanLength/pitch)>=NbElemts    
+%     Nbtot = NbElemts;
+% else  
+%     Nbtot = round(ScanLength/pitch);    
+% end
+
+   Nbtot = NbElemts;
+
 
 Delay = zeros(Nbtot,length(AlphaM)); %(µs)
 
@@ -82,17 +85,18 @@ for angle = 1:length(AlphaM)
 end
 
 WF_mat_sign = sign(WF_mat); % l'aixplorer code sur 2 niveaux [-1,1]
-
+WF_mat_sign0 = sign(Wf); % l'aixplorer code sur 2 niveaux [-1,1]
 
 % ======================================================================= %
 %% Arbitrary definition of US events
-FC = remote.fc('Bandwidth', 90 , 0); %FIR receiving bandwidth [%] - center frequency = f0 : 90
-RX = remote.rx('fcId', 1, 'RxFreq', 60 , 'QFilter', 2, 'RxElemts', 0, 0);
-
 
 FirstElmt  = max( round(X0/pitch),1);
 
 MedElmtList = 1:length(AlphaM); % list of shot ordering for angle scan (used to reconstruct image)
+
+EvtDur   = ceil(pulseDuration + max(max(Delay)) + PropagationTime);   
+
+
 
 
 for nbs = 1:length(AlphaM)
@@ -101,8 +105,17 @@ for nbs = 1:length(AlphaM)
 
     WFtmp    = squeeze( WF_mat_sign( :, :, nbs ) );
        
-    % Flat TX
-    TXList{nbs} = remote.tx_arbitrary('txClock180MHz', 1,'twId',1);
+    % Flat TX, other parameters : 
+    % 'tof2Focus': time of flight to focal point from the time origin of transmit [us]
+    % 'TxElemts' : 'id of the TX channels' [1 system.probe.NbElemts]
+    % % Delays for each tx elements
+    
+    
+    TXList{nbs} = remote.tx_arbitrary(...
+               'txClock180MHz', 1,...   % sampling rate = { 0 ,1 } = > {'90 MHz', '180 MHz'}
+               'twId',1,...             % {0 [1 Inf]} = {'no waveform', 'id of the waveform'},
+               'Delays',0,...
+               0);                      
     
     % Arbitrary TW
     TWList{nbs} = remote.tw_arbitrary( ...
@@ -114,19 +127,9 @@ for nbs = 1:length(AlphaM)
         'TxElemts',FirstElmt:FirstElmt+Nbtot-1, ...
         'DutyCycle', 1, ...
         0);
-    
-    
-    
-    % Event
-    EVENTList{nbs} = remote.event( ...
-        'txId', 1, ...
-        'rxId', 1, ...
-        'noop', Pause, ...
-        'numSamples', 128, ...
-        'skipSamples', 0, ... 128, ...
-        'duration', EvtDur, ...
-        0);
-    
+
+end
+
 % ELUSEV.arbitrary < elusev.elusev with additional parameters : 
 % Waveform , for each tx elements [-1 1]
 % Delays , for each tx elements (default = 0) [0 1000]
@@ -137,22 +140,26 @@ for nbs = 1:length(AlphaM)
 % RxCenter receive center position [mm] [1 100]
 % RxWidth , RxDuration , RxDelay , RxBandwidth , FIRBandwidth
 
-ELUSEV{nbs} = elusev.arbitrary( ...
-    'ARBITRARY' ,   'plane wave with delay matrix ', ...
-    'tx',           TXList{nbs}, ...
-    'tw',           TWList{nbs}, ...
-    'rx',           RX,...
-    'fc',           FC,...
-    'event',        EVENTList{nbs}, ...
-    'TrigOut',      TrigOut, ... 0,...
-    'TrigIn',       0,...
-    'TrigAll',      1, ...
-    'TrigOutDelay', 0, ...
-    0);
-
+    ELUSEV = elusev.arbitrary( ...
+        'ARBITRARY' ,   'plane wave with delay matrix ', ...
+        'tw',           TWList,...
+        'Waveform',     WF_mat_sign0, ...
+        'Delays',       Delay , ...
+        'ApodFct',      'none', ...   
+        'Pause',        EvtDur, ...
+        'PauseEnd',     100, ...
+        'RxFreq',       30, ...
+        'RxDuration',   98, ...
+        'RxDelay',      1, ...
+        'RxCenter',     1, ...
+        'RxWidth',      1, ...
+        'RxBandwidth',  1, ...
+        'TrigOut',      TrigOut, ...
+        'TrigIn',       0,...
+        'TrigAll',      1, ...
+        'TrigOutDelay', 0, ...
+        0);
     
-end
-
 % ======================================================================= %
 %% ELUSEV and ACMO definition
 % duration : sets the TGC duration [us] [0 inf] (default = 0)
@@ -162,6 +169,7 @@ end
 % DMA ('localBuffer'=0)
 
 ACMO = acmo.acmo( ...
+    'ACMO' , 'my personal sequence',...
     'elusev',           ELUSEV, ...
     'Ordering',         0, ...   % 'sets the ELUSEV execution order', {0 [1 Inf]} {'chronological ordering', 'customed ordering'}
     'Repeat' ,          1, ...   % ACMO repetition [1 Inf]
@@ -202,14 +210,9 @@ SEQ = usse.usse( ...
  
 %%%    Do NOT CHANGE - Sequence execution 
 %%%    Initialize remote on systems
+ 
  SEQ = SEQ.initializeRemote('IPaddress',AixplorerIP);
- %SEQ.Server
- %SEQ.InfoStruct.event
- 
-% remoteGetUserSequence(SEQ.Server)
-% remoteGetStatus(SEQ.Server)
 
- 
  display('Remote OK');
 
  % status :

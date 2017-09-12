@@ -151,7 +151,7 @@ transfer.Channel        = 1;
     
     % plotting delay map
     for i = 1:length(SEQ.InfoStruct.tx)
-      Z_mm(i,:) =   -(SEQ.InfoStruct.tx(i).Delays(1:192))*c*1e-3 ;
+      Z_mm =   (SEQ.InfoStruct.tx(1).Delays)*c*1e-3 ;
     end
     
     DelayLaw = EvalDelayLaw((1:192)*0.2,Z_mm);
@@ -179,7 +179,7 @@ if SaveData == 1
 MainFolderName = 'D:\Data\mai\';
 SubFolderName  = generateSubFolderName(MainFolderName);
 CommentName    = 'Sacher';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'wavelength',764,'TypeOfSequence',TypeOfSequence);
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'wavelength',764);
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','Datas','SampleRate','c','Range','TypeOfSequence');
 % save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
