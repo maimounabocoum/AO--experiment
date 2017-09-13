@@ -148,24 +148,24 @@ transfer.Channel        = 1;
     ylabel(cb,'AC tension (mV)')
     colormap(parula)
     set(findall(Hf,'-property','FontSize'),'FontSize',15) 
+    %%  Radon inversion :
+    addpath('D:\GIT\AO---softwares-and-developpement\radon inversion\shared functions folder');
+    % cd('D:\GIT\AO---softwares-and-developpement\radon inversion')
+    % currentFolder = pwd ;
+    % cd(currentFolder)
     
     % plotting delay map
     for i = 1:length(SEQ.InfoStruct.tx)
-      Z_mm(i,:) =   -(SEQ.InfoStruct.tx(i).Delays(1:192))*c*1e-3 ;
+      Z_m(i,:) =   -(SEQ.InfoStruct.tx(i).Delays(1:192))*c*1e-6 ;
     end
-    
-    DelayLaw = EvalDelayLaw((1:192)*0.2,Z_mm);
 
-    
-    %%  Radon inversion :
-      currentFolder = pwd ;
     % path to radon inversion folder
-      cd('D:\GIT\AO---softwares-and-developpement\radon inversion')
-       
-    Iradon = OPinversionFunction(Alphas*pi/180,z,Datas,SampleRate*1e6,c);
+    
+    [theta,M0] = EvalDelayLaw_shared((1:192)*0.2*1e-3,Z_m);    
+    Retroprojection_shared( Datas , (1:192)*0.2*1e-3, z ,theta ,M0);
     % RetroProj_cleaned(Alphas,Datas,SampleRate*1e6);
     % back to original folder 
-      cd(currentFolder)
+    
     %%
     end
 
