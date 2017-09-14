@@ -23,7 +23,7 @@
 % adresse Bastille : '192.168.0.20'
 % adresse Jussieu : '192.168.1.16'
 
-AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
+AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 % SRV = remoteDefineServer( 'extern' ,AixplorerIP,'9999');
 % SEQ = remoteGetUserSequence(SRV);
 %=======================  US Parameters =====================

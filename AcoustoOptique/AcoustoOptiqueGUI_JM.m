@@ -30,7 +30,7 @@
         DurationWaveform = 20;
         
         SaveData = 0 ;      % set to 1 to save data
-
+        AIXPLORER_Active = 'off'; % 'on' or 'off' 
 
  % estimation of loading time 
  fprintf('%i events, loading should take about %d seconds\n\r',(2*NbX+1)*NbZ,(2*NbX+1)*NbZ*3);
@@ -38,7 +38,8 @@
 %% ============================   Initialize AIXPLORER
 % %% Sequence execution
 % % ============================================================================ %
-
+if strcmp(AIXPLORER_Active,'on')
+    
 switch TypeOfSequence
     case 'OF'
 [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
@@ -50,6 +51,7 @@ Volt = min(Volt,15) ;
 
 end
 
+end
 
 c = common.constants.SoundSpeed ; % sound velocity in m/s
                     
@@ -63,9 +65,13 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
      
      SampleRate    =   10;
      Range         =   1;
-     GageActive = 'on' ; % on to activate external trig, off : will trig on timout value
+     GageActive = 'off' ; % on to activate external trig, off : will trig on timout value
      
- Nlines = length(SEQ.InfoStruct.event);   
+    if strcmp(AIXPLORER_Active,'on') 
+ Nlines = length(SEQ.InfoStruct.event);  
+    else
+        Nlines = (2*NbX+1)*NbZ ;
+    end
  
 [ret,Hgage,acqInfo,sysinfo] = InitOscilloGage(NTrig*Nlines,Prof,SampleRate,Range,GageActive);
 
@@ -81,24 +87,30 @@ transfer.Channel        = 1;
     
 
     %% ======================== start acquisition =============================
-     tic
-     SEQ = SEQ.loadSequence();
+     
+     if strcmp(AIXPLORER_Active,'on')
+         
+         tic
+         SEQ = SEQ.loadSequence();
 
-     fprintf('Sequence has loaded in %f s \n\r',toc)
-     display('--------ready to use -------------');
+         fprintf('Sequence has loaded in %f s \n\r',toc)
+         display('--------ready to use -------------');
+         
+     end
  
      
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
     
+    if strcmp(AIXPLORER_Active,'on')
 
-    SEQinfosPrint( SEQ )        % printout SEQ infos
+        SEQinfosPrint( SEQ )        % printout SEQ infos
 
-    %SEQ = StartMySequence(SEQ);
-    SEQ = SEQ.startSequence('Wait',0);
-    SEQinfosPrint( SEQ )        % printout SEQ infos 
+        %SEQ = StartMySequence(SEQ);
+        SEQ = SEQ.startSequence('Wait',0);
+        SEQinfosPrint( SEQ )        % printout SEQ infos 
     
-    
+    end
 %     % retreive received RF data 
 %     buffer = SEQ.getData('Realign', 1);
 %     figure
@@ -133,11 +145,11 @@ transfer.Channel        = 1;
     
     fprintf('Data Transfer lasted %f s \n\r',toc);
     
+    if strcmp(AIXPLORER_Active,'on')
 
-    
-    
-    SEQ = SEQ.stopSequence('Wait', 0);  
-    
+        SEQ = SEQ.stopSequence('Wait', 0);  
+  
+    end
     
     
 %% ======================== data post processing =============================

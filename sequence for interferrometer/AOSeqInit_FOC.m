@@ -9,7 +9,7 @@ w = instrfind; if ~isempty(w) fclose(w); delete(w); end
 
 clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
- AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
  addpath('D:\legHAL');
  addPathLegHAL();
  
@@ -30,7 +30,7 @@ clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
     X0              = 15;  % mm : position of min actuator for the scan
     Foc             = 35; % mm
     ScanLength      = 0.2; % mm
-    NTrig           = 50000; % number of repetition
+    NTrig           = 1000; % number of repetition
     Z1              = 10;   % mm
     Z2              = 70;   % mm
 

@@ -32,24 +32,24 @@
         DurationWaveform = 20;  % in us
         
         SaveData = 0 ;      % set to 1 to save data
-
-
+        AIXPLORER_Active = 'off'; % 'on' or 'off' 
  % estimation of loading time 
  fprintf('%i events, loading should take about %d seconds\n\r',(2*NbX+1)*NbZ,(2*NbX+1)*NbZ*3);
 
 %% ============================   Initialize AIXPLORER
 % %% Sequence execution
 % % ============================================================================ %
+if strcmp(AIXPLORER_Active,'on')
+    switch TypeOfSequence
+        case 'OF'
+    [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
+        case 'OP'
+    [SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
+        case 'JM'
+    Volt = min(Volt,15) ; 
+    [SEQ] = AOSeqInit_OJML(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
 
-switch TypeOfSequence
-    case 'OF'
-[SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
-    case 'OP'
-[SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
-    case 'JM'
-Volt = min(Volt,15) ; 
-[SEQ] = AOSeqInit_OJML(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
-
+    end
 end
 
 
@@ -67,7 +67,11 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
      Range         =   1;
      TriggerActive = 'on' ; % on to activate Gage external trig, off : will trig on Timeout value
      
- Nlines = length(SEQ.InfoStruct.event);   
+    if strcmp(AIXPLORER_Active,'on') 
+ Nlines = length(SEQ.InfoStruct.event);  
+    else
+        Nlines = (2*NbX+1)*NbZ ;
+    end
  
 [ret,Hgage,acqInfo,sysinfo] = InitOscilloGage(NTrig*Nlines,Prof,SampleRate,Range,TriggerActive);
 
@@ -91,8 +95,9 @@ transfer.Channel        = 1;
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
     
+     if strcmp(AIXPLORER_Active,'on')
     SEQ = SEQ.startSequence('Wait',0);
-    
+     end
     
     tic
     status = CsMl_QueryStatus(Hgage);
@@ -104,8 +109,14 @@ transfer.Channel        = 1;
        
     end
     
-    SEQ = SEQ.stopSequence('Wait', 0); 
     fprintf('Aquisition lasted %f s \n\r',toc);
+    
+     if strcmp(AIXPLORER_Active,'on')
+    
+    SEQ = SEQ.stopSequence('Wait', 0); 
+    
+    
+     end
     
     % Transfer data to Matlab
     % Z  = linspace(0,Prof,acqInfo.Depth); 
