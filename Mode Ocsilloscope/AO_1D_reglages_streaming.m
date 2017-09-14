@@ -87,16 +87,16 @@ end
 clear MyMeasurement
 %MyMeasurement = oscilloTrace(acqInfo.Depth,acqInfo.SegmentCount,acqInfo.SampleRate,c) ;
  
-% for k = 1:Nloop
-%  
+% % for k = 1:Nloop
+% %  
+% % end
+% parfor i = 1:2
+%     if i == 1
+%       a = 1
+%     else
+%       b = 1
+%     end
 % end
-parfor i = 1:2
-    if i == 1
-      a = 1
-    else
-      b = 1
-    end
-end
 
 
 

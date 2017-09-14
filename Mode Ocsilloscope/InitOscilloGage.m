@@ -90,7 +90,7 @@ switch TriggerSatus
     case 'on'
 acqInfo.TriggerTimeout  = 3e12; % in ms
     case 'off'
-acqInfo.TriggerTimeout  = 200; % in ms : set to natural Rep Rate of 2kHz       
+acqInfo.TriggerTimeout  = 1000; % in ms : set to natural Rep Rate of 2kHz       
 end
 
 acqInfo.TriggerHoldoff  = 0; % Number of points during which the card ignores trigs
@@ -153,7 +153,7 @@ trig.Slope              = CsMl_Translate('Negative', 'Slope'); % Aixplorer Trig 
 trig.Level              = 20; % in percent of the trig range (-100 to +100)
 trig.Source             = 0;
 trig.ExtCoupling        = CsMl_Translate('DC', 'ExtCoupling');
-trig.ExtRange           = 2000; % Vpp in mV, 10000=+-5V      
+trig.ExtRange           = 5000; % Vpp in mV, 10000=+-5V      
 
 end
 
