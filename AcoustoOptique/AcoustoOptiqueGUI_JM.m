@@ -6,11 +6,11 @@
 % adresse Jussieu : '192.168.1.16'
 % adresse Bastille : '192.168.0.20'
 
- AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
  addpath('sequences');
  addpath('subfunctions');
- addpath('D:\legHAL');
  addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
+ addpath('D:\_legHAL_Marc')
  addPathLegHAL();
  
        TypeOfSequence = 'JM'; % 'OF' , 'OP' , 'JM'
@@ -25,12 +25,12 @@
         X1          = 38 ;   % 'OF' , 'OP' 
         NTrig       = 3;   % 'OF' , 'OP' , 'JM'
         Prof        = 200;   % 'OF' , 'OP' , 'JM'
-        NbZ         = 2;     % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 2;     % 20 Nb de composantes de Fourier en X, 'JM'
+        NbZ         = 8;     % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = 20;     % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;
         
         SaveData = 0 ;      % set to 1 to save data
-        AIXPLORER_Active = 'off'; % 'on' or 'off' 
+        AIXPLORER_Active = 'on'; % 'on' or 'off' 
 
  % estimation of loading time 
  fprintf('%i events, loading should take about %d seconds\n\r',(2*NbX+1)*NbZ,(2*NbX+1)*NbZ*3);
@@ -65,7 +65,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
      
      SampleRate    =   10;
      Range         =   1;
-     GageActive = 'off' ; % on to activate external trig, off : will trig on timout value
+     GageActive = 'on' ; % on to activate external trig, off : will trig on timout value
      
     if strcmp(AIXPLORER_Active,'on') 
  Nlines = length(SEQ.InfoStruct.event);  
@@ -104,11 +104,11 @@ transfer.Channel        = 1;
     
     if strcmp(AIXPLORER_Active,'on')
 
-        SEQinfosPrint( SEQ )        % printout SEQ infos
+%        SEQinfosPrint( SEQ )        % printout SEQ infos
 
         %SEQ = StartMySequence(SEQ);
         SEQ = SEQ.startSequence('Wait',0);
-        SEQinfosPrint( SEQ )        % printout SEQ infos 
+ %       SEQinfosPrint( SEQ )        % printout SEQ infos 
     
     end
 %     % retreive received RF data 
@@ -241,25 +241,23 @@ transfer.Channel        = 1;
  
    
 %% save datas :
-%% save datas :
 if SaveData == 1
-MainFolderName = 'D:\Data\mai';
+MainFolderName = 'D:\Data\JM\';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'PVA';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Volt',Volt,'AlphaM',AlphaM);
-
-
-save([MainFolderName,FileName],'Volt','FreqSonde','NbHemicycle','Foc','DurationWaveform','NbZ','NbX',...
-               'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
-savefig(Hf,[MainFolderName,FileName]);
-saveas(Hf,[MainFolderName,FileName],'png');
+CommentName    = 'testimage';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Pe',480,'Pref',180);
+save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
+              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','Datas','SampleRate','c','Range','TypeOfSequence');
+% save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
+%               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
+savefig(Hf,FileName);
+saveas(Hf,FileName,'png');
 
 fprintf('Data has been saved under : \r %s \r\n',FileName);
 
 end
-
 %% ================================= command line to force a trigger on Gage :
 %  CsMl_ForceCapture(Hgage);
 %% ================================= quite remote ===========================================%%
-  %            SEQ = SEQ.quitRemote();
-
+%               SEQ = SEQ.quitRemote()      ;
+%               ret = CsMl_FreeAllSystems   ;
