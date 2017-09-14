@@ -9,15 +9,15 @@
 % adresse Jussieu :  '192.168.1.16'
 
 
- AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
  addpath('sequences');
  addpath('subfunctions');
  addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OP';
-        Volt            = 15;
+        TypeOfSequence  = 'OF';
+        Volt            = 40;
         FreqSonde       = 4;
         NbHemicycle     = 10;
         
@@ -26,12 +26,12 @@
         dA              = 1;
         
         Foc             = 23;
-        X0              = -1;
-        X1              = 100;
+        X0              = 2;
+        X1              = 30;
         
         NTrig           = 1000;
-        Prof            = 60;
-        SaveData        = 0 ; % set to 1 to save
+        Prof            = 40;
+        SaveData        = 1 ; % set to 1 to save
 
 
                  
@@ -118,7 +118,7 @@ transfer.Channel        = 1;
     
     SEQ = SEQ.stopSequence('Wait', 1);  
     
-    %% ======================== data post processing =============================
+    % ======================== data post processing =============================
     Hf = figure;
     set(Hf,'WindowStyle','docked');
     
@@ -176,10 +176,10 @@ transfer.Channel        = 1;
    
 %% save datas :
 if SaveData == 1
-MainFolderName = 'D:\Data\mai\';
+MainFolderName = 'D:\Data\JM\';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'Sacher';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'wavelength',764,'TypeOfSequence',TypeOfSequence);
+CommentName    = 'testimage';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Pe',480,'Pref',180);
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','Datas','SampleRate','c','Range','TypeOfSequence');
 % save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...

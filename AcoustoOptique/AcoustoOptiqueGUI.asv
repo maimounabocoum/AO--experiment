@@ -9,15 +9,15 @@
 % adresse Jussieu :  '192.168.1.16'
 
 
- AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
  addpath('sequences');
  addpath('subfunctions');
  addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OP';
-        Volt            = 15;
+        TypeOfSequence  = 'OF';
+        Volt            = 40;
         FreqSonde       = 4;
         NbHemicycle     = 10;
         
@@ -26,11 +26,11 @@
         dA              = 1;
         
         Foc             = 23;
-        X0              = -1;
-        X1              = 100;
+        X0              = 2;
+        X1              = 30;
         
-        NTrig           = 1000;
-        Prof            = 60;
+        NTrig           = 20;
+        Prof            = 40;
         SaveData        = 0 ; % set to 1 to save
 
 
@@ -118,7 +118,7 @@ transfer.Channel        = 1;
     
     SEQ = SEQ.stopSequence('Wait', 1);  
     
-    %% ======================== data post processing =============================
+    % ======================== data post processing =============================
     Hf = figure;
     set(Hf,'WindowStyle','docked');
     
@@ -148,24 +148,24 @@ transfer.Channel        = 1;
     ylabel(cb,'AC tension (mV)')
     colormap(parula)
     set(findall(Hf,'-property','FontSize'),'FontSize',15) 
+    %%  Radon inversion :
+    addpath('D:\GIT\AO---softwares-and-developpement\radon inversion\shared functions folder');
+    % cd('D:\GIT\AO---softwares-and-developpement\radon inversion')
+    % currentFolder = pwd ;
+    % cd(currentFolder)
     
     % plotting delay map
     for i = 1:length(SEQ.InfoStruct.tx)
-      Z_mm =   (SEQ.InfoStruct.tx(1).Delays)*c*1e-3 ;
+      Z_m(i,:) =   -(SEQ.InfoStruct.tx(i).Delays(1:192))*c*1e-6 ;
     end
-    
-    DelayLaw = EvalDelayLaw((1:192)*0.2,Z_mm);
 
-    
-    %%  Radon inversion :
-      currentFolder = pwd ;
     % path to radon inversion folder
-      cd('D:\GIT\AO---softwares-and-developpement\radon inversion')
-       
-    Iradon = OPinversionFunction(Alphas*pi/180,z,Datas,SampleRate*1e6,c);
+    
+    [theta,M0] = EvalDelayLaw_shared((1:192)*0.2*1e-3,Z_m);    
+    Retroprojection_shared( Datas , (1:192)*0.2*1e-3, z ,theta ,M0);
     % RetroProj_cleaned(Alphas,Datas,SampleRate*1e6);
     % back to original folder 
-      cd(currentFolder)
+    
     %%
     end
 
@@ -179,7 +179,7 @@ if SaveData == 1
 MainFolderName = 'D:\Data\mai\';
 SubFolderName  = generateSubFolderName(MainFolderName);
 CommentName    = 'Sacher';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'wavelength',764);
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'wavelength',764,'TypeOfSequence',TypeOfSequence);
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','Datas','SampleRate','c','Range','TypeOfSequence');
 % save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
