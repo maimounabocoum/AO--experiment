@@ -1,6 +1,6 @@
-% clear all; clc
-% w = instrfind; if ~isempty(w) fclose(w); delete(w); end
-% restoredefaultpath % restaure original path
+%   clear all; clc
+%   w = instrfind; if ~isempty(w) fclose(w); delete(w); end
+%   restoredefaultpath % restaure original path
 
 %% parameter for plane wave sequence :
 % ======================================================================= %
@@ -18,20 +18,20 @@
  
         TypeOfSequence  = 'OF';
         Volt            = 40;
-        FreqSonde       = 4;
-        NbHemicycle     = 10;
+        FreqSonde       = 2;
+        NbHemicycle     = 4;
         
         
         AlphaM          = 20;
         dA              = 1;
         
         Foc             = 23;
-        X0              = 2;
-        X1              = 30;
+        X0              = 20;
+        X1              = 42;
         
-        NTrig           = 1000;
+        NTrig           = 200;
         Prof            = 40;
-        SaveData        = 1 ; % set to 1 to save
+        SaveData        = 0 ; % set to 1 to save
 
 
                  

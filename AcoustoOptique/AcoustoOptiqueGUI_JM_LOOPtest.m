@@ -1,5 +1,5 @@
-clear all; close all; clc
-w = instrfind; if ~isempty(w) fclose(w); delete(w); end
+% clear all; close all; clc
+% w = instrfind; if ~isempty(w) fclose(w); delete(w); end
 
 %% parameter for plane wave sequence :
 % ======================================================================= %
@@ -14,6 +14,8 @@ w = instrfind; if ~isempty(w) fclose(w); delete(w); end
  addPathLegHAL();
  
        TypeOfSequence = 'JM'; % 'OF' , 'OP' , 'JM'
+       
+     
  
         Volt        = 25;     % 'OF' , 'OP' , 'JM'
         FreqSonde   = 2;     % 'OF' , 'OP' , 'JM'
@@ -23,15 +25,14 @@ w = instrfind; if ~isempty(w) fclose(w); delete(w); end
         dA          = 1;     % 'OP' 
         X0          = 0;     % 'OF' , 'OP' 
         X1          = 38 ;   % 'OF' , 'OP' 
-        NTrig       = 100;   % 'OF' , 'OP' , 'JM'
+        NTrig       = 10;   % 'OF' , 'OP' , 'JM'
         Prof        = 200;   % 'OF' , 'OP' , 'JM'
         NbZ         = 8;     % 8; % Nb de composantes de Fourier en Z, 'JM'
         NbX         = 10;     % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;
         
-        SaveData = 1 ;      % set to 1 to save data
+        SaveData = 0 ;      % set to 1 to save data
         AIXPLORER_Active = 'on'; % 'on' or 'off' 
-
  % estimation of loading time 
  fprintf('%i events, loading should take about %d seconds\n\r',(2*NbX+1)*NbZ,(2*NbX+1)*NbZ*3);
 
@@ -39,19 +40,18 @@ w = instrfind; if ~isempty(w) fclose(w); delete(w); end
 % %% Sequence execution
 % % ============================================================================ %
 if strcmp(AIXPLORER_Active,'on')
-    
-switch TypeOfSequence
-    case 'OF'
-[SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
-    case 'OP'
-[SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
-    case 'JM'
-Volt = min(Volt,25) ; 
-[SEQ,MedElmtList] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
+    switch TypeOfSequence
+        case 'OF'
+    [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
+        case 'OP'
+    [SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
+        case 'JM'
+    Volt = min(Volt,15) ; 
+    [SEQ,MedElmtList] = AOSeqInit_OJML(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
 
+    end
 end
 
-end
 
 c = common.constants.SoundSpeed ; % sound velocity in m/s
                     
@@ -65,7 +65,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
      
      SampleRate    =   10;
      Range         =   1;
-     GageActive = 'on' ; % on to activate external trig, off : will trig on timout value
+     TriggerActive = 'on' ; % on to activate Gage external trig, off : will trig on Timeout value
      
     if strcmp(AIXPLORER_Active,'on') 
  Nlines = length(SEQ.InfoStruct.event);  
@@ -73,7 +73,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
         Nlines = (2*NbX+1)*NbZ ;
     end
  
-[ret,Hgage,acqInfo,sysinfo] = InitOscilloGage(NTrig*Nlines,Prof,SampleRate,Range,GageActive);
+[ret,Hgage,acqInfo,sysinfo] = InitOscilloGage(NTrig*Nlines,Prof,SampleRate,Range,TriggerActive);
 
 fprintf(' Segments last %4.2f us \n\r',1e6*acqInfo.SegmentSize/acqInfo.SampleRate);
 
@@ -87,42 +87,38 @@ transfer.Channel        = 1;
     
 
     %% ======================== start acquisition =============================
-     
-     if strcmp(AIXPLORER_Active,'on')
-         
-         tic
-         SEQ = SEQ.loadSequence();
 
-         fprintf('Sequence has loaded in %f s \n\r',toc)
-         display('--------ready to use -------------');
-         
-     end
- 
-     
+    SequenceDuration_us = 1000;        % printout SEQ infos 
+    % starts loop for data online screaning
+       Nloop = 10 ;
+       
+    for Iloop = 1:Nloop
+        
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
     
-    if strcmp(AIXPLORER_Active,'on')
-
-%        SEQinfosPrint( SEQ )        % printout SEQ infos
-
-        %SEQ = StartMySequence(SEQ);
-        SEQ = SEQ.startSequence('Wait',0);
-    
-    end
-%     % retreive received RF data 
-%     buffer = SEQ.getData('Realign', 1);
-%     figure
-%     imagesc(double(mean(buffer.data,3)))
+     if strcmp(AIXPLORER_Active,'on')
+    SEQ = SEQ.startSequence('Wait',0);
+     end
     
     tic
     status = CsMl_QueryStatus(Hgage);
-    
-    while status ~= 0
-        status = CsMl_QueryStatus(Hgage);
-    end
+    tasks2execute = 0;
+    while status ~= 0 && tasks2execute < NTrig*(SequenceDuration_us/50)*200000
 
+        status = CsMl_QueryStatus(Hgage) ;
+        tasks2execute = tasks2execute + 1;
+       
+    end
+    
     fprintf('Aquisition lasted %f s \n\r',toc);
+    
+     if strcmp(AIXPLORER_Active,'on')
+    
+    SEQ = SEQ.stopSequence('Wait', 0); 
+    
+    
+     end
     
     % Transfer data to Matlab
     % Z  = linspace(0,Prof,acqInfo.Depth); 
@@ -144,16 +140,16 @@ transfer.Channel        = 1;
     
     fprintf('Data Transfer lasted %f s \n\r',toc);
     
-    if strcmp(AIXPLORER_Active,'on')
 
-        SEQ = SEQ.stopSequence('Wait', 0);  
-  
-    end
     
     
-%% ======================== data post processing =============================
-    Hf = figure;
-    set(Hf,'WindowStyle','docked');
+     
+    
+    
+    
+% ======================== data post processing =============================
+%     Hf = figure;
+%     set(Hf,'WindowStyle','docked');
     
     switch TypeOfSequence
         
@@ -192,14 +188,14 @@ transfer.Channel        = 1;
         z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
         x = (1:Nlines);
         
-            imagesc(x,z,1e3*Datas)
-            xlabel('lines Nbx, Nbz')
-            ylabel('z (mm)')    
-            title('Averaged raw datas')
-            cb = colorbar;
-            ylabel(cb,'AC tension (mV)')
-            colormap(parula)
-            set(findall(Hf,'-property','FontSize'),'FontSize',15)
+%             imagesc(x,z,1e3*Datas)
+%             xlabel('lines Nbx, Nbz')
+%             ylabel('z (mm)')    
+%             title('Averaged raw datas')
+%             cb = colorbar;
+%             ylabel(cb,'AC tension (mV)')
+%             colormap(parula)
+%             set(findall(Hf,'-property','FontSize'),'FontSize',15)
 
         XLambda = DurationWaveform*1e-6*1e3*c;
         CalcDelay = 2*XLambda;
@@ -212,21 +208,21 @@ transfer.Channel        = 1;
    [NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
    Nfrequencymodes = length(NBX(:));
 
-   for nbs = 1:Nfrequencymodes
-                
-            ExpFunc                         =  exp(2*1i*z*NBZ(nbs)*pi/XLambda);
-            ExpFunc(z<=CalcDelay)           =   0;
-            ExpFunc(z>(CalcDelay+IntDelay)) =   0;    
-            
-            F = Datas(:,nbs);
-                
-                %plot(z,F/max(F));
-                %hold;
-                %plot(z,real(ExpFunc),'r');
-            tR = ExpFunc*F;
-            tDum = [tDum tR];
-      
-   end
+       for nbs = 1:Nfrequencymodes
+
+                ExpFunc                         =  exp(2*1i*z*NBZ(nbs)*pi/XLambda);
+                ExpFunc(z<=CalcDelay)           =   0;
+                ExpFunc(z>(CalcDelay+IntDelay)) =   0;    
+
+                F = Datas(:,nbs);
+
+                    %plot(z,F/max(F));
+                    %hold;
+                    %plot(z,real(ExpFunc),'r');
+                tR = ExpFunc*F;
+                tDum = [tDum tR];
+
+       end
                
         DecalZ=0.7;
         NtF=32;
@@ -234,29 +230,32 @@ transfer.Channel        = 1;
 
        figure(100);
        imagesc(X,Y,I);
+       drawnow
     end
 
     
- 
+    end
    
 %% save datas :
+%% save datas :
 if SaveData == 1
-MainFolderName = 'D:\Data\JM\';
+MainFolderName = 'D:\Data\JM';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'ondecontinue';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Pe',480,'Pref',180);
-save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
-              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','Datas','SampleRate','c','Range','TypeOfSequence','NbX','NbZ');
-% save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
-%               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
-savefig(Hf,FileName);
-saveas(Hf,FileName,'png');
+CommentName    = 'PVA';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Volt',Volt,'AlphaM',AlphaM);
+
+
+save([MainFolderName,FileName],'Volt','FreqSonde','NbHemicycle','Foc','DurationWaveform','NbZ','NbX',...
+               'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
+savefig(Hf,[MainFolderName,FileName]);
+saveas(Hf,[MainFolderName,FileName],'png');
 
 fprintf('Data has been saved under : \r %s \r\n',FileName);
 
 end
+
 %% ================================= command line to force a trigger on Gage :
 %  CsMl_ForceCapture(Hgage);
 %% ================================= quite remote ===========================================%%
-%               SEQ = SEQ.quitRemote()      ;
-%               ret = CsMl_FreeAllSystems   ;
+%            SEQ = SEQ.quitRemote();
+

@@ -9,30 +9,30 @@
  AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
  addpath('sequences');
  addpath('subfunctions');
- addpath('D:\legHAL');
  addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
+ addpath('D:\_legHAL_Marc')
  addPathLegHAL();
  
        TypeOfSequence = 'JM'; % 'OF' , 'OP' , 'JM'
        
         Nloop = 1 ;
  
-        Volt        = 9;        % 'OF' , 'OP' , 'JM'
-        FreqSonde   = 2;        % 'OF' , 'OP' , 'JM'
-        NbHemicycle = 250;      % 'OF' , 'OP' , 'JM'
-        Foc         = 23;       % 'OF' 
-        AlphaM      = 20;       % 'OP' 
-        dA          = 1;        % 'OP' 
-        X0          = 0;        % 'OF' , 'OP' 
-        X1          = 38 ;      % 'OF' , 'OP' 
-        NTrig       = 3;        % 'OF' , 'OP' , 'JM'
-        Prof        = 200;      % 'OF' , 'OP' , 'JM'
-        NbZ         = 1;        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 1;        % 20 Nb de composantes de Fourier en X, 'JM'
-        DurationWaveform = 20;  % in us
+        Volt        = 15;     % 'OF' , 'OP' , 'JM'
+        FreqSonde   = 2;     % 'OF' , 'OP' , 'JM'
+        NbHemicycle = 250;   % 'OF' , 'OP' , 'JM'
+        Foc         = 23;    % 'OF' 
+        AlphaM      = 20;    % 'OP' 
+        dA          = 1;     % 'OP' 
+        X0          = 0;     % 'OF' , 'OP' 
+        X1          = 38 ;   % 'OF' , 'OP' 
+        NTrig       = 10;   % 'OF' , 'OP' , 'JM'
+        Prof        = 200;   % 'OF' , 'OP' , 'JM'
+        NbZ         = 4;     % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = 5;     % 20 Nb de composantes de Fourier en X, 'JM'
+        DurationWaveform = 20;
         
         SaveData = 0 ;      % set to 1 to save data
-        AIXPLORER_Active = 'off'; % 'on' or 'off' 
+        AIXPLORER_Active = 'on'; % 'on' or 'off' 
  % estimation of loading time 
  fprintf('%i events, loading should take about %d seconds\n\r',(2*NbX+1)*NbZ,(2*NbX+1)*NbZ*3);
 
@@ -47,7 +47,7 @@ if strcmp(AIXPLORER_Active,'on')
     [SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
         case 'JM'
     Volt = min(Volt,15) ; 
-    [SEQ] = AOSeqInit_OJML(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
+    [SEQ,MedElmtList] = AOSeqInit_OJML(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
 
     end
 end
@@ -88,7 +88,7 @@ transfer.Channel        = 1;
 
     %% ======================== start acquisition =============================
 
-    SequenceDuration_us = SEQinfosPrint( SEQ ) ;        % printout SEQ infos 
+    SequenceDuration_us = 1000;        % printout SEQ infos 
     % starts loop for data online screaning
     for Iloop = 1:Nloop
         
@@ -214,7 +214,7 @@ transfer.Channel        = 1;
             tDum = diag(ExpFunc*Datas)' ;
    
                
-        DecalZ  =   0.5;
+        DecalZ  =   0.7;
         NtF     =   32;
        [I X Y] = Reconstruct(tDum,NbX,NbZ,SampleRate,DecalZ,NtF,DurationWaveform,c);   
 
