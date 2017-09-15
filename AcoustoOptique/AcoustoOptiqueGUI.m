@@ -16,8 +16,8 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OP';
-        Volt            = 15;
+        TypeOfSequence  = 'OF';
+        Volt            = 50;
         FreqSonde       = 4;
         NbHemicycle     = 10;
         
