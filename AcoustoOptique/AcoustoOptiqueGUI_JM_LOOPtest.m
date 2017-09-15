@@ -9,47 +9,47 @@
  AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
  addpath('sequences');
  addpath('subfunctions');
- addpath('D:\legHAL');
  addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
+ addpath('D:\_legHAL_Marc')
  addPathLegHAL();
  
        TypeOfSequence = 'JM'; % 'OF' , 'OP' , 'JM'
        
-        Nloop = 1 ;
+     
  
-        Volt        = 9;        % 'OF' , 'OP' , 'JM'
-        FreqSonde   = 2;        % 'OF' , 'OP' , 'JM'
-        NbHemicycle = 250;      % 'OF' , 'OP' , 'JM'
-        Foc         = 23;       % 'OF' 
-        AlphaM      = 20;       % 'OP' 
-        dA          = 1;        % 'OP' 
-        X0          = 0;        % 'OF' , 'OP' 
-        X1          = 38 ;      % 'OF' , 'OP' 
-        NTrig       = 3;        % 'OF' , 'OP' , 'JM'
-        Prof        = 200;      % 'OF' , 'OP' , 'JM'
-        NbZ         = 1;        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 1;        % 20 Nb de composantes de Fourier en X, 'JM'
-        DurationWaveform = 20;  % in us
+        Volt        = 25;     % 'OF' , 'OP' , 'JM'
+        FreqSonde   = 2;     % 'OF' , 'OP' , 'JM'
+        NbHemicycle = 250;   % 'OF' , 'OP' , 'JM'
+        Foc         = 23;    % 'OF' 
+        AlphaM      = 20;    % 'OP' 
+        dA          = 1;     % 'OP' 
+        X0          = 0;     % 'OF' , 'OP' 
+        X1          = 38 ;   % 'OF' , 'OP' 
+        NTrig       = 10;   % 'OF' , 'OP' , 'JM'
+        Prof        = 200;   % 'OF' , 'OP' , 'JM'
+        NbZ         = 8;     % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = 10;     % 20 Nb de composantes de Fourier en X, 'JM'
+        DurationWaveform = 20;
         
         SaveData = 0 ;      % set to 1 to save data
-
-
+        AIXPLORER_Active = 'on'; % 'on' or 'off' 
  % estimation of loading time 
  fprintf('%i events, loading should take about %d seconds\n\r',(2*NbX+1)*NbZ,(2*NbX+1)*NbZ*3);
 
 %% ============================   Initialize AIXPLORER
 % %% Sequence execution
 % % ============================================================================ %
+if strcmp(AIXPLORER_Active,'on')
+    switch TypeOfSequence
+        case 'OF'
+    [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
+        case 'OP'
+    [SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
+        case 'JM'
+    Volt = min(Volt,15) ; 
+    [SEQ,MedElmtList] = AOSeqInit_OJML(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
 
-switch TypeOfSequence
-    case 'OF'
-[SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
-    case 'OP'
-[SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
-    case 'JM'
-Volt = min(Volt,15) ; 
-[SEQ] = AOSeqInit_OJML(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
-
+    end
 end
 
 
@@ -67,7 +67,11 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
      Range         =   1;
      TriggerActive = 'on' ; % on to activate Gage external trig, off : will trig on Timeout value
      
- Nlines = length(SEQ.InfoStruct.event);   
+    if strcmp(AIXPLORER_Active,'on') 
+ Nlines = length(SEQ.InfoStruct.event);  
+    else
+        Nlines = (2*NbX+1)*NbZ ;
+    end
  
 [ret,Hgage,acqInfo,sysinfo] = InitOscilloGage(NTrig*Nlines,Prof,SampleRate,Range,TriggerActive);
 
@@ -84,15 +88,18 @@ transfer.Channel        = 1;
 
     %% ======================== start acquisition =============================
 
-    SequenceDuration_us = SEQinfosPrint( SEQ ) ;        % printout SEQ infos 
+    SequenceDuration_us = 1000;        % printout SEQ infos 
     % starts loop for data online screaning
+       Nloop = 10 ;
+       
     for Iloop = 1:Nloop
         
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
     
+     if strcmp(AIXPLORER_Active,'on')
     SEQ = SEQ.startSequence('Wait',0);
-    
+     end
     
     tic
     status = CsMl_QueryStatus(Hgage);
@@ -104,8 +111,14 @@ transfer.Channel        = 1;
        
     end
     
-    SEQ = SEQ.stopSequence('Wait', 0); 
     fprintf('Aquisition lasted %f s \n\r',toc);
+    
+     if strcmp(AIXPLORER_Active,'on')
+    
+    SEQ = SEQ.stopSequence('Wait', 0); 
+    
+    
+     end
     
     % Transfer data to Matlab
     % Z  = linspace(0,Prof,acqInfo.Depth); 
@@ -134,9 +147,9 @@ transfer.Channel        = 1;
     
     
     
-%% ======================== data post processing =============================
-    Hf = figure;
-    set(Hf,'WindowStyle','docked');
+% ======================== data post processing =============================
+%     Hf = figure;
+%     set(Hf,'WindowStyle','docked');
     
     switch TypeOfSequence
         
@@ -169,56 +182,55 @@ transfer.Channel        = 1;
    % ylim([0 50])
    
    case 'JM'
-       
+        %MedElmtList = 1:Nlines ;
         Datas = RetreiveDatas(raw,NTrig,Nlines,1:Nlines);
         % Calcul composante de Fourier
-        
-        [NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
-        Nfrequencymodes = length(NBX(:));
-   
         z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
-        Z = repmat(z,length(NBZ(:)),1);
         x = (1:Nlines);
         
-            imagesc(x,z,1e3*Datas)
-            xlabel('lines Nbx, Nbz')
-            ylabel('z (mm)')    
-            title('Averaged raw datas')
-            cb = colorbar;
-            ylabel(cb,'AC tension (mV)')
-            colormap(parula)
-            set(findall(Hf,'-property','FontSize'),'FontSize',15)
+%             imagesc(x,z,1e3*Datas)
+%             xlabel('lines Nbx, Nbz')
+%             ylabel('z (mm)')    
+%             title('Averaged raw datas')
+%             cb = colorbar;
+%             ylabel(cb,'AC tension (mV)')
+%             colormap(parula)
+%             set(findall(Hf,'-property','FontSize'),'FontSize',15)
 
-        XLambda = (DurationWaveform*1e-6)*1e3*c;
+        XLambda = DurationWaveform*1e-6*1e3*c;
         CalcDelay = 2*XLambda;
-        IntDelay  = 3*XLambda;
+        IntDelay = 3*XLambda;
                   
-        tDum = [];   
+        tDum = [];
 
-   for nbs = 1:Nfrequencymodes
-                
-            %ExpFunc                         =  exp(2*1i*z*NBZ(nbs)*pi/XLambda);
-            ExpFunc                                                 =  exp(2*1i*pi*(NBZ(:).*z)/XLambda);
-            ExpFunc( Z <= CalcDelay || Z > (CalcDelay+IntDelay))    =   0;
- 
-                imagesc(z,F/max(F));
-                %hold;
-                %plot(z,real(ExpFunc),'r');
-            tR = ExpFunc*Datas(:,nbs) ;
-            tDum = [tDum tR];
-      
-   end
+        nbs = 1;
+  
+   [NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
+   Nfrequencymodes = length(NBX(:));
+
+       for nbs = 1:Nfrequencymodes
+
+                ExpFunc                         =  exp(2*1i*z*NBZ(nbs)*pi/XLambda);
+                ExpFunc(z<=CalcDelay)           =   0;
+                ExpFunc(z>(CalcDelay+IntDelay)) =   0;    
+
+                F = Datas(:,nbs);
+
+                    %plot(z,F/max(F));
+                    %hold;
+                    %plot(z,real(ExpFunc),'r');
+                tR = ExpFunc*F;
+                tDum = [tDum tR];
+
+       end
                
-        DecalZ=0.5;
+        DecalZ=0.7;
         NtF=32;
-       [I X Y] = Reconstruct2(tDum,NbX,NbZ,SampleRate,DecalZ,NtF,DurationWaveform,c);   
+       [I X Y]=Reconstruct(tDum,NbX,NbZ,SampleRate,DecalZ,NtF,DurationWaveform,c,system.probe.Pitch);   
 
-       Hfinal = figure(100);
-       set(Hfinal,'WindowStyle','docked');
+       figure(100);
        imagesc(X,Y,I);
-       title('reconstructed image')
-       xlabel('x (mm)')
-       ylabel('y (mm)')
+       drawnow
     end
 
     

@@ -16,10 +16,10 @@
 %  clear all;
  
  %=================== indicate location of LEGAL folder
- addpath('D:\legHAL\')
+ addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  %==================== indicate location for Gage Drivers
- addpath(genpath('D:\drivers\CompuScope MATLAB SDK\'))
+ addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
  
  
 
@@ -27,18 +27,18 @@
 % adresse Bastille : '192.168.0.20'
 % adresse Jussieu : '192.168.1.16'
 
-AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
+AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 % SRV = remoteDefineServer( 'extern' ,AixplorerIP,'9999');
 % SEQ = remoteGetUserSequence(SRV);
 %=======================  US Parameters =====================
 
-Volt        = 30; % V
-FreqSonde   = 3;  % MHz
+Volt        = 40; % V
+FreqSonde   = 4;  % MHz
 NbHemicycle = 4;
-X0          = 20; % mm
-Foc         = 20; % mm
+X0          = 15; % mm
+Foc         = 25; % mm
 NTrig       = 1000; %1000
-Prof        = 800; % mm 800 gain
+Prof        = 60; % mm 800 gain
 
 %%====================== Parameters loop
 Nloop = 500;
@@ -49,7 +49,7 @@ Nloop = 500;
 Range = 1; % V
 SampleRate = 10; % MHz
 GageActive = 'on'; % 'on' or 'off' 
-AIXPLORER_Active = 'off'; % 'on' or 'off' 
+AIXPLORER_Active = 'on'; % 'on' or 'off' 
 
 
 

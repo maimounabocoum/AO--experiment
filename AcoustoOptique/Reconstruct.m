@@ -1,4 +1,4 @@
-function [I X Y]=Reconstruct(tDum,NbX,NbZ,SampleRate,DecalZ,NtF,durationWaveform,c)
+function [I X Y]=Reconstruct(tDum,NbX,NbZ,SampleRate,DecalZ,NtF,durationWaveform,c,pitch)
 
 % Variables
 c = c/1000; % conversion m/s en mm/us
@@ -17,5 +17,5 @@ end;
 I = ifft2(fftshift(tF));
 I = I - ones(NtF,1)*I(1,:);
 
-X = (0:NtF-1)*0.2*128/NtF;
+X = (0:NtF-1)*pitch*128/NtF;
 Y = (0:NtF-1)*20*1.54/NtF;

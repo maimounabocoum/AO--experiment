@@ -143,14 +143,14 @@ switch TriggerSatus
     case 'on'
 trig.Trigger            = 1;
 trig.Slope              = CsMl_Translate('Negative', 'Slope'); % Aixplorer Trig has a neg slope
-trig.Level              = 20; % in percent of the trig range (-100 to +100)
+trig.Level              = 10; % in percent of the trig range (-100 to +100)
 trig.Source             = CsMl_Translate('External', 'Source');
 trig.ExtCoupling        = CsMl_Translate('DC', 'ExtCoupling');
-trig.ExtRange           = 2000; % Vpp in mV, 10000=+-5V
+trig.ExtRange           = 10000; % Vpp in mV, 10000=+-5V
     case 'off'
 trig.Trigger            = 1;
 trig.Slope              = CsMl_Translate('Negative', 'Slope'); % Aixplorer Trig has a neg slope
-trig.Level              = 0; % in percent of the trig range (-100 to +100)
+trig.Level              = 20; % in percent of the trig range (-100 to +100)
 trig.Source             = 0;
 trig.ExtCoupling        = CsMl_Translate('DC', 'ExtCoupling');
 trig.ExtRange           = 5000; % Vpp in mV, 10000=+-5V      

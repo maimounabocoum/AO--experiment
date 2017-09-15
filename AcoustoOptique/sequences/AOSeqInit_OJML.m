@@ -4,7 +4,7 @@
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
 
-function SEQ = AOSeqInit_OJM(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
+function [SEQ,MedElmtList] = AOSeqInit_OJM(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
 
 
 % user defined parameters :
@@ -46,7 +46,7 @@ nuX0 = 1.0/(NbPixels*pitch);      % Pas fréquence spatiale en X (en mm-1)
 
 [NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
 Nfrequencymodes = length(NBX(:));
-
+MedElmtList = 1:Nfrequencymodes ;
 %% Arbitrary definition of US events
 FC = remote.fc('Bandwidth', 90 , 0); %FIR receiving bandwidth [%] - center frequency = f0 : 90
 RX = remote.rx('fcId', 1, 'RxFreq', 60 , 'QFilter', 2, 'RxElemts', 1:128, 0);
@@ -141,7 +141,7 @@ SEQ = usse.usse( ...
     'acmo', ACMOList, ...    'Loopidx',1, ...
     'Repeat', NTrig, ...  'Popup',0, ...
     'DropFrames', 0, ...
-    'Loop', 0, ...
+    'Loop', 1, ...
     'DataFormat', 'RF', ...
     'Popup', 0, ...
     0);
