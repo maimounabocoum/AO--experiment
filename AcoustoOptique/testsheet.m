@@ -1,54 +1,41 @@
-%% test scrpits
+%%
+clearvars; 
 
-AlphaM = -20:20 ;
-Nbtot = 10;
-pitch = 0.2 ;
-c = 1540 ;
-dt_s = (1/180);
-f0 = 6;
-NbHemicycle = 10;
-pulseDuration = NbHemicycle*(0.5/f0) ;
+c = 1450 ;
+DurationWaveform = 20 ;
+pitch = 0.2e-3;
+NbPixels  = 128;                     % nombre de pixels
+Xs        = (0:NbPixels-1)*pitch; 
+f0 = 2e6;
+Lx = (NbPixels*pitch);
+Lz = 30 ;
+nuZ0 = 2/(50e-3); % Pas fréquence spatiale en Z (en mm-1)
+nuX0 = 1/Lx;      % Pas fréquence spatiale en X (en mm-1)
+NbX = 3 ;
+NbZ = 1 ;
+Fe = 180e6 ; % sampling frequency in Hz
 
+[NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
 
-Delay = zeros(Nbtot,length(AlphaM)); %(µs)
+Nfrequencymodes = length(NBX(:));
+MedElmtList = 1:Nfrequencymodes ;
 
-for i = 1:length(AlphaM)
+for nbs = 1:Nfrequencymodes
     
-%     Delay(:,i) = sin(pi/180*AlphaM(i))*...
-%         (1:size(Delay,1))*(pitch)/(c*1000); 
-    
-    Delay(:,i) = 1000*(1/c)*tan(pi/180*AlphaM(i))*(1:Nbtot)*(pitch); %s
-    Delay(:,i) = Delay(:,i) - min(Delay(:,i));
-    
+        
+        nuZ  = NBZ(nbs)*nuZ0; % fréquence de modulation de phase (en Hz) 
+        nuX  = NBX(nbs)*nuX0;  % fréquence spatiale (en mm-1)
+        
+        % f0 : MHz
+        % fz : 
+        % nuX : en mm-1
+
+        %Waveform = CalcMatHole(f0,fz,nuX,Xs); % Calculer la matrice
+        Waveform = CalcMatHole_V2(Xs,nuX,nuZ,c,f0,Fe); % Calculer la matrice
+        imagesc(Waveform)
+        drawnow
+        pause(1)
+       
+
 end
-
-figure
- plot(Delay)
-
-% for i = 1:length(AlphaM)
-%     
-%     Delay(:,i) = Delay(:,i) + max(max(Delay(:,:)))-max(Delay(:,i));
-%     
-% end
-
-
-DlySmpl = round(Delay/dt_s);
-
-
-
-T_Wf = 0:dt_s:pulseDuration;
-Wf = sin(2*pi*f0*T_Wf);
-
-N_T = length(Wf) + max(max(DlySmpl))
-WF_mat = zeros(N_T,size(Delay,1),size(Delay,2));
-
-for kk = 1:length(AlphaM)
-    for j = 1:size(Delay,1)
-        WF_mat( DlySmpl(j,kk) + (1:length(Wf)),j,kk) = Wf;
-    end
-end
-
-
-imagesc(squeeze(WF_mat(:,:,15)))
-
 

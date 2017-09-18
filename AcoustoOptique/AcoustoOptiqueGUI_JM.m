@@ -187,7 +187,7 @@ transfer.Channel        = 1;
    
    case 'JM'
         %MedElmtList = 1:Nlines ;
-        Datas = RetreiveDatas(raw,NTrig,Nlines,1:Nlines);
+        %Datas = RetreiveDatas(raw,NTrig,Nlines,1:Nlines);
         % Calcul composante de Fourier
         z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
         x = (1:Nlines);
@@ -246,7 +246,7 @@ SubFolderName  = generateSubFolderName(MainFolderName);
 CommentName    = 'ondecontinue';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Pe',480,'Pref',180);
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
-              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','Datas','SampleRate','c','Range','TypeOfSequence','NbX','NbZ');
+              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','Datas','SampleRate','c','Range','TypeOfSequence','x','z','NbX','NbZ');
 % save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
 %               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
 savefig(Hf,FileName);

@@ -1,4 +1,4 @@
-function [I X Y]=Reconstruct(tDum,NbX,NbZ,SampleRate,DecalZ,NtF,durationWaveform,c)
+function [I X Y]=Reconstruct()
 
 % Variables
 c = c/1000;         % conversion m/s en mm/us
