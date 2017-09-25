@@ -3,7 +3,7 @@
 
 % open file to read :
 clearvars;
-[filename,foldername] = uigetfile('D:\Data\mai\2017-06-14\1D data - water flow - 1000av','MultiSelect', 'on');
+[filename,foldername] = uigetfile('D:\Data\mai\','MultiSelect', 'on');
 
 for Nselection = 1:length(filename)
     
@@ -30,7 +30,7 @@ end
 
 %% plot all inidividual averages
 for Nselection = 1:length(filename)
-figure(1)
+figure;
 hold on
 plot(SData{Nselection}.z(1:length(LineAverage{Nselection}))*1e3,LineAverage{Nselection})
 legend(filename)
@@ -39,7 +39,6 @@ end
 %% plot average
 average = 0*LineAverage{1} ;
 for Nselection = 1:length(filename)
-figure(1)
 average = average + LineAverage{Nselection}/length(filename) ;
 hold on
 plot(SData{Nselection}.z(1:length(LineAverage{Nselection}))*1e3,LineAverage{Nselection})

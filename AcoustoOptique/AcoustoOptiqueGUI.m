@@ -1,6 +1,6 @@
 %   clear all; clc
 %   w = instrfind; if ~isempty(w) fclose(w); delete(w); end
-%   restoredefaultpath % restaure original path
+%  restoredefaultpath % restaure original path
 
 %% parameter for plane wave sequence :
 % ======================================================================= %

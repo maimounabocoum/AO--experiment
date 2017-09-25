@@ -127,9 +127,9 @@ clear 'ACOUSTO'
 clear 'TPC'
 % ============================================================================ %
 % Build the REMOTE structure
-[SEQ NbAcq] = SEQ.buildRemote();
-%% Acquisition AO
-SEQ = SEQ.initializeRemote('IPaddress', AixplorerIP);
+ [SEQ NbAcq] = SEQ.buildRemote();
+% %% Acquisition AO
+ SEQ = SEQ.initializeRemote('IPaddress', AixplorerIP);
 %SEQ.Server
 
 
