@@ -3,7 +3,7 @@
 % ATTENTION !! Même si la séquence US n'écoute pas, il faut quand même
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
-function [SEQ,Delay,MedElmtList,ActiveLIST,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig)
+function [SEQ,Delay,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig)
  clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
 
@@ -37,8 +37,6 @@ Pause                  = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause 
 %% Codage en arbitrary : delay matrix and waveform
 dt_s          = 1/(SampFreq);  % unit us
 pulseDuration = NbHemicycle*(0.5/f0) ; % US inital pulse duration in us
-
-
 
 
 % ======================================================================= %
@@ -89,9 +87,7 @@ RX = remote.rx('fcId', 1, 'RxFreq', 60 , 'QFilter', 2, 'RxElemts', 0, 0);
 
 
 MedElmtList = 1:length(AlphaM); % list of shot ordering for angle scan (used to reconstruct image)
-% define boolean matrix with the index of active actuators :
-ActiveLIST = false(NbElemts,length(AlphaM));
-ActiveLIST(ElmtBorns(1):ElmtBorns(2),:) = true ;
+
 
 for nbs = 1:length(AlphaM)
     
@@ -121,7 +117,7 @@ for nbs = 1:length(AlphaM)
         'DutyCycle', 1, ...
         0);
     
-
+    
     
     % Event
     EVENTList{nbs} = remote.event( ...

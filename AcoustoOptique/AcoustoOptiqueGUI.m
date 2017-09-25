@@ -16,8 +16,8 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OF';
-        Volt            = 50;
+        TypeOfSequence  = 'OP';
+        Volt            = 20;
         FreqSonde       = 6;
         NbHemicycle     = 4;
         
@@ -45,7 +45,7 @@ switch TypeOfSequence
 [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
     case 'OP'
 Volt = min(20,Volt); % security for OP routine       
- [SEQ,Delay,MedElmtList,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
+ [SEQ,Delay,MedElmtList,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
 %[SEQ,Delay,MedElmtList,Alphas] = AOSeqInit_OP_arbitrary(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
 
 end
@@ -161,8 +161,8 @@ transfer.Channel        = 1;
 
     % path to radon inversion folder
     
-    [theta,M0] = EvalDelayLaw_shared((1:192)*0.2*1e-3,Z_m);    
-    Retroprojection_shared( Datas , (1:192)*0.2*1e-3, z ,theta ,M0);
+    [theta,M0] = EvalDelayLaw_shared((1:192)*0.2*1e-3,Z_m,ActiveLIST);    
+    Hretroprojection = Retroprojection_shared( Datas , (1:192)*0.2*1e-3, z ,theta ,M0);
     % RetroProj_cleaned(Alphas,Datas,SampleRate*1e6);
     % back to original folder 
     
@@ -178,7 +178,7 @@ transfer.Channel        = 1;
 if SaveData == 1
 MainFolderName = 'D:\Data\mai\';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'AgarTuyauWatermoved';
+CommentName    = 'AgarWaterANDintralipide';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Freq',FreqSonde);
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','Datas','SampleRate','c','Range','TypeOfSequence');
@@ -186,6 +186,7 @@ save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
 %               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
 savefig(Hf,FileName);
 saveas(Hf,FileName,'png');
+saveas(Hretroprojection,[FileName,'_retrop'],'png')
 
 fprintf('Data has been saved under : \r %s \r\n',FileName);
 
