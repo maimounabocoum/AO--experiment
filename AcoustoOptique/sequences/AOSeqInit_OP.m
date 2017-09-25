@@ -105,7 +105,7 @@ for nbs = 1:length(AlphaM)
     
     TXList{nbs} = remote.tx_arbitrary(...
                'txClock180MHz', 1 ,...   % sampling rate = { 0 ,1 } = > {'90 MHz', '180 MHz'}
-               'twId',1,...             % {0 [1 Inf]} = {'no waveform', 'id of the waveform'},
+               'twId',1,...              % {0 [1 Inf]} = {'no waveform', 'id of the waveform'},
                'Delays',Delay(nbs,:),...
                0);                      
     

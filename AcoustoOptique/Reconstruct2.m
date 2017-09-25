@@ -1,4 +1,4 @@
-function [I X Y]=Reconstruct()
+function [I X Y]=Reconstruct2()
 
 % Variables
 c = c/1000;         % conversion m/s en mm/us

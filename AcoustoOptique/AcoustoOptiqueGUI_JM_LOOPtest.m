@@ -6,7 +6,7 @@
 % adresse Jussieu : '192.168.1.16'
 % adresse Bastille : '192.168.0.20'
 
- AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
  addpath('sequences');
  addpath('subfunctions');
  addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
@@ -17,7 +17,7 @@
        
      
  
-        Volt        = 25;     % 'OF' , 'OP' , 'JM'
+        Volt        = 10;     % 'OF' , 'OP' , 'JM'
         FreqSonde   = 2;     % 'OF' , 'OP' , 'JM'
         NbHemicycle = 250;   % 'OF' , 'OP' , 'JM'
         Foc         = 23;    % 'OF' 

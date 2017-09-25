@@ -88,7 +88,8 @@ transfer.Channel        = 1;
 
     %% ======================== start acquisition =============================
 
-    SequenceDuration_us = 1000;        % printout SEQ infos 
+    SequenceDuration_us = 1000;   
+    
     % starts loop for data online screaning
     for Iloop = 1:Nloop
         
@@ -105,7 +106,7 @@ transfer.Channel        = 1;
     while status ~= 0 && tasks2execute < NTrig*(SequenceDuration_us/50)*200000
 
         status = CsMl_QueryStatus(Hgage) ;
-        tasks2execute = tasks2execute + 1;
+        tasks2execute = tasks2execute + 1; % increment to exit loop in case Gage would not trig
        
     end
     
@@ -202,12 +203,12 @@ transfer.Channel        = 1;
         XLambda = (DurationWaveform*1e-6)*1e3*c;
         CalcDelay = 2*XLambda;
         IntDelay  = 3*XLambda;
-                               
-            %ExpFunc                         =  exp(2*1i*z*NBZ(nbs)*pi/XLambda);
-            ExpFunc                                                      =  exp(2*1i*pi*(NBZ(:).*z)/XLambda);
-            ExpFunc( : , z <= CalcDelay || z > (CalcDelay+IntDelay))     =   0;
- 
-            imagesc(z,1:Nfrequencymodes,ExpFunc);
+
+            ExpFunc                          =  exp(2*1i*pi*(NBZ(:)*z)/XLambda);
+            ExpFunc( : , z <= CalcDelay)     =   0;
+            ExpFunc( : , z > (CalcDelay+IntDelay) ) =   0;
+            
+            imagesc(z,1:Nfrequencymodes,real( ExpFunc) );
             %   tR = ExpFunc*Datas(:,nbs) ;
             %   tDum = [tDum tR];
             %   tR = ExpFunc*Datas(:,nbs) ;
@@ -216,7 +217,7 @@ transfer.Channel        = 1;
                
         DecalZ  =   0.7;
         NtF     =   32;
-       [I X Y] = Reconstruct(tDum,NbX,NbZ,SampleRate,DecalZ,NtF,DurationWaveform,c);   
+       [I X Y]=Reconstruct(tDum,NbX,NbZ,SampleRate,DecalZ,NtF,DurationWaveform,c,system.probe.Pitch); 
 
        Hfinal = figure(100);
        set(Hfinal,'WindowStyle','docked');

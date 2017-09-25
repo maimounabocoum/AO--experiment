@@ -6,7 +6,7 @@ w = instrfind; if ~isempty(w) fclose(w); delete(w); end
 % adresse Jussieu : '192.168.1.16'
 % adresse Bastille : '192.168.0.20'
 
- AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
  addpath('sequences');
  addpath('subfunctions');
  addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
@@ -15,7 +15,7 @@ w = instrfind; if ~isempty(w) fclose(w); delete(w); end
  
        TypeOfSequence = 'JM'; % 'OF' , 'OP' , 'JM'
  
-        Volt        = 25;     % 'OF' , 'OP' , 'JM'
+        Volt        = 15;     % 'OF' , 'OP' , 'JM'
         FreqSonde   = 2;     % 'OF' , 'OP' , 'JM'
         NbHemicycle = 250;   % 'OF' , 'OP' , 'JM'
         Foc         = 23;    % 'OF' 
@@ -25,11 +25,11 @@ w = instrfind; if ~isempty(w) fclose(w); delete(w); end
         X1          = 38 ;   % 'OF' , 'OP' 
         NTrig       = 100;   % 'OF' , 'OP' , 'JM'
         Prof        = 200;   % 'OF' , 'OP' , 'JM'
-        NbZ         = 8;     % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 10;     % 20 Nb de composantes de Fourier en X, 'JM'
+        NbZ         = 3;     % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = 3;     % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;
         
-        SaveData = 1 ;      % set to 1 to save data
+        SaveData = 0 ;      % set to 1 to save data
         AIXPLORER_Active = 'on'; % 'on' or 'off' 
 
  % estimation of loading time 
@@ -46,7 +46,7 @@ switch TypeOfSequence
     case 'OP'
 [SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'JM'
-Volt = min(Volt,25) ; 
+Volt = min(Volt,20) ; 
 [SEQ,MedElmtList] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
 
 end
@@ -186,8 +186,8 @@ transfer.Channel        = 1;
    % ylim([0 50])
    
    case 'JM'
-        %MedElmtList = 1:Nlines ;
-        %Datas = RetreiveDatas(raw,NTrig,Nlines,1:Nlines);
+        MedElmtList = 1:Nlines ;
+        Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
         % Calcul composante de Fourier
         z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
         x = (1:Nlines);
