@@ -9,7 +9,7 @@
 % adresse Jussieu :  '192.168.1.16'
 
 
- AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
  addpath('sequences');
  addpath('subfunctions');
  addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
@@ -17,8 +17,8 @@
  addPathLegHAL;
  
         TypeOfSequence  = 'OF';
-        Volt            = 40;
-        FreqSonde       = 2;
+        Volt            = 50;
+        FreqSonde       = 6;
         NbHemicycle     = 4;
         
         
@@ -26,12 +26,12 @@
         dA              = 1;
         
         Foc             = 23;
-        X0              = 20;
-        X1              = 42;
+        X0              = 5;
+        X1              = 25;
         
         NTrig           = 200;
-        Prof            = 40;
-        SaveData        = 0 ; % set to 1 to save
+        Prof            = 80;
+        SaveData        = 1 ; % set to 1 to save
 
 
                  
@@ -176,10 +176,10 @@ transfer.Channel        = 1;
    
 %% save datas :
 if SaveData == 1
-MainFolderName = 'D:\Data\JM\';
+MainFolderName = 'D:\Data\mai\';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'testimage';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Pe',480,'Pref',180);
+CommentName    = 'AgarTuyauWatermoved';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Freq',FreqSonde);
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','Datas','SampleRate','c','Range','TypeOfSequence');
 % save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...

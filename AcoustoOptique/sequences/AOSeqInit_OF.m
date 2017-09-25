@@ -112,7 +112,7 @@ EvtDur   = ceil( pulseDuration + max(DelayLaw) + PropagationTime );
 
 ElmtBorns   = [min(NbElemts,max(1,round(X0/pitch))),max(1,min(NbElemts,round(X1/pitch)))];
 ElmtBorns   = sort(ElmtBorns); % in case X0 and X1 are mixed up
-MedElmtList = ElmtBorns(1):ElmtBorns(2)  
+MedElmtList = ElmtBorns(1):ElmtBorns(2)  ;
 %MedElmtList = randperm(round(ScanLength/pitch)) ;  
 
 % % ======================================================================= %

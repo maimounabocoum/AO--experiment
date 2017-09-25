@@ -27,7 +27,7 @@
 % adresse Bastille : '192.168.0.20'
 % adresse Jussieu : '192.168.1.16'
 
-AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
+AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
 % SRV = remoteDefineServer( 'extern' ,AixplorerIP,'9999');
 % SEQ = remoteGetUserSequence(SRV);
 %=======================  US Parameters =====================
@@ -35,10 +35,10 @@ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 Volt        = 40; % V
 FreqSonde   = 4;  % MHz
 NbHemicycle = 4;
-X0          = 15; % mm
-Foc         = 25; % mm
+X0          = 18; % mm
+Foc         = 45; % mm
 NTrig       = 1000; %1000
-Prof        = 60; % mm 800 gain
+Prof        = 80; % mm 800 gain
 
 %%====================== Parameters loop
 Nloop = 500;
