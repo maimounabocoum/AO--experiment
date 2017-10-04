@@ -4,14 +4,7 @@
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
 
-function [SEQ,MedElmtList] = AOSeqInit_OJM(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
-
-
-% user defined parameters :
-
-    ScanLength      = X1 - X0; % mm
-        
-
+function [SEQ,MedElmtList,NUX,NUZ] = AOSeqInit_OJM(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
 
 %% System parameters import :
 % ======================================================================= %
@@ -31,20 +24,25 @@ Pause                  = max( NoOp-ceil(PropagationTime) , MinNoop ); % pause du
 
 % ======================================================================= %
 %% Codage en arbitrary : delay matrix and waveform
-dt_s          = 1/(SampFreq);  % unit us
 pulseDuration = NbHemicycle*(0.5/f0) ; % US inital pulse duration in us
 
 %% ==================== Codage en arbitrary : preparation des acmos ==============
+% shooting elements 
+ElmtBorns   = [min(NbElemts,max(1,round(X0/pitch))),max(1,min(NbElemts,round(X1/pitch)))];
+ElmtBorns   = sort(ElmtBorns) ; % in case X0 and X1 are mixed up
 
-NbPixels  = 128;                     % nombre de pixels
-Xs        = (0:NbPixels-1)*pitch;    % Echelle de graduation en X
-%u        = 1.54;                    % vitesse de propagation en mm/us
 
+Nbtot    = ElmtBorns(2) - ElmtBorns(1) + 1 ;
+Xs        = (0:Nbtot-1)*pitch;             % Echelle de graduation en X
 
-nuZ0 = 1e6/DurationWaveform;     % Pas fréquentiel de la modulation de phase (en Hz)
-nuX0 = 1.0/(NbPixels*pitch);      % Pas fréquence spatiale en X (en mm-1)
+nuZ0 = 1/((c*1e3)*DurationWaveform*1e-6);  % Pas fréquence spatiale en Z (en mm-1)
+nuX0 = 1.0/(Nbtot*pitch);                  % Pas fréquence spatiale en X (en mm-1)
 
 [NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
+% initialization of empty frequency matrix
+NUX = zeros('like',NBX); 
+NUZ = zeros('like',NBZ); 
+
 Nfrequencymodes = length(NBX(:));
 MedElmtList = 1:Nfrequencymodes ;
 %% Arbitrary definition of US events
@@ -53,13 +51,16 @@ RX = remote.rx('fcId', 1, 'RxFreq', 60 , 'QFilter', 2, 'RxElemts', 1:128, 0);
 
 for nbs = 1:Nfrequencymodes
     
-        nuZ   = NBZ(nbs)*nuZ0; % fréquence de modulation de phase (en Hz) 
+        nuZ  = NBZ(nbs)*nuZ0; % fréquence de modulation de phase (en Hz) 
         nuX  = NBX(nbs)*nuX0;  % fréquence spatiale (en mm-1)
         
         % f0 : MHz
-        % fz : 
+        % nuZ : en mm-1
         % nuX : en mm-1
-        Waveform = CalcMatHole(f0,nuZ,nuX,Xs); % Calculer la matrice
+        [nuX,nuZ,~,Waveform] = CalcMatHole(f0,nuX,nuZ,Xs,SampFreq,c); % Calculer la matrice
+        % upgrade frequency map : 
+        NUX(nbs) = nuX ;
+        NUZ(nbs) = nuZ ;
        
 %       fprintf('waveform is lasting %4.2f us \n\r',size(Waveform,1)/SampFreq)
 %       imagesc(Waveform);
@@ -80,7 +81,7 @@ for nbs = 1:Nfrequencymodes
                     'repeat',4 , ...
                     'repeat256', 0, ...
                     'ApodFct', 'none', ...
-                    'TxElemts',1:NbPixels, ...
+                    'TxElemts',ElmtBorns(1):ElmtBorns(2), ...
                     'DutyCycle', 1, ...
                     0);
 
@@ -141,7 +142,7 @@ SEQ = usse.usse( ...
     'acmo', ACMOList, ...    'Loopidx',1, ...
     'Repeat', NTrig, ...  'Popup',0, ...
     'DropFrames', 0, ...
-    'Loop', 0, ...
+    'Loop', 0 , ...
     'DataFormat', 'RF', ...
     'Popup', 0, ...
     0);
@@ -156,11 +157,12 @@ SEQ = usse.usse( ...
 
  % status :
  display('Begin loading sequence to Hardware');
-%  tic
-%  SEQ = SEQ.loadSequence();
-%  
-%  fprintf('Sequence has loaded in %f s \n\r',toc)
-%  display('--------ready to use -------------');
+     tic
+     SEQ = SEQ.loadSequence();
+     
+     
+     fprintf('Sequence has loaded in %f s \n\r',toc)
+     display('--------ready to use -------------');
 end
 
 

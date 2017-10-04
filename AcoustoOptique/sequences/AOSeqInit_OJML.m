@@ -25,7 +25,6 @@ Pause                  = max( NoOp-ceil(PropagationTime) , MinNoop ); % pause du
 
 % ======================================================================= %
 %% Codage en arbitrary : delay matrix and waveform
-dt_s          = 1/(SampFreq);  % unit us
 pulseDuration = NbHemicycle*(0.5/f0) ; % US inital pulse duration in us
 
 %% ==================== Codage en arbitrary : preparation des acmos ==============

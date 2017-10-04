@@ -47,7 +47,7 @@ switch TypeOfSequence
 [SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'JM'
 Volt = min(Volt,20) ; 
-[SEQ,MedElmtList] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
+[SEQ,MedElmtList,NUX,NUZ] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
 
 end
 
@@ -201,39 +201,22 @@ transfer.Channel        = 1;
             colormap(parula)
             set(findall(Hf,'-property','FontSize'),'FontSize',15)
 
-        XLambda = DurationWaveform*1e-6*1e3*c;
-        CalcDelay = 2*XLambda;
-        IntDelay = 3*XLambda;
-                  
-        tDum = [];
+       [I,X,Z] = Reconstruct(NbX , NbZ, ...
+                             NUX , NUZ ,...
+                             x , z , ...
+                             Datas , ...
+                             SampleRate , DurationWaveform, c , system.probe.Pitch*1e-3); 
 
-        nbs = 1;
-  
-   [NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
-   Nfrequencymodes = length(NBX(:));
-
-   for nbs = 1:Nfrequencymodes
-                
-            ExpFunc                         =  exp(2*1i*z*NBZ(nbs)*pi/XLambda);
-            ExpFunc(z<=CalcDelay)           =   0;
-            ExpFunc(z>(CalcDelay+IntDelay)) =   0;    
-            
-            F = Datas(:,nbs);
-                
-                %plot(z,F/max(F));
-                %hold;
-                %plot(z,real(ExpFunc),'r');
-            tR = ExpFunc*F;
-            tDum = [tDum tR];
-      
-   end
-               
-        DecalZ=0.7;
-        NtF=32;
-       [I X Y]=Reconstruct(tDum,NbX,NbZ,SampleRate,DecalZ,NtF,DurationWaveform,c,system.probe.Pitch);   
-
-       figure(100);
-       imagesc(X,Y,I);
+       Hfinal = figure(100);
+       set(Hfinal,'WindowStyle','docked');
+       imagesc(X,Z,I);
+       title('reconstructed image')
+       xlabel('x (mm)')
+       ylabel('z (mm)')
+       cb = colorbar;
+       ylabel(cb,'a.u')
+       set(findall(Hfinal,'-property','FontSize'),'FontSize',15)
+       
     end
 
     
