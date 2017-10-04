@@ -1,14 +1,14 @@
-function [I,X,Z] = Reconstruct(NbX,NbZ,NUX,NUZ,x,z,Datas,SampleRate,durationWaveform,c,pitch)
+function [I X Y]=Reconstruct(NbX,NbZ,x,z,Datas,SampleRate,durationWaveform,c,pitch)
 % all inputs are in SI units
 
 
         [NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
-        Nfrequencymodes = length(NUX(:));
+        Nfrequencymodes = length(NBX(:));
         XLambda = (durationWaveform*1e-6)*1e3*c;
 
             % each line is the exponential for NBz
-            % integrale is performed between 2*XLambda and 5*XLambda
-            ExpFunc                          =   exp(2*1i*pi*(NUZ(:)*z));
+            % integral
+            ExpFunc                          =   exp(2*1i*pi*(NBZ(:)*z)/XLambda);
             ExpFunc( : , z <= 2*XLambda )    =   0;
             ExpFunc( : , z > 5*XLambda  )    =   0;
             
@@ -18,13 +18,16 @@ function [I,X,Z] = Reconstruct(NbX,NbZ,NUX,NUZ,x,z,Datas,SampleRate,durationWave
             Cnm = diag(ExpFunc*Datas)' ;
    
                
-        DecalZ  =   0.7; % ??
+        DecalZ  =   0.7;
         NtF     =   2^5;
         
 % Variables
 
 NtFs = NtF/2+1; % index of 0 in fourier domain
 tF = zeros(NtF);
+
+[NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
+Nfrequencymodes = length(NBX(:));
 
 for nbs = 1:Nfrequencymodes
     
@@ -47,4 +50,4 @@ I = I - ones(NtF,1)*I(1,:);
 
 X = (0:NtF-1)*pitch*128/NtF;
 
-Z = (0:NtF-1)*durationWaveform*1.54/NtF;
+Y = (0:NtF-1)*20*1.54/NtF;

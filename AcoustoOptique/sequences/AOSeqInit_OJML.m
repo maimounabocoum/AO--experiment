@@ -4,7 +4,7 @@
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
 
-function [SEQ,MedElmtList] = AOSeqInit_OJM(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
+function [SEQ,MedElmtList,NUX,NUZ] = AOSeqInit_OJM(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
 
 
 %% System parameters import :
@@ -35,14 +35,16 @@ ElmtBorns   = sort(ElmtBorns) ; % in case X0 and X1 are mixed up
 
 
 Nbtot    = ElmtBorns(2) - ElmtBorns(1) + 1 ;
-Xs        = (0:Nbtot-1)*pitch;    % Echelle de graduation en X
-%u        = 1.54;                    % vitesse de propagation en mm/us
-
+Xs        = (0:Nbtot-1)*pitch;             % Echelle de graduation en X
 
 nuZ0 = 1/((c*1e3)*DurationWaveform*1e-6);  % Pas fréquence spatiale en Z (en mm-1)
 nuX0 = 1.0/(Nbtot*pitch);                  % Pas fréquence spatiale en X (en mm-1)
 
 [NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
+% initialization of empty frequency matrix
+NUX = zeros('like',NBX); 
+NUZ = zeros('like',NBZ); 
+
 Nfrequencymodes = length(NBX(:));
 MedElmtList = 1:Nfrequencymodes ;
 %% Arbitrary definition of US events
@@ -55,9 +57,12 @@ for nbs = 1:Nfrequencymodes
         nuX  = NBX(nbs)*nuX0;  % fréquence spatiale (en mm-1)
         
         % f0 : MHz
-        % fz : 
+        % nuZ : en mm-1
         % nuX : en mm-1
-        [~,Waveform] = CalcMatHole(f0,nuX,nuZ,Xs,SampFreq,c); % Calculer la matrice
+        [nuX,nuZ,~,Waveform] = CalcMatHole(f0,nuX,nuZ,Xs,SampFreq,c); % Calculer la matrice
+        % upgrade frequency map : 
+        NUX(nbs) = nuX ;
+        NUZ(nbs) = nuZ ;
        
 %       fprintf('waveform is lasting %4.2f us \n\r',size(Waveform,1)/SampFreq)
 %       imagesc(Waveform);

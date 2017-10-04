@@ -1,4 +1,4 @@
-function [t,Mat] = CalcMatHole(f0,nuX,nuZ,x,Fe,c)
+function [nuX,nuZ,t,Mat] = CalcMatHole(f0,nuX,nuZ,x,Fe,c)
 % c input in m/s
 % f0  (en MHz) est la fréquence de porteuse
 % nuZ (en mm-1)
