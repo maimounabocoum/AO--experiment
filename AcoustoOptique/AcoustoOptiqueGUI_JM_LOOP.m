@@ -182,14 +182,14 @@ transfer.Channel        = 1;
    
    case 'JM'
        
-        Datas = RetreiveDatas(raw,NTrig,Nlines,1:Nlines);
+       % Datas = RetreiveDatas(raw,NTrig,Nlines,1:Nlines);
         % Calcul composante de Fourier
         
         [NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
         Nfrequencymodes = length(NBX(:));
    
-        z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
-        x = (1:Nlines);
+%         z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
+%         x = (1:Nlines);
         
             imagesc(x,z,1e3*Datas)
             xlabel('lines Nbx, Nbz')
@@ -225,6 +225,7 @@ transfer.Channel        = 1;
        title('reconstructed image')
        xlabel('x (mm)')
        ylabel('y (mm)')
+       
     end
 
     
