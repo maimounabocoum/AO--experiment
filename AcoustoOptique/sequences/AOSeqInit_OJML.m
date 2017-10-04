@@ -7,12 +7,6 @@
 function [SEQ,MedElmtList] = AOSeqInit_OJM(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
 
 
-% user defined parameters :
-
-    ScanLength      = X1 - X0; % mm
-        
-
-
 %% System parameters import :
 % ======================================================================= %
 c           = common.constants.SoundSpeed ; %[m/s]
@@ -35,14 +29,18 @@ dt_s          = 1/(SampFreq);  % unit us
 pulseDuration = NbHemicycle*(0.5/f0) ; % US inital pulse duration in us
 
 %% ==================== Codage en arbitrary : preparation des acmos ==============
+% shooting elements 
+ElmtBorns   = [min(NbElemts,max(1,round(X0/pitch))),max(1,min(NbElemts,round(X1/pitch)))];
+ElmtBorns   = sort(ElmtBorns) ; % in case X0 and X1 are mixed up
 
-NbPixels  = 128;                     % nombre de pixels
-Xs        = (0:NbPixels-1)*pitch;    % Echelle de graduation en X
+
+Nbtot    = ElmtBorns(2) - ElmtBorns(1) + 1 ;
+Xs        = (0:Nbtot-1)*pitch;    % Echelle de graduation en X
 %u        = 1.54;                    % vitesse de propagation en mm/us
 
 
-freq0 = 1e6/DurationWaveform;     % Pas fréquentiel de la modulation de phase (en Hz)
-nuX0 = 1.0/(NbPixels*pitch);      % Pas fréquence spatiale en X (en mm-1)
+nuZ0 = 1/((c*1e3)*DurationWaveform*1e-6);  % Pas fréquence spatiale en Z (en mm-1)
+nuX0 = 1.0/(Nbtot*pitch);                  % Pas fréquence spatiale en X (en mm-1)
 
 [NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
 Nfrequencymodes = length(NBX(:));
@@ -53,13 +51,13 @@ RX = remote.rx('fcId', 1, 'RxFreq', 60 , 'QFilter', 2, 'RxElemts', 1:128, 0);
 
 for nbs = 1:Nfrequencymodes
     
-        fz   = NBZ(nbs)*freq0; % fréquence de modulation de phase (en Hz) 
+        nuZ  = NBZ(nbs)*nuZ0; % fréquence de modulation de phase (en Hz) 
         nuX  = NBX(nbs)*nuX0;  % fréquence spatiale (en mm-1)
         
         % f0 : MHz
         % fz : 
         % nuX : en mm-1
-        Waveform = CalcMatHole(f0,fz,nuX,Xs); % Calculer la matrice
+        [~,Waveform] = CalcMatHole(f0,nuX,nuZ,Xs,SampFreq,c); % Calculer la matrice
        
 %       fprintf('waveform is lasting %4.2f us \n\r',size(Waveform,1)/SampFreq)
 %       imagesc(Waveform);
@@ -80,7 +78,7 @@ for nbs = 1:Nfrequencymodes
                     'repeat',4 , ...
                     'repeat256', 0, ...
                     'ApodFct', 'none', ...
-                    'TxElemts',1:NbPixels, ...
+                    'TxElemts',ElmtBorns(1):ElmtBorns(2), ...
                     'DutyCycle', 1, ...
                     0);
 

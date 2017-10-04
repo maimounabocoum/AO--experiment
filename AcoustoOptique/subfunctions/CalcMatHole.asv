@@ -1,23 +1,24 @@
-function [t,Mat] = CalcMatHole(f0,nuX,nuZ,x,Fe,c)
+function [f0,nuZ,Mat] = CalcMatHole(f0,nuX,nuZ,x,Fe,c)
 % c input in m/s
 % f0  (en MHz) est la fréquence de porteuse
 % nuZ (en mm-1)
 % nuX (en mm-1)
 % Fe : sampling frequency in MHz ; 
-% x  : coordinate vector in mm
 
 % conversion of all input to SI unitzs : 
 Fe = Fe*1e6 ;   %MHz->Hz
 f0 = f0*1e6;    %MHz->Hz
 nuZ = 1e3*nuZ ; %mm-1->m-1
 nuX = 1e3*nuX ; %mm-1->m-1
-x = x*1e-3;     %mm->m
 
 % conversion to temporal frequency along z
 fz = c*nuZ ;
 
 dt = 1/Fe ; % in s
+dz = c*dt ; % in m
+
 Tmax = (20.1*1e-6);   % periode maximale d'un cycle élémentaire (en s)
+Lmax = c*Tmax ;     % periode maximale d'un cycle élémentaire (en m)
 
 Tz = 1/fz;          % periode de l'envelloppe A in s
 T0 = 1/f0;          % periode de la porteuse A in s
@@ -53,10 +54,13 @@ t = (0:N-1)*dt;  % time in us
 
 [X,T] = meshgrid(x,t);
 
+s0 = sin(2*pi*f0*t);    % porteuse A sur axe z
+%T = t'*ones(1,length(x));
+%tX = nuX*ones(length(t),1)*x/fz;
 alpha = nuX/fz;
-carrier = sin(2*pi*f0*T);
+ts0 = s0'*ones(1,length(x));
 
-Mat = sign(carrier).*(sin(2*pi*fz*(T-alpha*X))>0);
+Mat = sign(ts0).*(sin(2*pi*fz*(T-alpha*X))>0);
 
 end
     
