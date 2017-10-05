@@ -227,9 +227,9 @@ CommentName    = 'PVA';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Volt',Volt,'AlphaM',AlphaM);
 
 
-save([MainFolderName,FileName],'Volt','FreqSonde','NbHemicycle','Foc','DurationWaveform','NbZ','NbX',...
+save([MainFolderName,FileName],'Volt','FreqSonde','NbHemicycle','Foc','DurationWaveform','NbZ','NbX','NUZ','NUX',...
                'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
-savefig(Hf,[MainFolderName,FileName]);
+savefig(Hfinal,[MainFolderName,FileName]);
 saveas(Hfinal,[MainFolderName,FileName],'png');
 
 fprintf('Data has been saved under : \r %s \r\n',FileName);
