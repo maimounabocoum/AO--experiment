@@ -27,13 +27,15 @@
         X1          = 25;    % 'OF' , 'OP' 
         NTrig       = 100;   % 'OF' , 'OP' , 'JM'
         Prof        = 200;   % 'OF' , 'OP' , 'JM'
-        NbZ         = 1;     % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 10;     % 20 Nb de composantes de Fourier en X, 'JM'
+        NbZ         = 8;     % 4; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = 10;     % 5 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;
         
         SaveData = 1 ;      % set to 1 to save data
         AIXPLORER_Active = 'on'; % 'on' or 'off' 
  % estimation of loading time 
+ % [NUX,NUZ] = evalNUs(NbX,NbZ,FreqSonde,SampleRate);
+
  fprintf('%i events, loading should take about %d seconds\n\r',(2*NbX+1)*NbZ,(2*NbX+1)*NbZ*3);
 
 %% ============================   Initialize AIXPLORER
@@ -183,7 +185,6 @@ transfer.Channel        = 1;
        
         Datas = RetreiveDatas(raw,NTrig,Nlines,1:Nlines);
        % Calcul composante de Fourier
-        
          z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
          x = (1:Nlines);
             Hfinal = figure(100);
@@ -229,7 +230,7 @@ CommentName    = 'SL102';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'NbZ',NbZ,'NbX',NbX);
 
 
-save([FileName],'Volt','FreqSonde','NbHemicycle','Foc','DurationWaveform','NbZ','NbX','NUZ','NUX',...
+save([FileName],'Volt','FreqSonde','NbHemicycle','Foc','DurationWaveform','NbZ','NbX','x','z','NUZ','NUX',...
                'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
 savefig(Hfinal,FileName);
 saveas(Hfinal,FileName,'png');
