@@ -9,29 +9,29 @@
 % adresse Jussieu :  '192.168.1.16'
 
 
- AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
  addpath('sequences');
  addpath('subfunctions');
  addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OP';
-        Volt            = 25;
-        FreqSonde       = 6;
-        NbHemicycle     = 4;
+        TypeOfSequence  = 'OF';
+        Volt            = 50;
+        FreqSonde       = 3;
+        NbHemicycle     = 2;
         
         
         AlphaM          = 20;
         dA              = 1;
         
-        Foc             = 23;
-        X0              = 5;
+        Foc             = 25;
+        X0              = 10;
         X1              = 25;
         
-        NTrig           = 10;
-        Prof            = 80;
-        SaveData        = 0 ; % set to 1 to save
+        NTrig           = 1000;
+        Prof            = 40;
+        SaveData        = 1 ; % set to 1 to save
 
 
                  
@@ -149,7 +149,8 @@ transfer.Channel        = 1;
     colormap(parula)
     set(findall(Hf,'-property','FontSize'),'FontSize',15) 
     %%  Radon inversion :
-    addpath('D:\GIT\AO---softwares-and-developpement\radon inversion\shared functions folder');
+    addpath('D:\AO---softwares-and-developpement\radon inversion\shared functions folder')
+    %addpath('D:\GIT\AO---softwares-and-developpement\radon inversion\shared functions folder');
     % cd('D:\GIT\AO---softwares-and-developpement\radon inversion')
     % currentFolder = pwd ;
     % cd(currentFolder)
@@ -162,7 +163,7 @@ transfer.Channel        = 1;
     % path to radon inversion folder
     
     [theta,M0] = EvalDelayLaw_shared((1:192)*0.2*1e-3,Z_m,ActiveLIST);    
-    Hretroprojection = Retroprojection_shared( Datas , find(ActiveLIST(:,1))*(system.probe.Pitch*1e-3), z ,theta ,M0);
+    Retroprojection_shared( Datas , find(ActiveLIST(:,1))*(system.probe.Pitch*1e-3), z ,theta ,M0,Hf);
     % RetroProj_cleaned(Alphas,Datas,SampleRate*1e6);
     % back to original folder 
     
@@ -176,9 +177,9 @@ transfer.Channel        = 1;
    
 %% save datas :
 if SaveData == 1
-MainFolderName = 'D:\Data\mai\';
+MainFolderName = 'D:\Data\JM\';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'AgarWaterANDintralipide';
+CommentName    = 'ReferenceFocusedSL102';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Ntrig',NTrig,'Volt',Volt);
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','Datas','SampleRate','c','Range','TypeOfSequence');

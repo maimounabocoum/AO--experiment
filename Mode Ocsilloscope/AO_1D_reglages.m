@@ -10,10 +10,10 @@
 %  clear all; close all; clc
 %  w = instrfind; if ~isempty(w) fclose(w); delete(w); end
 %  clear all;
-  clear all; clc
-  w = instrfind; if ~isempty(w) delete(w); end
-  clear all;
-  restoredefaultpath % 
+%   clear all; clc
+%   w = instrfind; if ~isempty(w) delete(w); end
+%   clear all;
+%   restoredefaultpath % 
  
  %=================== indicate location of LEGAL folder
  addpath('D:\legHAL')
@@ -27,18 +27,18 @@
 % adresse Bastille : '192.168.0.20'
 % adresse Jussieu : '192.168.1.16'
 
-AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
+AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 % SRV = remoteDefineServer( 'extern' ,AixplorerIP,'9999');
 % SEQ = remoteGetUserSequence(SRV);
 %=======================  US Parameters =====================
 
-Volt        = 50; % V
+Volt        = 20; % V
 FreqSonde   = 2;  % MHz
 NbHemicycle = 4;
-X0          = 18; % mm
-Foc         = 45; % mm
+X0          = 30; % mm
+Foc         = 70; % mm
 NTrig       = 1000; %1000
-Prof        = 80; % mm 800 gain
+Prof        = 100; % mm 800 gain
 
 %%====================== Parameters loop
 Nloop = 50;

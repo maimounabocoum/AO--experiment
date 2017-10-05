@@ -29,8 +29,8 @@ function DurationTotal = SEQinfosPrint( SEQ )
      [NELEM,T_waveform] = meshgrid(Nelement,t_waveform);
      T_waveform = T_waveform + repmat(SEQ.InfoStruct.tx(i).Delays,length(t_waveform),1) ;
      surfc(NELEM,T_waveform,SEQ.InfoStruct.tx(i).waveform)
+     %imagesc(SEQ.InfoStruct.tx(i).waveform')
      shading interp
-     ylim([0 15])
      view([0,90])
      pause(0.2)
      drawnow

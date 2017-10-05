@@ -9,28 +9,28 @@
 % adresse Jussieu :  '192.168.1.16'
 
 
- AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
  addpath('sequences');
  addpath('subfunctions');
  addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OP';
-        Volt            = 20;
-        FreqSonde       = 6;
+        TypeOfSequence  = 'OF';
+        Volt            = 50;
+        FreqSonde       = 3;
         NbHemicycle     = 4;
         
         
         AlphaM          = 20;
         dA              = 1;
         
-        Foc             = 23;
-        X0              = 5;
+        Foc             = 25;
+        X0              = 10;
         X1              = 25;
         
         NTrig           = 10;
-        Prof            = 80;
+        Prof            = 40;
         SaveData        = 0 ; % set to 1 to save
 
 
@@ -42,7 +42,7 @@
 clear SEQ MedElmtList raw Datas
 switch TypeOfSequence
     case 'OF'
-[SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
+[SEQ,MedElmtList] = AOSeqInit_OFL(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
     case 'OP'
 Volt = min(30,Volt); % security for OP routine       
 [SEQ,Delay,MedElmtList,ActiveLIST,Alphas] = AOSeqInit_OPL(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
@@ -80,9 +80,8 @@ transfer.Channel        = 1;
  
     %% ======================== start acquisition =============================
     SequenceDuration_us = 100 ; 
-    Nloop = 30 ;
-    Hf = figure;
-    set(Hf,'WindowStyle','docked');
+    Nloop = 50 ;
+    
     
  for Iloop = 1:Nloop
             
@@ -127,7 +126,8 @@ transfer.Channel        = 1;
     
     
     % ======================== data post processing =============================
-
+    Hf = figure(100);
+    set(Hf,'WindowStyle','docked');
     
     switch TypeOfSequence
         case 'OF'

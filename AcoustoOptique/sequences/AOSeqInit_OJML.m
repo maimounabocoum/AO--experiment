@@ -34,7 +34,7 @@ ElmtBorns   = sort(ElmtBorns) ; % in case X0 and X1 are mixed up
 
 
 Nbtot    = ElmtBorns(2) - ElmtBorns(1) + 1 ;
-Xs        = (0:Nbtot-1)*pitch;             % Echelle de graduation en X
+Xs        = (0:Nbtot-1)*pitch;             % Echelle de graduation en mm
 
 nuZ0 = 1/((c*1e3)*DurationWaveform*1e-6);  % Pas fréquence spatiale en Z (en mm-1)
 nuX0 = 1.0/(Nbtot*pitch);                  % Pas fréquence spatiale en X (en mm-1)

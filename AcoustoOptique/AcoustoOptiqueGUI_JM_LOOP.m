@@ -17,21 +17,21 @@
        
         Nloop = 1 ;
  
-        Volt        = 15;     % 'OF' , 'OP' , 'JM'
+        Volt        = 30;     % 'OF' , 'OP' , 'JM'
         FreqSonde   = 2;     % 'OF' , 'OP' , 'JM'
         NbHemicycle = 250;   % 'OF' , 'OP' , 'JM'
-        Foc         = 23;    % 'OF' 
+        Foc         = 25;    % 'OF' 
         AlphaM      = 20;    % 'OP' 
         dA          = 1;     % 'OP' 
-        X0          = 0;     % 'OF' , 'OP' 
-        X1          = 38 ;   % 'OF' , 'OP' 
-        NTrig       = 10;   % 'OF' , 'OP' , 'JM'
+        X0          = 10;    % 'OF' , 'OP'
+        X1          = 25;    % 'OF' , 'OP' 
+        NTrig       = 100;   % 'OF' , 'OP' , 'JM'
         Prof        = 200;   % 'OF' , 'OP' , 'JM'
-        NbZ         = 4;     % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 5;     % 20 Nb de composantes de Fourier en X, 'JM'
+        NbZ         = 1;     % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = 10;     % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;
         
-        SaveData = 0 ;      % set to 1 to save data
+        SaveData = 1 ;      % set to 1 to save data
         AIXPLORER_Active = 'on'; % 'on' or 'off' 
  % estimation of loading time 
  fprintf('%i events, loading should take about %d seconds\n\r',(2*NbX+1)*NbZ,(2*NbX+1)*NbZ*3);
@@ -89,7 +89,7 @@ transfer.Channel        = 1;
     %% ======================== start acquisition =============================
 
     SequenceDuration_us = 1000;   
-    
+    Nloop = 1 ;
     % starts loop for data online screaning
     for Iloop = 1:Nloop
         
@@ -146,9 +146,8 @@ transfer.Channel        = 1;
     
     
     
-%% ======================== data post processing =============================
-    Hf = figure;
-    set(Hf,'WindowStyle','docked');
+% ======================== data post processing =============================
+
     
     switch TypeOfSequence
         
@@ -182,20 +181,22 @@ transfer.Channel        = 1;
    
    case 'JM'
        
-       % Datas = RetreiveDatas(raw,NTrig,Nlines,1:Nlines);
+        Datas = RetreiveDatas(raw,NTrig,Nlines,1:Nlines);
        % Calcul composante de Fourier
         
-%         z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
-%         x = (1:Nlines);
-        
+         z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
+         x = (1:Nlines);
+            Hfinal = figure(100);
+            set(Hfinal,'WindowStyle','docked');
+%            subplot(121)
             imagesc(x,z,1e3*Datas)
+            %imagesc(1e3*Datas)
             xlabel('lines Nbx, Nbz')
             ylabel('z (mm)')    
             title('Averaged raw datas')
             cb = colorbar;
             ylabel(cb,'AC tension (mV)')
             colormap(parula)
-            set(findall(Hf,'-property','FontSize'),'FontSize',15)
 
        [I,X,Z] = Reconstruct(NbX , NbZ, ...
                              NUX , NUZ ,...
@@ -203,8 +204,9 @@ transfer.Channel        = 1;
                              Datas , ...
                              SampleRate , DurationWaveform, c , system.probe.Pitch*1e-3); 
 
-       Hfinal = figure(100);
-       set(Hfinal,'WindowStyle','docked');
+     %   subplot(122)
+     Hfinal = figure(101);
+      set(Hfinal,'WindowStyle','docked');
        imagesc(X,Z,I);
        title('reconstructed image')
        xlabel('x (mm)')
@@ -223,14 +225,14 @@ transfer.Channel        = 1;
 if SaveData == 1
 MainFolderName = 'D:\Data\JM';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'PVA';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Volt',Volt,'AlphaM',AlphaM);
+CommentName    = 'SL102';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'NbZ',NbZ,'NbX',NbX);
 
 
-save([MainFolderName,FileName],'Volt','FreqSonde','NbHemicycle','Foc','DurationWaveform','NbZ','NbX','NUZ','NUX',...
+save([FileName],'Volt','FreqSonde','NbHemicycle','Foc','DurationWaveform','NbZ','NbX','NUZ','NUX',...
                'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
-savefig(Hfinal,[MainFolderName,FileName]);
-saveas(Hfinal,[MainFolderName,FileName],'png');
+savefig(Hfinal,FileName);
+saveas(Hfinal,FileName,'png');
 
 fprintf('Data has been saved under : \r %s \r\n',FileName);
 
