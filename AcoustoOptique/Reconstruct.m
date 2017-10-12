@@ -18,7 +18,7 @@ dx_fourier = abs(max(x) - min(x)) ;
             Cnm = conj(diag(ExpFunc*Datas))' ;
    
                
-        DecalZ  =   0.7; % ??
+        DecalZ  =   0.9; % ??
         NtF     =   2^10;
         
 % Variables

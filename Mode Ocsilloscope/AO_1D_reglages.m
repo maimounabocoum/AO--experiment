@@ -32,11 +32,11 @@ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 % SEQ = remoteGetUserSequence(SRV);
 %=======================  US Parameters =====================
 
-Volt        = 20; % V
+Volt        = 50; % V
 FreqSonde   = 2;  % MHz
 NbHemicycle = 4;
-X0          = 30; % mm
-Foc         = 70; % mm
+X0          = 15; % mm
+Foc         = 25; % mm
 NTrig       = 1000; %1000
 Prof        = 100; % mm 800 gain
 

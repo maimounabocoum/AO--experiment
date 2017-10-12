@@ -19,7 +19,7 @@
         TypeOfSequence  = 'OF';
         Volt            = 50;
         FreqSonde       = 3;
-        NbHemicycle     = 4;
+        NbHemicycle     = 6;
         
         
         AlphaM          = 20;
@@ -29,8 +29,8 @@
         X0              = 10;
         X1              = 25;
         
-        NTrig           = 10;
-        Prof            = 40;
+        NTrig           = 100;
+        Prof            = 50;
         SaveData        = 0 ; % set to 1 to save
 
 
@@ -80,7 +80,7 @@ transfer.Channel        = 1;
  
     %% ======================== start acquisition =============================
     SequenceDuration_us = 100 ; 
-    Nloop = 50 ;
+    Nloop = 20 ;
     
     
  for Iloop = 1:Nloop

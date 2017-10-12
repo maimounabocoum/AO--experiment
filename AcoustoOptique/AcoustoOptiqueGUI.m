@@ -17,19 +17,19 @@
  addPathLegHAL;
  
         TypeOfSequence  = 'OF';
-        Volt            = 50;
+        Volt            = 45;
         FreqSonde       = 3;
-        NbHemicycle     = 2;
+        NbHemicycle     = 6;
         
         
         AlphaM          = 20;
         dA              = 1;
         
-        Foc             = 25;
-        X0              = 10;
-        X1              = 25;
+        Foc             = 20;
+        X0              = 5;
+        X1              = 30;
         
-        NTrig           = 1000;
+        NTrig           = 500;
         Prof            = 40;
         SaveData        = 1 ; % set to 1 to save
 
@@ -179,8 +179,8 @@ transfer.Channel        = 1;
 if SaveData == 1
 MainFolderName = 'D:\Data\JM\';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'ReferenceFocusedSL102';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Ntrig',NTrig,'Volt',Volt);
+CommentName    = 'ScantensionFocusedSL102';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Volt',Volt);
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','Datas','SampleRate','c','Range','TypeOfSequence');
 % save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...

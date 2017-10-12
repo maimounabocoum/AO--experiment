@@ -29,7 +29,7 @@ w = instrfind; if ~isempty(w) fclose(w); delete(w); end
         NbX         = 5;     % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;
         
-        SaveData = 0 ;      % set to 1 to save data
+        SaveData = 1 ;      % set to 1 to save data
         AIXPLORER_Active = 'on'; % 'on' or 'off' 
 
  % estimation of loading time 
@@ -229,7 +229,7 @@ SubFolderName  = generateSubFolderName(MainFolderName);
 CommentName    = 'ondecontinue';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Pe',480,'Pref',180);
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
-              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','Datas','SampleRate','c','Range','TypeOfSequence','x','z','NbX','NbZ');
+              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','Datas','SampleRate','c','Range','TypeOfSequence','x','z','NbX','NbZ','NUX','NUZ');
 % save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
 %               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
 savefig(Hf,FileName);

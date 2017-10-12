@@ -17,15 +17,15 @@
        
         Nloop = 1 ;
  
-        Volt        = 30;     % 'OF' , 'OP' , 'JM'
+        Volt        = 10;     % 'OF' , 'OP' , 'JM'
         FreqSonde   = 2;     % 'OF' , 'OP' , 'JM'
         NbHemicycle = 250;   % 'OF' , 'OP' , 'JM'
         Foc         = 25;    % 'OF' 
         AlphaM      = 20;    % 'OP' 
         dA          = 1;     % 'OP' 
-        X0          = 10;    % 'OF' , 'OP'
-        X1          = 25;    % 'OF' , 'OP' 
-        NTrig       = 100;   % 'OF' , 'OP' , 'JM'
+        X0          = 5;    % 'OF' , 'OP'
+        X1          = 30;    % 'OF' , 'OP' 
+        NTrig       = 1000;   % 'OF' , 'OP' , 'JM'
         Prof        = 200;   % 'OF' , 'OP' , 'JM'
         NbZ         = 8;     % 4; % Nb de composantes de Fourier en Z, 'JM'
         NbX         = 10;     % 5 Nb de composantes de Fourier en X, 'JM'
@@ -148,7 +148,7 @@ transfer.Channel        = 1;
     
     
     
-% ======================== data post processing =============================
+%% ======================== data post processing =============================
 
     
     switch TypeOfSequence
@@ -226,12 +226,12 @@ transfer.Channel        = 1;
 if SaveData == 1
 MainFolderName = 'D:\Data\JM';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'SL102';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'NbZ',NbZ,'NbX',NbX);
+CommentName    = 'SL102laseroff';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'NbZ',NbZ,'NbX',NbX,'Volt',Volt);
 
 
 save([FileName],'Volt','FreqSonde','NbHemicycle','Foc','DurationWaveform','NbZ','NbX','x','z','NUZ','NUX',...
-               'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
+               'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','Datas','SampleRate','c','Range','TypeOfSequence');
 savefig(Hfinal,FileName);
 saveas(Hfinal,FileName,'png');
 
