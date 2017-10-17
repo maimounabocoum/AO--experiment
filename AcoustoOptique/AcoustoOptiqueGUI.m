@@ -24,21 +24,21 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OP';
-        Volt            = 15;
+        TypeOfSequence  = 'OF';
+        Volt            = 40;
         FreqSonde       = 3;
         NbHemicycle     = 4;
         
         
         AlphaM          = 20;
-        dA              = 1;
+        dA              = 10;
         
         Foc             = 20;
-        X0              = 0;
-        X1              = 38;
+        X0              = 5;
+        X1              = 35;
         
-        NTrig           = 500;
-        Prof            = 50;
+        NTrig           = 200;
+        Prof            = 40;
         SaveData        = 1 ; % set to 1 to save
 
 
@@ -47,7 +47,7 @@
 %% ============================   Initialize AIXPLORER
 % %% Sequence execution
 % % ============================================================================ %
-clear SEQ MedElmtList raw Datas
+clear SEQ MedElmtList raw Datas ActiveLIST Alphas Delay Z_m
 switch TypeOfSequence
     case 'OF'
 [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
@@ -138,8 +138,6 @@ transfer.Channel        = 1;
     imagesc(x,z,1e3*Datas)
     xlabel('x (mm)')
     ylabel('z (mm)')
-%     axis equal
-%     axis tight
     title('Averaged raw datas')
     cb = colorbar;
     ylabel(cb,'AC tension (mV)')
@@ -148,7 +146,7 @@ transfer.Channel        = 1;
         case 'OP'
     Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
     z = (1:actual.ActualLength)*(c/(1e6*SampleRate));
-    imagesc(Alphas,z*1e3,1e3*Datas)
+    imagesc(Alphas*180/pi,z*1e3,1e3*Datas)
     xlabel('angle (°)')
     ylabel('z (mm)')
     title('Averaged raw datas')
@@ -157,18 +155,18 @@ transfer.Channel        = 1;
     colormap(parula)
     set(findall(Hf,'-property','FontSize'),'FontSize',15) 
     %%  Radon inversion :
-    
+    Hresconstruct = figure;
+    set(Hresconstruct,'WindowStyle','docked');
     % plotting delay map
     for i = 1:size(Delay,1)
-      %Z_m(i,:) =   -(SEQ.InfoStruct.tx(i).Delays(1:192))*c*1e-6 ;
       Z_m(i,:) =   -Delay(i,:)*c*1e-6 ;
     end
     
-    MyImage = OP(Datas,Alphas*pi/180,z,SampleRate*1e6,c) ;
+    MyImage = OP(Datas,Alphas,z,SampleRate*1e6,c) ;
     [I,z_out] = DataFiltering(MyImage) ;
     
     [theta,M0] = EvalDelayLaw_shared((1:192)*0.2*1e-3,Z_m,ActiveLIST);    
-    Retroprojection_shared( I , find(ActiveLIST(:,1))*(system.probe.Pitch*1e-3), z_out ,theta ,M0,Hf);
+    Retroprojection_shared( I , find(ActiveLIST(:,1))*(system.probe.Pitch*1e-3), z_out ,theta ,M0,Hresconstruct);
     % RetroProj_cleaned(Alphas,Datas,SampleRate*1e6);
     % back to original folder 
     
@@ -185,18 +183,23 @@ if SaveData == 1
     
 MainFolderName = 'D:\Data\JM\';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'ApresOptimizationLaser';
+CommentName    = 'AgarREF';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Volt',Volt);
-save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
-              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','x','z','Datas','SampleRate','c','Range','TypeOfSequence');
-% save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
-%               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
 savefig(Hf,FileName);
 saveas(Hf,FileName,'png');
-if strcmp(TypeOfSequence,'OP')
-    % saving reconstructed image
-saveas(Hf,[FileName,'_retrop'],'png');
+
+switch TypeOfSequence
+    case 'OF'
+save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
+              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','x','z','Datas','SampleRate','c','Range','TypeOfSequence');
+    case 'OP'
+save(FileName,'Volt','Delay','FreqSonde','NbHemicycle','Alphas'...
+              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','x','z','Datas','SampleRate','c','Range','TypeOfSequence');
+
+          saveas(Hresconstruct,[FileName,'_retrop'],'png');
 end
+
+
 
 fprintf('Data has been saved under : \r %s \r\n',FileName);
 

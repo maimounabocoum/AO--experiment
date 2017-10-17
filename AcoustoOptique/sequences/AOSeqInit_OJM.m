@@ -14,7 +14,7 @@ NbElemts    = system.probe.NbElemts ;
 pitch       = system.probe.Pitch ; % in mm
 MinNoop     = system.hardware.MinNoop;
 
-NoOp       = 500;             % µs minimum time between two US pulses
+NoOp       = 1500;             % µs minimum time between two US pulses
 
 % ======================================================================= %
 

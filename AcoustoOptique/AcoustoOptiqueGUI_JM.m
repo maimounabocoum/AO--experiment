@@ -1,19 +1,28 @@
-clear all; close all; clc
-w = instrfind; if ~isempty(w) fclose(w); delete(w); end
+% clear all; close all; clc
+% w = instrfind; if ~isempty(w) fclose(w); delete(w); end
 
 %% parameter for plane wave sequence :
 % ======================================================================= %
 % adresse Jussieu : '192.168.1.16'
 % adresse Bastille : '192.168.0.20'
 
- AixplorerIP    = '192.168.0.20'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
+ % path at Jussieu :
+ if strcmp(AixplorerIP,'192.168.1.16')
+ addpath('D:\AO---softwares-and-developpement\radon inversion\shared functions folder')
+ end
+ % path at Bastille :
+ if strcmp(AixplorerIP,'192.168.0.20')
+ addpath('D:\GIT\AO---softwares-and-developpement\radon inversion\shared functions folder');
+ end
+ 
  addpath('sequences');
  addpath('subfunctions');
  addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
  addpath('D:\_legHAL_Marc')
- addPathLegHAL();
+ addPathLegHAL;
  
-       TypeOfSequence = 'JM'; % 'OF' , 'OP' , 'JM'
+       TypeOfSequence = 'JM'; % 'OF' , 'JM'
  
         Volt        = 15;     % 'OF' , 'OP' , 'JM'
         FreqSonde   = 2;     % 'OF' , 'OP' , 'JM'
@@ -25,8 +34,8 @@ w = instrfind; if ~isempty(w) fclose(w); delete(w); end
         X1          = 38 ;   % 'OF' , 'OP' 
         NTrig       = 100;   % 'OF' , 'OP' , 'JM'
         Prof        = 200;   % 'OF' , 'OP' , 'JM'
-        NbZ         = 4;     % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 5;     % 20 Nb de composantes de Fourier en X, 'JM'
+        NbZ         = 8;     % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = 4;     % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;
         
         SaveData = 1 ;      % set to 1 to save data
@@ -165,26 +174,9 @@ transfer.Channel        = 1;
     imagesc(x,z,1e3*Datas)
     xlabel('x (mm)')
     ylabel('z (mm)')
-%     axis equal
-%     axis tight
-
-        case 'OP'
-            
-    Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
-    z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
-    x = AlphaM;
-    imagesc(x,z,1e3*Datas)
-    xlabel('angle (°)')
-    ylabel('z (mm)')
-    title('Averaged raw datas')
-    cb = colorbar;
-    ylabel(cb,'AC tension (mV)')
-    colormap(parula)
-    set(findall(Hf,'-property','FontSize'),'FontSize',15) 
 
 
-   % ylim([0 50])
-   
+
    case 'JM'
         MedElmtList = 1:Nlines ;
         Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
@@ -207,7 +199,7 @@ transfer.Channel        = 1;
                              Datas , ...
                              SampleRate , DurationWaveform, c , system.probe.Pitch*1e-3); 
 
-       Hfinal = figure(100);
+       Hfinal = figure(101);
        set(Hfinal,'WindowStyle','docked');
        imagesc(X,Z,I);
        title('reconstructed image')
@@ -226,14 +218,23 @@ transfer.Channel        = 1;
 if SaveData == 1
 MainFolderName = 'D:\Data\JM\';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'ondecontinue';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Pe',480,'Pref',180);
-save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
-              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','Datas','SampleRate','c','Range','TypeOfSequence','x','z','NbX','NbZ','NUX','NUZ');
+CommentName    = 'AgarSL102Noop1500';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'NbZ',NbZ,'NbZ',NbX);
+save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','X0','X1',...
+              'NTrig','Nlines','Prof','MedElmtList','Datas',...
+              'SampleRate','c','Range','TypeOfSequence','x','z',...
+              'NbX','NbZ','NUX','NUZ');
 % save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
 %               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
 savefig(Hf,FileName);
 saveas(Hf,FileName,'png');
+
+switch TypeOfSequence
+    case 'OF'
+saveas(Hf,FileName,'png');
+    case 'JM'
+saveas(Hfinal,FileName,'png');      
+end
 
 fprintf('Data has been saved under : \r %s \r\n',FileName);
 

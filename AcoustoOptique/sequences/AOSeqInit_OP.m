@@ -52,10 +52,11 @@ Nbtot = ElmtBorns(2) - ElmtBorns(1) + 1 ;
 
 
 Delay = zeros(length(AlphaM),NbElemts); %(µs)
+AlphaM = AlphaM*pi/180 ;
 
 for i = 1:length(AlphaM)
       
-    Delay(i,:) = 1000*(1/c)*tan(pi/180*AlphaM(i))*(1:NbElemts)'*(pitch); %s
+    Delay(i,:) = 1000*(1/c)*tan(AlphaM(i))*(1:NbElemts)'*(pitch); %s
     Delay(i,:) = Delay(i,:) - min(Delay(i,:));
     
 end
