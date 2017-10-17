@@ -33,10 +33,10 @@ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 %=======================  US Parameters =====================
 
 Volt        = 50; % V
-FreqSonde   = 2;  % MHz
-NbHemicycle = 4;
+FreqSonde   = 3;  % MHz
+NbHemicycle = 10;
 X0          = 15; % mm
-Foc         = 25; % mm
+Foc         = 20; % mm
 NTrig       = 1000; %1000
 Prof        = 100; % mm 800 gain
 

@@ -14,10 +14,14 @@
  addPathLegHAL();
  
        TypeOfSequence = 'JM'; % 'OF' , 'OP' , 'JM'
+    
+    %   a=[];
+    %   V=[];
        
+ for ConsigneVolt=10:20;      
         Nloop = 1 ;
  
-        Volt        = 10;     % 'OF' , 'OP' , 'JM'
+        Volt        = ConsigneVolt     % 'OF' , 'OP' , 'JM'
         FreqSonde   = 2;     % 'OF' , 'OP' , 'JM'
         NbHemicycle = 250;   % 'OF' , 'OP' , 'JM'
         Foc         = 25;    % 'OF' 
@@ -226,7 +230,7 @@ transfer.Channel        = 1;
 if SaveData == 1
 MainFolderName = 'D:\Data\JM';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'SL102laseroff';
+CommentName    = 'Scan_SL102';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'NbZ',NbZ,'NbX',NbX,'Volt',Volt);
 
 
@@ -238,6 +242,10 @@ saveas(Hfinal,FileName,'png');
 fprintf('Data has been saved under : \r %s \r\n',FileName);
 
 end
+
+a=[a sum(sum(I))];
+V=[V Volt];
+ end
 
 %% ================================= command line to force a trigger on Gage :
 %  CsMl_ForceCapture(Hgage);

@@ -2,35 +2,43 @@
 %   w = instrfind; if ~isempty(w) fclose(w); delete(w); end
 %  restoredefaultpath % restaure original path
 
-%% parameter for plane wave sequence :
+%% addpath and parameter for wave sequences :
 % ======================================================================= %
 
 % adresse Bastille : '192.168.0.20'
 % adresse Jussieu :  '192.168.1.16'
 
-
  AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
+ % path at Jussieu :
+ if strcmp(AixplorerIP,'192.168.1.16')
+ addpath('D:\AO---softwares-and-developpement\radon inversion\shared functions folder')
+ end
+ % path at Bastille :
+ if strcmp(AixplorerIP,'192.168.0.20')
+ addpath('D:\GIT\AO---softwares-and-developpement\radon inversion\shared functions folder');
+ end
+ 
  addpath('sequences');
  addpath('subfunctions');
  addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OF';
-        Volt            = 45;
+        TypeOfSequence  = 'OP';
+        Volt            = 15;
         FreqSonde       = 3;
-        NbHemicycle     = 6;
+        NbHemicycle     = 4;
         
         
         AlphaM          = 20;
         dA              = 1;
         
         Foc             = 20;
-        X0              = 5;
-        X1              = 30;
+        X0              = 0;
+        X1              = 38;
         
         NTrig           = 500;
-        Prof            = 40;
+        Prof            = 50;
         SaveData        = 1 ; % set to 1 to save
 
 
@@ -44,7 +52,7 @@ switch TypeOfSequence
     case 'OF'
 [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
     case 'OP'
-Volt = min(30,Volt); % security for OP routine       
+Volt = min(50,Volt); % security for OP routine       
  [SEQ,Delay,MedElmtList,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
 %[SEQ,Delay,MedElmtList,Alphas] = AOSeqInit_OP_arbitrary(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
 
@@ -149,21 +157,18 @@ transfer.Channel        = 1;
     colormap(parula)
     set(findall(Hf,'-property','FontSize'),'FontSize',15) 
     %%  Radon inversion :
-    addpath('D:\AO---softwares-and-developpement\radon inversion\shared functions folder')
-    %addpath('D:\GIT\AO---softwares-and-developpement\radon inversion\shared functions folder');
-    % cd('D:\GIT\AO---softwares-and-developpement\radon inversion')
-    % currentFolder = pwd ;
-    % cd(currentFolder)
     
     % plotting delay map
-    for i = 1:length(SEQ.InfoStruct.tx)
-      Z_m(i,:) =   -(SEQ.InfoStruct.tx(i).Delays(1:192))*c*1e-6 ;
+    for i = 1:size(Delay,1)
+      %Z_m(i,:) =   -(SEQ.InfoStruct.tx(i).Delays(1:192))*c*1e-6 ;
+      Z_m(i,:) =   -Delay(i,:)*c*1e-6 ;
     end
-
-    % path to radon inversion folder
+    
+    MyImage = OP(Datas,Alphas*pi/180,z,SampleRate*1e6,c) ;
+    [I,z_out] = DataFiltering(MyImage) ;
     
     [theta,M0] = EvalDelayLaw_shared((1:192)*0.2*1e-3,Z_m,ActiveLIST);    
-    Retroprojection_shared( Datas , find(ActiveLIST(:,1))*(system.probe.Pitch*1e-3), z ,theta ,M0,Hf);
+    Retroprojection_shared( I , find(ActiveLIST(:,1))*(system.probe.Pitch*1e-3), z_out ,theta ,M0,Hf);
     % RetroProj_cleaned(Alphas,Datas,SampleRate*1e6);
     % back to original folder 
     
@@ -177,19 +182,20 @@ transfer.Channel        = 1;
    
 %% save datas :
 if SaveData == 1
+    
 MainFolderName = 'D:\Data\JM\';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'ScantensionFocusedSL102';
+CommentName    = 'ApresOptimizationLaser';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Volt',Volt);
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
-              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','Datas','SampleRate','c','Range','TypeOfSequence');
+              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','x','z','Datas','SampleRate','c','Range','TypeOfSequence');
 % save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
 %               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
 savefig(Hf,FileName);
 saveas(Hf,FileName,'png');
 if strcmp(TypeOfSequence,'OP')
     % saving reconstructed image
-saveas(Hretroprojection,[FileName,'_retrop'],'png');
+saveas(Hf,[FileName,'_retrop'],'png');
 end
 
 fprintf('Data has been saved under : \r %s \r\n',FileName);
