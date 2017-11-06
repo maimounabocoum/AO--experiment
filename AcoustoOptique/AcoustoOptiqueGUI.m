@@ -25,20 +25,20 @@
  addPathLegHAL;
  
         TypeOfSequence  = 'OF';
-        Volt            = 40;
+        Volt            = 50;
         FreqSonde       = 3;
         NbHemicycle     = 4;
         
         
         AlphaM          = 20;
-        dA              = 10;
+        dA              = 1;
         
         Foc             = 20;
-        X0              = 5;
-        X1              = 35;
+        X0              = 10;
+        X1              = 30;
         
-        NTrig           = 200;
-        Prof            = 40;
+        NTrig           = 500;
+        Prof            = 50;
         SaveData        = 1 ; % set to 1 to save
 
 
@@ -108,7 +108,7 @@ transfer.Channel        = 1;
     % Z  = linspace(0,Prof,acqInfo.Depth); 
     % loop over segment counts:
 
-    toc
+    t_aquisition = toc
     
     tic 
     for SegmentNumber = 1:acqInfo.SegmentCount
@@ -158,15 +158,17 @@ transfer.Channel        = 1;
     Hresconstruct = figure;
     set(Hresconstruct,'WindowStyle','docked');
     % plotting delay map
-    for i = 1:size(Delay,1)
-      Z_m(i,:) =   -Delay(i,:)*c*1e-6 ;
-    end
+%     for i = 1:size(Delay,1)
+%       Z_m(i,:) =   -Delay(i,:)*c*1e-6 ;
+%     end
     
     MyImage = OP(Datas,Alphas,z,SampleRate*1e6,c) ;
     [I,z_out] = DataFiltering(MyImage) ;
+%     Xm = (1:system.probe.NbElemts)*(0.2e-3) ;
+    Xm = (1:system.probe.NbElemts)*(system.probe.Pitch*1e-3) ;
+    [theta,M0,X0,Z0] = EvalDelayLaw_shared(Xm,Delay,ActiveLIST,c);   
     
-    [theta,M0] = EvalDelayLaw_shared((1:192)*0.2*1e-3,Z_m,ActiveLIST);    
-    Retroprojection_shared( I , find(ActiveLIST(:,1))*(system.probe.Pitch*1e-3), z_out ,theta ,M0,Hresconstruct);
+    Retroprojection_shared(I , Xm , z_out ,theta ,M0,Hresconstruct);
     % RetroProj_cleaned(Alphas,Datas,SampleRate*1e6);
     % back to original folder 
     
@@ -181,20 +183,20 @@ transfer.Channel        = 1;
 %% save datas :
 if SaveData == 1
     
-MainFolderName = 'D:\Data\JM\';
+MainFolderName = 'D:\Data\Mai\';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'AgarREF';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Volt',Volt);
+CommentName    = 'IrisClosed';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence);
 savefig(Hf,FileName);
 saveas(Hf,FileName,'png');
 
 switch TypeOfSequence
     case 'OF'
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
-              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','x','z','Datas','SampleRate','c','Range','TypeOfSequence');
+              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','x','z','Datas','SampleRate','c','Range','TypeOfSequence','t_aquisition');
     case 'OP'
-save(FileName,'Volt','Delay','FreqSonde','NbHemicycle','Alphas'...
-              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','x','z','Datas','SampleRate','c','Range','TypeOfSequence');
+save(FileName,'Volt','Delay','ActiveLIST','FreqSonde','NbHemicycle','Alphas'...
+              ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','x','z','Datas','SampleRate','c','Range','TypeOfSequence','t_aquisition');
 
           saveas(Hresconstruct,[FileName,'_retrop'],'png');
 end

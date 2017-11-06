@@ -51,13 +51,13 @@ ElmtBorns   = sort(ElmtBorns) ; % in case X0 and X1 are mixed up
 Nbtot = ElmtBorns(2) - ElmtBorns(1) + 1 ;
 
 
-Delay = zeros(length(AlphaM),NbElemts); %(µs)
+Delay = zeros(NbElemts,length(AlphaM)); %(µs)
 AlphaM = AlphaM*pi/180 ;
 
 for i = 1:length(AlphaM)
       
-    Delay(i,:) = 1000*(1/c)*tan(AlphaM(i))*(1:NbElemts)'*(pitch); %s
-    Delay(i,:) = Delay(i,:) - min(Delay(i,:));
+    Delay(:,i) = 1000*(1/c)*sin(AlphaM(i))*(1:NbElemts)'*(pitch); %s
+    Delay(:,i) = Delay(:,i) - min(Delay(:,i));
     
 end
 %  
@@ -67,10 +67,6 @@ end
 %     Delay(:,i) = Delay(:,i) + max(Delay(:));
 %     
 % end
-
-
-DlySmpl = round(Delay/dt_s); % conversion in steps
-
 
 
 % waveform
@@ -107,7 +103,7 @@ for nbs = 1:length(AlphaM)
     TXList{nbs} = remote.tx_arbitrary(...
                'txClock180MHz', 1 ,...   % sampling rate = { 0 ,1 } = > {'90 MHz', '180 MHz'}
                'twId',1,...              % {0 [1 Inf]} = {'no waveform', 'id of the waveform'},
-               'Delays',Delay(nbs,:),...
+               'Delays',Delay(:,nbs),...
                0);                      
     
     % Arbitrary TW
@@ -205,6 +201,9 @@ SEQ = usse.usse( ...
  
 % remoteGetUserSequence(SEQ.Server)
 % remoteGetStatus(SEQ.Server)
+
+% convert Delay matrix to us -> s
+Delay = Delay*1e-6;
 
  
  display('Remote OK');
