@@ -24,7 +24,7 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OF';
+        TypeOfSequence  = 'OP';
         Volt            = 50;
         FreqSonde       = 3;
         NbHemicycle     = 4;
@@ -37,7 +37,7 @@
         X0              = 10;
         X1              = 30;
         
-        NTrig           = 500;
+        NTrig           = 10;
         Prof            = 50;
         SaveData        = 1 ; % set to 1 to save
 
@@ -161,7 +161,9 @@ transfer.Channel        = 1;
 %     for i = 1:size(Delay,1)
 %       Z_m(i,:) =   -Delay(i,:)*c*1e-6 ;
 %     end
-    
+    [MconvX,MconvY] = meshgrid(-10:10,10:10);
+    Mconv = exp(-(MconvX.^2+MconvY.^2)/(2*5^2));
+    %conv2(Datas,Mconv,'same')
     MyImage = OP(Datas,Alphas,z,SampleRate*1e6,c) ;
     [I,z_out] = DataFiltering(MyImage) ;
 %     Xm = (1:system.probe.NbElemts)*(0.2e-3) ;

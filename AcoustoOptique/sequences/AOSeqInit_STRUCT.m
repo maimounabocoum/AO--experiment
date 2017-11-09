@@ -121,7 +121,10 @@ for ii = 1:length(US.FlatAngles)
             end
             
             figure(256+ll)
-            imagesc(squeeze(WF_mat(ll,ii,kk,:,:)))
+            % ll : phase
+            % ii : angle
+            % kk :
+            imagesc(squeeze(WF_mat(ll,ii,kk,:,:))) % matrix emission for all elements
             drawnow
             pause(0.1)
             
