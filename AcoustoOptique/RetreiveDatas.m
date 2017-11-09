@@ -1,8 +1,8 @@
 function datas = RetreiveDatas( raw , Ntrig, Nlines,MedElmtList)
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+% Retreiving average from raw datas
+%   Maïmouna Bocoum
 
-%% test to see o raw as the rigth number of coulumn :
+%% test to see o raw as the rigth number of column :
 if size(raw,2)~=Ntrig*Nlines
     datas = [];
     fprintf('wrong num of columns for input matrix')

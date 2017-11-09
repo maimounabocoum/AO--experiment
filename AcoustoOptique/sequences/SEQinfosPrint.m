@@ -32,7 +32,7 @@ function DurationTotal = SEQinfosPrint( SEQ )
      %imagesc(SEQ.InfoStruct.tx(i).waveform')
      shading interp
      view([0,90])
-     pause(0.2)
+     pause(1)
      drawnow
  end
  

@@ -22,24 +22,24 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-       TypeOfSequence = 'JM'; % 'OF' , 'JM'
+       TypeOfSequence = 'JM';   % 'OF' , 'JM'
  
-        Volt        = 15;     % 'OF' , 'OP' , 'JM'
-        FreqSonde   = 2;     % 'OF' , 'OP' , 'JM'
-        NbHemicycle = 250;   % 'OF' , 'OP' , 'JM'
-        Foc         = 23;    % 'OF' 
-        AlphaM      = 20;    % 'OP' 
-        dA          = 1;     % 'OP' 
-        X0          = 0;     % 'OF' , 'OP' 
-        X1          = 38 ;   % 'OF' , 'OP' 
-        NTrig       = 100;   % 'OF' , 'OP' , 'JM'
-        Prof        = 200;   % 'OF' , 'OP' , 'JM'
-        NbZ         = 8;     % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 4;     % 20 Nb de composantes de Fourier en X, 'JM'
-        DurationWaveform = 20;
+        Volt        = 15;       % 'OF' , 'OP' , 'JM'
+        FreqSonde   = 2;        % 'OF' , 'OP' , 'JM'
+        NbHemicycle = 250;      % 'OF' , 'OP' , 'JM'
+        Foc         = 23;       % 'OF' 
+        AlphaM      = 20;       % 'OP' 
+        dA          = 1;        % 'OP' 
+        X0          = 0;        % 'OF' , 'OP' 
+        X1          = 38 ;      % 'OF' , 'OP' 
+        NTrig       = 100;      % 'OF' , 'OP' , 'JM'
+        Prof        = 200;      % 'OF' , 'OP' , 'JM'
+        NbZ         = 8;        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = 4;        % 20 Nb de composantes de Fourier en X, 'JM'
+        DurationWaveform = 20;  % length in dimension x (us)
         
-        SaveData = 1 ;      % set to 1 to save data
-        AIXPLORER_Active = 'on'; % 'on' or 'off' 
+        SaveData = 1 ;          % set to 1 to save data
+        AIXPLORER_Active = 'on';% 'on' or 'off' 
 
  % estimation of loading time 
  fprintf('%i events, loading should take about %d seconds\n\r',(2*NbX+1)*NbZ,(2*NbX+1)*NbZ*3);
@@ -51,8 +51,10 @@ if strcmp(AIXPLORER_Active,'on')
     
 switch TypeOfSequence
     case 'OF'
+NbHemicycle = min(NbHemicycle,15);
 [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
     case 'OP'
+NbHemicycle = min(NbHemicycle,15);
 [SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'JM'
 Volt = min(Volt,20) ; 

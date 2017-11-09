@@ -3,19 +3,8 @@
 % ATTENTION !! Même si la séquence US n'écoute pas, il faut quand même
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
-function [SEQ,Delay,MedElmtList,ActiveLIST,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig)
+function [SEQ,Delay,ScanParam,ActiveLIST,AlphaM,dFx] = AOSeqInit_OS(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , dA , Nbx , X0 , X1 ,Prof, NTrig)
  clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
-
-
- 
-% user defined parameters :
-
-    ScanLength      = X1 - X0; % mm
-    
-% creation of vector for scan:       
-if dA > 0
-    AlphaM = sort(-abs(AlphaM):dA:abs(AlphaM));   % Planes waves angles (deg) 
-end
 
 %% System parameters import :
 % ======================================================================= %
@@ -33,48 +22,91 @@ PropagationTime        = Prof/c*1e3 ;   % 1 / pulse frequency repetition [us]
 TrigOut                = 10;            % µs
 Pause                  = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause duration in µs
 
-% ======================================================================= %
-%% Codage en arbitrary : delay matrix and waveform
-dt_s          = 1/(SampFreq);  % unit us
-pulseDuration = NbHemicycle*(0.5/f0) ; % US inital pulse duration in us
-
-
 
 
 % ======================================================================= %
-%% Codage en arbitrary : delay matrix and waveform
-% shooting elements 
+%% Update of Scanning parameters :
+
+Lx = (X1 - X0)*1e-3;       % m
+dFx = 1/Lx ;               % m^-1
+NbX = [1;1;1;1]*(Nbx);              % probed frequencies 
+
+
+% creation of vector for scan:       
+if dA > 0
+    AlphaM = sort(-abs(AlphaM):dA:abs(AlphaM));   % Planes waves angles (deg) 
+end
+
+
+[NX,ALPHA] = meshgrid([0;NbX(:)],AlphaM(:)) ;
+
+ScanParam = [ALPHA(:),NX(:)];
+Nscan = 4*length(AlphaM)*length(NbX) + 1 ; % +1 for 0 order
+
+% ======================================================================= %
+%% shooting elements initialization
+
+Ielements = 1:NbElemts ;
+Xelements = Ielements*(pitch*1e-3) ; % elements coordinated in m
+
 ElmtBorns   = [min(NbElemts,max(1,round(X0/pitch))),max(1,min(NbElemts,round(X1/pitch)))];
 ElmtBorns   = sort(ElmtBorns) ; % in case X0 and X1 are mixed up
 
+ActiveLIST = true(NbElemts,Nscan); 
 
-Nbtot = ElmtBorns(2) - ElmtBorns(1) + 1 ;
+for i_decimate = 1:length(NbX)
+
+    i_cos      = 4*i_decimate - 3 ;
+    i_ncos     = 4*i_decimate - 2 ;
+    i_sin      = 4*i_decimate - 1 ;
+    i_nsin     = 4*i_decimate - 0 ;
+    
+    I = 1:length(AlphaM)+1 ;
+    
+    Icos  = I + ( i_cos-1 )*length(AlphaM) ;  % index of column with same decimate
+    Incos = I + (i_ncos-1 )*length(AlphaM) ;  % index of column with same decimate
+    Isin  = I + (i_sin-1  )*length(AlphaM) ;  % index of column with same decimate
+    Insin = I + (i_nsin-1 )*length(AlphaM) ;  % index of column with same decimate
+    
+    ActiveLIST( : , Icos  )   = CalcMat_OS( Xelements , dFx*Nbx(i_decimate) , ActiveLIST(:,Icos) , 'cos' ) ;
+    ActiveLIST( : , Incos )   = ~ActiveLIST( : , Icos );
+    ActiveLIST( : , Isin  )   = CalcMat_OS( Xelements , dFx*Nbx(i_decimate) , ActiveLIST(:,Isin) , 'sin' ) ;
+    ActiveLIST( : , Insin )   = ~ActiveLIST( : , Isin );
+    
+end
+
+ActiveLIST(setdiff(Ielements,ElmtBorns(1):ElmtBorns(2)),:) = false ;
 
 
-Delay = zeros(NbElemts,length(AlphaM)); %(µs)
+
+% ======================================================================= %
+%% Codage en arbitrary : delay matrix and waveform
+dt_s          = 1/(SampFreq);           % unit us
+pulseDuration = NbHemicycle*(0.5/f0) ;  % US inital pulse duration in us
+
+
+
+
+% ======================================================================= %
+%% Codage en arbitrary : delay matrix and waveform
+
+Delay = zeros(NbElemts,Nscan); %(µs)
 AlphaM = AlphaM*pi/180 ;
 
 for i = 1:length(AlphaM)
-      
-    Delay(:,i) = 1000*(1/c)*sin(AlphaM(i))*(1:NbElemts)'*(pitch); %s
-    Delay(:,i) = Delay(:,i) - min(Delay(:,i));
+    Delay(:,i ) = 1000*(1/c)*sin(AlphaM(i))*(1:NbElemts)'*(pitch); %s
+    Delay(:,i ) = Delay(:,i ) - min(Delay(:,i));
     
 end
-%  
-% for i = 1:length(AlphaM)
-%     % setting absolute maximum delay for as reference for 0 angle ..?
-%     Delay(:,i) = Delay(:,i) - max(Delay(:,i)); 
-%     Delay(:,i) = Delay(:,i) + max(Delay(:));
-%     
-% end
 
-
-% waveform
+Delay = repmat( Delay(:,1:length(AlphaM)), 1 , Nscan/length(AlphaM) ) ;
+  
+%% Waveform Matrix for each piezo element
 T_Wf = 0:dt_s:pulseDuration;
 Wf = sin(2*pi*f0*T_Wf);
 N_T = length(Wf) ;
     
-WF_mat      = repmat(Wf,Nbtot,1);
+WF_mat      =  repmat(Wf,NbElemts,1);
 WF_mat_sign =  sign(WF_mat); % l'aixplorer code sur 3 niveaux [-1,0,1]
 
 
@@ -85,12 +117,18 @@ RX = remote.rx('fcId', 1, 'RxFreq', 60 , 'QFilter', 2, 'RxElemts', 0, 0);
 
 
 
-MedElmtList = 1:length(AlphaM); % list of shot ordering for angle scan (used to reconstruct image)
+% list of shot ordering for angle scan (used to reconstruct image)
 % define boolean matrix with the index of active actuators :
-ActiveLIST = false(NbElemts,length(AlphaM));
-ActiveLIST(ElmtBorns(1):ElmtBorns(2),:) = true ;
 
-for nbs = 1:length(AlphaM)
+%% remove empty shots which cause Aixplorer error:
+Iremove = find( sum(ActiveLIST,1) == 0 );
+
+ActiveLIST(:,Iremove) = [];
+Nscan = Nscan - length(Iremove) ;
+ScanParam(Iremove,:) = [] ;
+Delay(:,Iremove) = [] ;
+
+for nbs = 1:Nscan
     
     EvtDur   = ceil(pulseDuration + max(max(Delay)) + PropagationTime);   
        
@@ -107,14 +145,21 @@ for nbs = 1:length(AlphaM)
                0);                      
     
     % Arbitrary TW
+    figure(100)
+        imagesc(ActiveLIST(:,nbs))
+        xlabel('x (mm)')
+        ylabel('z(mm)')
+        drawnow
 
+
+       
     TWList{nbs} = remote.tw_arbitrary( ...
-        'Waveform',WF_mat_sign, ...
+        'Waveform',WF_mat_sign(ActiveLIST(:,nbs),:), ...
         'RepeatCH', 0, ...
         'repeat',0 , ...
         'repeat256', 0, ...
         'ApodFct', 'none', ...
-        'TxElemts',ElmtBorns(1):ElmtBorns(2), ...
+        'TxElemts',Ielements(ActiveLIST(:,nbs)), ...
         'DutyCycle', 1, ...
         0);
     
@@ -190,21 +235,16 @@ SEQ = usse.usse( ...
     'Popup', 0, ...         % enables the popups to control the sequence execution : {0,1}
     0);                     % debugg parameter
 
+% Convert Delay matrix to us -> s for data post processing
+Delay = Delay*1e-6;
+
+
+%%    Initialize remote on systems
 [SEQ NbAcq] = SEQ.buildRemote();
  display('Build OK')
  
-%%%    Do NOT CHANGE - Sequence execution 
-%%%    Initialize remote on systems
+
  SEQ = SEQ.initializeRemote('IPaddress',AixplorerIP);
- %SEQ.Server
- %SEQ.InfoStruct.event
- 
-% remoteGetUserSequence(SEQ.Server)
-% remoteGetStatus(SEQ.Server)
-
-% convert Delay matrix to us -> s
-Delay = Delay*1e-6;
-
  
  display('Remote OK');
 
