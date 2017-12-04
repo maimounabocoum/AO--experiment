@@ -1,6 +1,6 @@
 function [I,X,Z] = Reconstruct(NbX,NbZ,NUX,NUZ,x,z,Datas,SampleRate,durationWaveform,c,pitch)
 % all inputs are in SI units
-dx_fourier = abs(max(x) - min(x)) ;
+
 
         [NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
         Nfrequencymodes = length(NUX(:));
@@ -20,6 +20,10 @@ dx_fourier = abs(max(x) - min(x)) ;
                
         DecalZ  =   0.9; % ??
         NtF     =   2^10;
+        dF = diff(NUX(:)) ;
+        dF = min(dF(dF>0));
+        Fmax = (NtF/2)*dF;
+        dx = 1/abs(Fmax) ;
         
 % Variables
 
@@ -45,6 +49,6 @@ end
 I = ifft2(fftshift(tF));
 I = I - ones(NtF,1)*I(1,:);
 
-X = (0:NtF-1)*pitch*128/NtF;
+X = (-NtF/2:(NtF/2-1))*(192*pitch/(NtF-1));
 
 Z = (0:NtF-1)*durationWaveform*1.54/NtF;

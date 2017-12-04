@@ -11,11 +11,11 @@ Lx = (NbPixels*pitch);
 Lz = 30 ;
 nuZ0 = 2/Lx; % Pas fréquence spatiale en Z (en mm-1)
 nuX0 = 1/Lx;      % Pas fréquence spatiale en X (en mm-1)
-NbX = 4 ;
-NbZ = 5 ;
+NbX = 40 ;
+NbZ = 1 ;
 Fe = 180; % sampling frequency in MHz
 
-[NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
+[NBX,NBZ] = meshgrid(1:NbX,1);
 
 Nfrequencymodes = length(NBX(:));
 MedElmtList = 1:Nfrequencymodes ;

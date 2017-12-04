@@ -25,7 +25,7 @@
  addPathLegHAL;
  
         TypeOfSequence  = 'OS';
-        Volt            = 50;
+        Volt            = 40;
         FreqSonde       = 3;
         NbHemicycle     = 4;
         
@@ -35,15 +35,15 @@
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbX             = 1:5 ;     % 20 Nb de composantes de Fourier en X, 'JM'
+        NbX             = 1:30 ;     % 20 Nb de composantes de Fourier en X, 'JM'
         
         Foc             = 20;
-        X0              = 5;
-        X1              = 30;
+        X0              = -1; %5-25
+        X1              = 40;
         
-        NTrig           = 800;
+        NTrig           = 1200;
         Prof            = 50;
-        SaveData        = 0 ; % set to 1 to save
+        SaveData        = 1 ; % set to 1 to save
 
 
                  
@@ -58,11 +58,11 @@ Volt = min(50,Volt); % security for OP routine
 [SEQ,ScanParam] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
     case 'OP'
 Volt = min(50,Volt); % security for OP routine       
- [SEQ,Delay,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
+[SEQ,Delay,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
 %[SEQ,Delay,ScanParam,Alphas] = AOSeqInit_OP_arbitrary(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'OS'
- Volt = min(50,Volt); % security for OP routine     
-  [SEQ,Delay,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , NbX , X0 , X1 ,Prof, NTrig);
+Volt = min(50,Volt); % security for OP routine     
+[SEQ,Delay,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , NbX , X0 , X1 ,Prof, NTrig);
 
 end
 
@@ -185,16 +185,21 @@ transfer.Channel        = 1;
     %%  Fourier  Inversion :
     Hresconstruct = figure;
     set(Hresconstruct,'WindowStyle','docked');
+     
+%     [MconvX,MconvY] = meshgrid(-10:10,10:10);
+%     Mconv = exp(-(MconvX.^2+MconvY.^2)/(2*0.5^2));
+    % conv2(Datas,Mconv,'same')
+    
     MyImage = OS(Datas,ScanParam(:,1),ScanParam(:,2),...
                  dFx,z,SampleRate*1e6,c) ; 
          
     MyImage.F_R = MyImage.fourierz( MyImage.R ) ;   
     [MyImage.F_R, MyImage.theta,MyImage.decimation] = MyImage.AddSinCos(MyImage.F_R) ;
     FTF = MyImage.GetFourier(MyImage.F_R,MyImage.decimation ) ;
-    %figure; imagesc(MyImage.fx,MyImage.fz,abs(FTF) );   
+    %figure; imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(FTF) );   
     
     OriginIm = MyImage.ifourier(FTF) ;
-    imagesc(MyImage.x*1e3 + mean([X0,X1]),MyImage.z*1e3,abs(OriginIm));
+    imagesc(MyImage.x*1e3 + mean([X0,X1]),MyImage.z*1e3,fftshift(abs(OriginIm),2));
     ylim([0 Prof])
     xlabel('x(mm)')
     ylabel('z(mm)')
@@ -217,7 +222,7 @@ if SaveData == 1
     
 MainFolderName = 'D:\Data\Mai\';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'IrisClosed';
+CommentName    = 'Ref';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence);
 savefig(Hf,FileName);
 saveas(Hf,FileName,'png');
@@ -229,8 +234,12 @@ save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
     case 'OP'
 save(FileName,'Volt','Delay','ActiveLIST','FreqSonde','NbHemicycle','Alphas'...
               ,'X0','X1','NTrig','Nlines','Prof','ScanParam','x','z','Datas','SampleRate','c','Range','TypeOfSequence','t_aquisition');
+saveas(Hresconstruct,[FileName,'_retrop'],'png');
+    case 'OS'
+save(FileName,'Volt','Delay','ActiveLIST','FreqSonde','NbHemicycle','Alphas','NbX','dFx'...
+                  ,'X0','X1','NTrig','Nlines','Prof','ScanParam','x','z','Datas','SampleRate','c','Range','TypeOfSequence','t_aquisition');
 
-          saveas(Hresconstruct,[FileName,'_retrop'],'png');
+saveas(Hresconstruct,[FileName,'_ifft'],'png');
 end
 
 

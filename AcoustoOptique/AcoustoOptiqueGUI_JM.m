@@ -203,7 +203,8 @@ transfer.Channel        = 1;
 
        Hfinal = figure(101);
        set(Hfinal,'WindowStyle','docked');
-       imagesc(X,Z,I);
+       imagesc(X*1e3+mean([X0 X1]),Z,I);
+       xlim([5 35])
        title('reconstructed image')
        xlabel('x (mm)')
        ylabel('z (mm)')

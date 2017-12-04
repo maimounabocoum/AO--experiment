@@ -61,7 +61,7 @@ for i_decimate = 1:length(NbX)
     i_sin      = 4*i_decimate - 1 ;
     i_nsin     = 4*i_decimate - 0 ;
     
-    I = 1:length(AlphaM)+1 ;
+    I = (1:length(AlphaM)) + 1 ;
     
     Icos  = I + ( i_cos-1 )*length(AlphaM) ;  % index of column with same decimate
     Incos = I + (i_ncos-1 )*length(AlphaM) ;  % index of column with same decimate
