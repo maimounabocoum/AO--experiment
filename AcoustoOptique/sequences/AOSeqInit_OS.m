@@ -41,7 +41,7 @@ end
 [NX,ALPHA] = meshgrid([0;NbX(:)],AlphaM(:)) ;
 
 ScanParam = [ALPHA(:),NX(:)];
-Nscan = 4*length(AlphaM)*length(NbX) + 1 ; % +1 for 0 order
+Nscan = 4*length(AlphaM)*length(Nbx) + 1 ; % +1 for 0 order
 
 % ======================================================================= %
 %% shooting elements initialization
@@ -54,7 +54,7 @@ ElmtBorns   = sort(ElmtBorns) ; % in case X0 and X1 are mixed up
 
 ActiveLIST = true(NbElemts,Nscan); 
 
-for i_decimate = 1:length(NbX)
+for i_decimate = 1:length(Nbx)
 
     i_cos      = 4*i_decimate - 3 ;
     i_ncos     = 4*i_decimate - 2 ;
@@ -146,7 +146,7 @@ for nbs = 1:Nscan
     
     % Arbitrary TW
     figure(100)
-        imagesc(ActiveLIST(:,nbs))
+        imagesc(ActiveLIST(:,nbs)')
         xlabel('x (mm)')
         ylabel('z(mm)')
         drawnow

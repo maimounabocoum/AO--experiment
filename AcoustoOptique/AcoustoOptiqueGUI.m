@@ -26,8 +26,8 @@
  
         TypeOfSequence  = 'OS';
         Volt            = 40;
-        FreqSonde       = 3;
-        NbHemicycle     = 4;
+        FreqSonde       = 6;
+        NbHemicycle     = 1;
         
         
         AlphaM          = 0;
@@ -35,15 +35,15 @@
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbX             = 1:30 ;     % 20 Nb de composantes de Fourier en X, 'JM'
+        NbX             = 1:20 ;     % 20 Nb de composantes de Fourier en X, 'JM'
         
-        Foc             = 20;
-        X0              = -1; %5-25
-        X1              = 40;
+        Foc             = 28;
+        X0              = 0; %10-25
+        X1              = 38;
         
-        NTrig           = 1200;
-        Prof            = 50;
-        SaveData        = 1 ; % set to 1 to save
+        NTrig           = 200;
+        Prof            = 40;
+        SaveData        = 0 ; % set to 1 to save
 
 
                  
@@ -142,7 +142,7 @@ transfer.Channel        = 1;
         case 'OF'
     Datas = RetreiveDatas(raw,NTrig,Nlines,ScanParam);
     z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
-    x = ScanParam*system.probe.Pitch;
+
     imagesc(x,z,1e3*Datas)
     xlabel('x (mm)')
     ylabel('z (mm)')
@@ -181,7 +181,8 @@ transfer.Channel        = 1;
         case 'OS'
     Datas = RetreiveDatas(raw,NTrig,Nlines,1:size(ScanParam,1));
     z = (1:actual.ActualLength)*(c/(1e6*SampleRate));
-    imagesc(Alphas*180/pi,z*1e3,1e3*Datas)   
+    x = ScanParam*system.probe.Pitch;
+    imagesc(1:size(Datas,2),z*1e3,1e3*Datas)   
     %%  Fourier  Inversion :
     Hresconstruct = figure;
     set(Hresconstruct,'WindowStyle','docked');
@@ -220,10 +221,10 @@ transfer.Channel        = 1;
 %% save datas :
 if SaveData == 1
     
-MainFolderName = 'D:\Data\Mai\';
+MainFolderName = 'D:\Data\Francois\';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'Ref';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence);
+CommentName    = 'Vertical';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Noop',1500);
 savefig(Hf,FileName);
 saveas(Hf,FileName,'png');
 
@@ -237,7 +238,7 @@ save(FileName,'Volt','Delay','ActiveLIST','FreqSonde','NbHemicycle','Alphas'...
 saveas(Hresconstruct,[FileName,'_retrop'],'png');
     case 'OS'
 save(FileName,'Volt','Delay','ActiveLIST','FreqSonde','NbHemicycle','Alphas','NbX','dFx'...
-                  ,'X0','X1','NTrig','Nlines','Prof','ScanParam','x','z','Datas','SampleRate','c','Range','TypeOfSequence','t_aquisition');
+                  ,'X0','X1','NTrig','Nlines','Prof','ScanParam','z','Datas','SampleRate','c','Range','TypeOfSequence','t_aquisition');
 
 saveas(Hresconstruct,[FileName,'_ifft'],'png');
 end
