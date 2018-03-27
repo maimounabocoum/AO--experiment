@@ -6,7 +6,7 @@
 % Last modified : maimouna bocoum
 
 %============================== Init program ======================
-
+% 
 %  clear all; close all; clc
 %  w = instrfind; if ~isempty(w) fclose(w); delete(w); end
 %  clear all;
@@ -32,23 +32,23 @@ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 % SEQ = remoteGetUserSequence(SRV);
 %=======================  US Parameters =====================
 
-Volt        = 35; % V
-FreqSonde   = 6;  % MHz
-NbHemicycle = 5;
+Volt        = 30; % V
+FreqSonde   = 3;  % MHz
+NbHemicycle = 100;
 X0          = 15;   % mm
-Foc         = 12;   % mm
-NTrig       = 1000; %1000
-Prof        = 50;  % mm 800 gain
+Foc         = 99;   % mm
+NTrig       = 5; %1000
+Prof        = 40;  % mm 800 gain
 
 %%====================== Parameters loop
-Nloop = 30;
+Nloop = 300;
 
 %-----------------------------------------------------------
 %% Gage Init parmaters
 %----------------------------------------------------------------------
 Range = 1; % V
 SampleRate = 10; % MHz
-GageActive = 'on'; % 'on' or 'off' 
+GageActive = 'off'; % 'on' or 'off' 
 AIXPLORER_Active = 'on'; % 'on' or 'off' 
 
 
@@ -89,6 +89,7 @@ for k = 1:Nloop
    
     switch AIXPLORER_Active
     case 'on'
+        %%
     SEQ = SEQ.startSequence('Wait',0);
     close;
     end

@@ -24,10 +24,10 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OS';
-        Volt            = 40;
-        FreqSonde       = 6;
-        NbHemicycle     = 1;
+        TypeOfSequence  = 'OP';
+        Volt            = 30;
+        FreqSonde       = 3;
+        NbHemicycle     = 250;
         
         
         AlphaM          = 0;
@@ -37,11 +37,11 @@
         % integer list > 0
         NbX             = 1:20 ;     % 20 Nb de composantes de Fourier en X, 'JM'
         
-        Foc             = 28;
+        Foc             = 20;
         X0              = 0; %10-25
         X1              = 38;
         
-        NTrig           = 200;
+        NTrig           = 3;
         Prof            = 40;
         SaveData        = 0 ; % set to 1 to save
 
@@ -142,7 +142,7 @@ transfer.Channel        = 1;
         case 'OF'
     Datas = RetreiveDatas(raw,NTrig,Nlines,ScanParam);
     z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
-
+    x = ScanParam*system.probe.Pitch;
     imagesc(x,z,1e3*Datas)
     xlabel('x (mm)')
     ylabel('z (mm)')
@@ -221,7 +221,7 @@ transfer.Channel        = 1;
 %% save datas :
 if SaveData == 1
     
-MainFolderName = 'D:\Data\Francois\';
+MainFolderName = 'D:\Data\Mai\';
 SubFolderName  = generateSubFolderName(MainFolderName);
 CommentName    = 'Vertical';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Noop',1500);
