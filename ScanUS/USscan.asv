@@ -1,0 +1,49 @@
+classdef USscan
+    %UNTITLED6 Summary of this class goes here
+    %   Detailed explanation goes here
+    
+    properties
+        x       % scanning vector
+        y       % scanning vector
+        z       % scanning vector
+        Positions
+        Nscans
+        Naverage       % averaging per position
+        Npoints        % Number of points / aquisition line
+        
+        Datas
+    end
+    
+    methods
+        function obj =  USscan(x,y,z,Naverage,Npoints)
+            % initialisation of properties
+            obj.x = x ;
+            obj.y = y ;
+            obj.z = z ;
+            [X,Y,Z] = meshgrid(x,y,z);
+            
+            % switch even values from matrix
+            X
+            
+            X_increase = x(:) ;
+            X_decrease = flipud(x(:));
+            
+            % snale order for scan
+            obj.Positions = [X(:),Y(:),Z(:)];
+            
+            
+            obj.Naverage = Naverage ;
+            obj.Npoints  = Npoints  ;
+            
+            % empty Data inituialization
+            Nx = max(length(x),1);
+            Ny = max(length(y),1);
+            Nz = max(length(z),1);
+            obj.Nscans = Nx*Ny*Nz ;
+            obj.Datas = zeros(obj.Npoints,obj.Nscans) ;
+        end
+
+    end
+    
+end
+
