@@ -44,9 +44,9 @@
 if strcmp(AIXPLORER_Active,'on')
     switch TypeOfSequence
         case 'OF'
-    [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
+    [SEQ,MedElmtList] = AOSeqInit_OFL(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
         case 'OP'
-    [SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
+    [SEQ,MedElmtList,AlphaM] = AOSeqInit_OPL(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
         case 'JM'
     Volt = min(Volt,15) ; 
     [SEQ,MedElmtList,NUX,NUZ] = AOSeqInit_OJML(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);

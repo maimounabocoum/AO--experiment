@@ -1,7 +1,7 @@
-function PolluxDepRel(controller,axe,d)
+function PolluxDepRel(controller,pos,MyMotor)
 
-fprintf(controller,[num2str(d,'%2.2f') ' ' num2str(axe) ' nr']);
+fprintf(controller,[num2str(pos,'%2.4f') ' ' MyMotor ' nr']);
 
-PolluxWaitToFinish(controller,axe)
+PolluxWaitToFinish(controller,MyMotor)
 
 end

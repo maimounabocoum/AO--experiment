@@ -10,35 +10,62 @@ classdef USscan
         Nscans
         Naverage       % averaging per position
         Npoints        % Number of points / aquisition line
+
         
         Datas
     end
     
     methods
-        function obj =  USscan(x,y,z,Naverage,Npoints)
+        function obj =  USscan(x,y,z,Naverage,Npoints,Nevents)
+            
+            
             
             % empty Data inituialization
             Nx = max(length(x),1);
             Ny = max(length(y),1);
             Nz = max(length(z),1);
             obj.Nscans = Nx*Ny*Nz ;
+
             
             % initialisation of properties
             obj.x = x ;
             obj.y = y ;
             obj.z = z ;
-            x = 0:1:2  ; % horizontal axis (1)
-            y = 0:1:2  ;  
-            z = 0:2;    % vertical axis   (2)
-            [X,Y,Z] = meshgrid(x,y,z);
-            test =[X(:),Y(:),Z(:)]
+
+           
             
-            % switch even values from matrix
+                
+            %making plan (X,Y) scan
+            if mod(Ny,2)==0
+                % parity
+            X = repmat([x(:);flipud(x(:))], Ny/2 , 1 )  ;
+            Y = repmat(y(:)',Nx,1);
+            XY = [X(:),Y(:)] ;
             
-            % snale order for scan
-            obj.Positions = [X(:),Y(:),Z(:)];
+            else
+
+            X = [ x(:) ; repmat( [flipud(x(:)) ; x(:) ], (Ny-1)/2 , 1 ) ]  ;
+            Y = repmat(y(:)',Nx,1);
+            XY = [X(:),Y(:)] ; 
+            
+            end
+            
+            % making full (X,Y,Z) box
+            if mod(Nz,2)==0
+            
+                XYZ = repmat( [XY;flipud(XY)] , Nz/2 , 1 );
+                Z = repmat(z(:)',Nx*Ny,1);
+                XYZ = [XYZ,Z(:)];
+                
+            else
+                XYZ = [ XY ; repmat( [flipud(XY);XY] , (Nz-1)/2 , 1 ) ];
+                Z = repmat(z(:)',Nx*Ny,1);
+                XYZ = [XYZ,Z(:)];               
+                
+            end
             
             
+            obj.Positions = XYZ ;
             obj.Naverage = Naverage ;
             obj.Npoints  = Npoints  ;
             
