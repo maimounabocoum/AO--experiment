@@ -22,7 +22,7 @@ function DurationTotal = SEQinfosPrint( SEQ )
  figure;
  clear T_waveform
  dt_s = 1/(system.hardware.ClockFreq);
- for i = 1:length(SEQ.InfoStruct.tx)
+ for i = 1%:length(SEQ.InfoStruct.tx)
      delay_waveform = 0 ;
      t_waveform = (1:size(SEQ.InfoStruct.tx(i).waveform,1))*dt_s;
      Nelement = 1:size(SEQ.InfoStruct.tx(i).waveform,2);

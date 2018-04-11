@@ -29,7 +29,7 @@ Pause                  = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause 
 
 Lx = (X1 - X0)*1e-3;       % m
 dFx = 1/Lx ;               % m^-1
-NbX = [1;1;1;1]*(Nbx);              % probed frequencies 
+NbX = [1;1;1;1]*(Nbx);     % probed frequencies 
 
 
 % creation of vector for scan:       
@@ -51,6 +51,7 @@ Xelements = Ielements*(pitch*1e-3) ; % elements coordinated in m
 
 ElmtBorns   = [min(NbElemts,max(1,round(X0/pitch))),max(1,min(NbElemts,round(X1/pitch)))];
 ElmtBorns   = sort(ElmtBorns) ; % in case X0 and X1 are mixed up
+XMiddle  = mean(ElmtBorns)*(pitch*1e-3);
 
 ActiveLIST = true(NbElemts,Nscan); 
 
@@ -68,9 +69,9 @@ for i_decimate = 1:length(Nbx)
     Isin  = I + (i_sin-1  )*length(AlphaM) ;  % index of column with same decimate
     Insin = I + (i_nsin-1 )*length(AlphaM) ;  % index of column with same decimate
     
-    ActiveLIST( : , Icos  )   = CalcMat_OS( Xelements , dFx*Nbx(i_decimate) , ActiveLIST(:,Icos) , 'cos' ) ;
+    ActiveLIST( : , Icos  )   = CalcMat_OS( Xelements-XMiddle , dFx*Nbx(i_decimate) , ActiveLIST(:,Icos) , 'cos' ) ;
     ActiveLIST( : , Incos )   = ~ActiveLIST( : , Icos );
-    ActiveLIST( : , Isin  )   = CalcMat_OS( Xelements , dFx*Nbx(i_decimate) , ActiveLIST(:,Isin) , 'sin' ) ;
+    ActiveLIST( : , Isin  )   = CalcMat_OS( Xelements-XMiddle , dFx*Nbx(i_decimate) , ActiveLIST(:,Isin) , 'sin' ) ;
     ActiveLIST( : , Insin )   = ~ActiveLIST( : , Isin );
     
 end
