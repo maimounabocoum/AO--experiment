@@ -5,69 +5,19 @@
 %% addpath and parameter for wave sequences :
 % ======================================================================= %
 
-% adresse Bastille : '192.168.0.20'
-% adresse Jussieu :  '192.168.1.16'
 
- AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
- % path at Jussieu :
- if strcmp(AixplorerIP,'192.168.1.16')
- addpath('D:\AO---softwares-and-developpement\radon inversion\shared functions folder')
- end
- % path at Bastille :
- if strcmp(AixplorerIP,'192.168.0.20')
- addpath('D:\GIT\AO---softwares-and-developpement\radon inversion\shared functions folder');
- end
- 
- addpath('sequences');
- addpath('subfunctions');
- addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
- addpath('D:\_legHAL_Marc')
- addPathLegHAL;
- 
-        TypeOfSequence  = 'OS';
+
+
         Volt            = 40;
         FreqSonde       = 3;
         NbHemicycle     = 4;
         
         
-        AlphaM          = 0;
-        dA              = 0;
-        
-        % the case NbX = 0 is automatically generated, so NbX should be an
-        % integer list > 0
-        NbX             = 1:10 ;     % 20 Nb de composantes de Fourier en X, 'JM'
-        
-        Foc             = 25;
-        X0              = 0; %10-25
-        X1              = 38;
-        
-        NTrig           = 800;
-        Prof            = 40;
         SaveData        = 1 ; % set to 1 to save
 
 
-                 
 
-%% ============================   Initialize AIXPLORER
-% %% Sequence execution
-% % ============================================================================ %
-clear SEQ ScanParam raw Datas ActiveLIST Alphas Delay Z_m
-switch TypeOfSequence
-    case 'OF'
-Volt = min(50,Volt); % security for OP routine  
-[SEQ,ScanParam] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
-    case 'OP'
-Volt = min(50,Volt); % security for OP routine       
-[SEQ,Delay,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
-%[SEQ,Delay,ScanParam,Alphas] = AOSeqInit_OP_arbitrary(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
-    case 'OS'
-Volt = min(50,Volt); % security for OP routine     
-[SEQ,Delay,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , NbX , X0 , X1 ,Prof, NTrig);
-
-end
-
-
-c = common.constants.SoundSpeed ; % sound velocity in m/s
+c = 1450 ; % sound velocity in m/s
                     
 %%  ========================================== Init Gage ==================
 % Possible return values for status are:
@@ -75,8 +25,8 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
 %   1 = Waiting for trigger event
 %   2 = Triggered but still busy acquiring
 %   3 = Data transfer is in progress
-     SampleRate    =   10;
-     Range         =   1;
+     SampleRate    =   10; %MHz
+     Range         =   1;  %+/-1V
      GageActive = 'on' ; % 'on' to activate external trig, 'off' : will trig on timout value
      
  Nlines = length(SEQ.InfoStruct.event);    
@@ -181,8 +131,15 @@ transfer.Channel        = 1;
         case 'OS'
      Datas = RetreiveDatas(raw,NTrig,Nlines,1:size(ScanParam,1));
      z = (1:actual.ActualLength)*(c/(1e6*SampleRate));
-     x = ScanParam*system.probe.Pitch;
-    imagesc(1:size(Datas,2),z*1e3,1e3*Datas)   
+     x = ScanParam(:,2);
+    imagesc(x,z*1e3,1e3*Datas)   
+    xlabel('order N_x')
+    zlabel('z(mm)')
+    cb = colorbar;
+    ylabel(cb,'AC tension (mV)')
+    colormap(parula)
+    set(findall(Hf,'-property','FontSize'),'FontSize',15) 
+    
     %  Fourier  Inversion :
     Hresconstruct = figure;
     set(Hresconstruct,'WindowStyle','docked');
@@ -200,7 +157,7 @@ transfer.Channel        = 1;
     %figure; imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(FTF) );   
     
     OriginIm = MyImage.ifourier(FTF) ;
-    imagesc(MyImage.x*1e3 + mean([X0,X1]),MyImage.z*1e3,fftshift(abs(OriginIm),2));
+    imagesc(MyImage.x*1e3 + mean([X0,X1]),MyImage.z*1e3,real(OriginIm));
     ylim([0 Prof])
     xlabel('x(mm)')
     ylabel('z(mm)')

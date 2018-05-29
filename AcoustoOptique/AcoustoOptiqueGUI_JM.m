@@ -35,7 +35,7 @@
         NTrig       = 100;      % 'OF' , 'OP' , 'JM'
         Prof        = 200;      % 'OF' , 'OP' , 'JM'
         NbZ         = 3;        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 5;        % 20 Nb de composantes de Fourier en X, 'JM'
+        NbX         = 0;        % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;  % length in dimension x (us)
         
         SaveData = 1 ;          % set to 1 to save data

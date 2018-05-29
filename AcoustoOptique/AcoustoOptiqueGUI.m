@@ -24,18 +24,18 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OS';
+        TypeOfSequence  = 'OP';
         Volt            = 40;
         FreqSonde       = 3;
         NbHemicycle     = 4;
         
         
-        AlphaM          = 0;
-        dA              = 0;
+        AlphaM          = 20;
+        dA              = 1;
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbX             = 1:1 ;     % 20 Nb de composantes de Fourier en X, 'JM'
+        NbX             = 1:5:10 ;     % 20 Nb de composantes de Fourier en X, 'JM'
         
         Foc             = 25;
         X0              = 0; %10-25

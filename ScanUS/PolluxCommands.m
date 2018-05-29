@@ -34,7 +34,7 @@ SetVelocity(Controller,4,'2'); % not working ??
 SetZeroHere(Controller,'1')
 
 % absolute move
-PolluxDepAbs(Controller,80,'1')
+PolluxDepAbs(Controller,80,'2')
 
 % relative move
 PolluxDepRel(Controller,-5,'2')
@@ -60,7 +60,6 @@ SetLimitRange(Controller,0,70,'2')
 % emmergency stop motion
 StopMotion(Controller,'1')
 StopMotion(Controller,'2')
-
 
 
 
