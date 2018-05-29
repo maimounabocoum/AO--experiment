@@ -3,7 +3,7 @@
 % ATTENTION !! Même si la séquence US n'écoute pas, il faut quand même
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
-function [SEQ,Delay,ScanParam,ActiveLIST,AlphaM,dFx] = AOSeqInit_OS(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , dA , Nbx , X0 , X1 ,Prof, NTrig)
+function [SEQ,Delay,ScanParam,ActiveLIST,AlphaM,dFx] = AOSeqInit_OS(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , Nbx , X0 , X1 ,Prof, NTrig)
  clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
 %% System parameters import :
@@ -29,19 +29,18 @@ Pause                  = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause 
 
 Lx = (X1 - X0)*1e-3;       % m
 dFx = 1/Lx ;               % m^-1
+
+if ~isempty(Nbx)
 NbX = [1;1;1;1]*(Nbx);     % probed frequencies 
-
-
-% creation of vector for scan:       
-if dA > 0
-    AlphaM = sort(-abs(AlphaM):dA:abs(AlphaM));   % Planes waves angles (deg) 
+else
+NbX = [];
 end
 
-
+% creation of vector for scan:       
 [NX,ALPHA] = meshgrid([0;NbX(:)],AlphaM(:)) ;
 
 ScanParam = [ALPHA(:),NX(:)];
-Nscan = 4*length(AlphaM)*length(Nbx) + 1 ; % +1 for 0 order
+Nscan = 4*length(AlphaM)*length(Nbx) + length(AlphaM) ; % + 1 for 0 order
 
 % ======================================================================= %
 %% shooting elements initialization
@@ -62,16 +61,16 @@ for i_decimate = 1:length(Nbx)
     i_sin      = 4*i_decimate - 1 ;
     i_nsin     = 4*i_decimate - 0 ;
     
-    I = (1:length(AlphaM)) + 1 ;
+    I = (1:length(AlphaM)) + length(AlphaM) ;
     
     Icos  = I + ( i_cos-1 )*length(AlphaM) ;  % index of column with same decimate
     Incos = I + (i_ncos-1 )*length(AlphaM) ;  % index of column with same decimate
     Isin  = I + (i_sin-1  )*length(AlphaM) ;  % index of column with same decimate
     Insin = I + (i_nsin-1 )*length(AlphaM) ;  % index of column with same decimate
     
-    ActiveLIST( : , Icos  )   = CalcMat_OS( Xelements-XMiddle , dFx*Nbx(i_decimate) , ActiveLIST(:,Icos) , 'cos' ) ;
+    ActiveLIST( : , Icos  )   = CalcMat_OS( Xelements - XMiddle , dFx*Nbx(i_decimate) , ActiveLIST(:,Icos) , 'cos' ) ;
     ActiveLIST( : , Incos )   = ~ActiveLIST( : , Icos );
-    ActiveLIST( : , Isin  )   = CalcMat_OS( Xelements-XMiddle , dFx*Nbx(i_decimate) , ActiveLIST(:,Isin) , 'sin' ) ;
+    ActiveLIST( : , Isin  )   = CalcMat_OS( Xelements - XMiddle , dFx*Nbx(i_decimate) , ActiveLIST(:,Isin) , 'sin' ) ;
     ActiveLIST( : , Insin )   = ~ActiveLIST( : , Isin );
     
 end
@@ -92,7 +91,6 @@ pulseDuration = NbHemicycle*(0.5/f0) ;  % US inital pulse duration in us
 %% Codage en arbitrary : delay matrix and waveform
 
 Delay = zeros(NbElemts,Nscan); %(µs)
-AlphaM = AlphaM*pi/180 ;
 
 for i = 1:length(AlphaM)
     Delay(:,i ) = 1000*(1/c)*sin(AlphaM(i))*(1:NbElemts)'*(pitch); %s
@@ -147,10 +145,13 @@ for nbs = 1:Nscan
     
     % Arbitrary TW
     figure(100)
+    subplot(121)
         imagesc(ActiveLIST(:,nbs)')
         xlabel('x (mm)')
         ylabel('z(mm)')
-        drawnow
+        subplot(122)
+        plot(Delay(:,nbs))
+     drawnow
 
 
        

@@ -24,25 +24,25 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OP';
+        TypeOfSequence  = 'OS';
         Volt            = 40;
         FreqSonde       = 3;
-        NbHemicycle     = 4;
+        NbHemicycle     = 5;
         
         
-        AlphaM          = 20;
-        dA              = 1;
+        AlphaM          = (-20:20)*pi/180;
+
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbX             = 1:5:10 ;     % 20 Nb de composantes de Fourier en X, 'JM'
+        NbX             = [1:10] ;     % 20 Nb de composantes de Fourier en X, 'OS'
         
-        Foc             = 25;
-        X0              = 0; %10-25
-        X1              = 38;
+        Foc             = 30;
+        X0              = 10; %10-25
+        X1              = 30;
         
-        NTrig           = 800;
-        Prof            = 40;
+        NTrig           = 10;
+        Prof            = 45;
         SaveData        = 1 ; % set to 1 to save
 
 
@@ -58,11 +58,11 @@ Volt = min(50,Volt); % security for OP routine
 [SEQ,ScanParam] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
     case 'OP'
 Volt = min(50,Volt); % security for OP routine       
-[SEQ,Delay,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
+[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof, NTrig);
 %[SEQ,Delay,ScanParam,Alphas] = AOSeqInit_OP_arbitrary(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'OS'
 Volt = min(50,Volt); % security for OP routine     
-[SEQ,Delay,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , NbX , X0 , X1 ,Prof, NTrig);
+[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , NbX , X0 , X1 ,Prof, NTrig);
 
 end
 
@@ -96,7 +96,7 @@ transfer.Channel        = 1;
  
     %% ======================== start acquisition =============================
     %SEQinfosPrint( SEQ )        % printout SEQ infos
-    SEQ = SEQ.stopSequence('Wait', 1);
+    SEQ = SEQ.stopSequence('Wait', 0);
     
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
@@ -132,7 +132,7 @@ transfer.Channel        = 1;
     
     CsMl_ErrorHandler(ret, 1, Hgage);
     
-    SEQ = SEQ.stopSequence('Wait', 1);  
+    SEQ = SEQ.stopSequence('Wait', 0);  
     
     %% ======================== data post processing =============================
     Hf = figure;
@@ -144,6 +144,7 @@ transfer.Channel        = 1;
     z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
     x = ScanParam*system.probe.Pitch;
     imagesc(x,z,1e3*Datas)
+    ylim([0 Prof])
     xlabel('x (mm)')
     ylabel('z (mm)')
     title('Averaged raw datas')
@@ -163,23 +164,31 @@ transfer.Channel        = 1;
     colormap(parula)
     set(findall(Hf,'-property','FontSize'),'FontSize',15) 
     %%  Radon inversion :
-    Hresconstruct = figure;
-    set(Hresconstruct,'WindowStyle','docked');
-    [MconvX,MconvY] = meshgrid(-10:10,10:10);
-    Mconv = exp(-(MconvX.^2+MconvY.^2)/(2*5^2));
+
+%     [MconvX,MconvY] = meshgrid(-10:10,10:10);
+%     Mconv = exp(-(MconvX.^2+MconvY.^2)/(2*5^2));
     %conv2(Datas,Mconv,'same')
     MyImage = OP(Datas,Alphas,z,SampleRate*1e6,c) ;
     [I,z_out] = DataFiltering(MyImage) ;
 %     Xm = (1:system.probe.NbElemts)*(0.2e-3) ;
-    Xm = (1:system.probe.NbElemts)*(system.probe.Pitch*1e-3) ;
-    [theta,M0,X0,Z0] = EvalDelayLaw_shared(Xm,Delay,ActiveLIST,c);   
+    X_m = (1:system.probe.NbElemts)*(system.probe.Pitch*1e-3) ;
+    [theta,M0,X0,Z0] = EvalDelayLaw_shared(X_m,DelayLAWS,ActiveLIST,c); 
+
+    Hresconstruct = figure;
+    set(Hresconstruct,'WindowStyle','docked');
+    Ireconstruct = Retroprojection_shared(I , X_m , z_out ,theta ,M0,Hresconstruct);
+    ylim([0 Prof])
+    cb = colorbar;
+    ylabel(cb,'a.u')
+    colormap(parula)
+    set(findall(Hresconstruct,'-property','FontSize'),'FontSize',15) 
     
-    Retroprojection_shared(I , Xm , z_out ,theta ,M0,Hresconstruct);
     % RetroProj_cleaned(Alphas,Datas,SampleRate*1e6);
     % back to original folder 
     
         case 'OS'
      Datas = RetreiveDatas(raw,NTrig,Nlines,1:size(ScanParam,1));
+     X_m = (1:system.probe.NbElemts)*(system.probe.Pitch*1e-3) ;
      z = (1:actual.ActualLength)*(c/(1e6*SampleRate));
      x = ScanParam(:,2);
     imagesc(x,z*1e3,1e3*Datas)   
@@ -190,30 +199,40 @@ transfer.Channel        = 1;
     colormap(parula)
     set(findall(Hf,'-property','FontSize'),'FontSize',15) 
     
-    %  Fourier  Inversion :
-    Hresconstruct = figure;
-    set(Hresconstruct,'WindowStyle','docked');
-     
+
 %     [MconvX,MconvY] = meshgrid(-10:10,10:10);
 %     Mconv = exp(-(MconvX.^2+MconvY.^2)/(2*0.5^2));
     % conv2(Datas,Mconv,'same')
     
     MyImage = OS(Datas,ScanParam(:,1),ScanParam(:,2),...
-                 dFx,z,SampleRate*1e6,c) ; 
+                 dFx,z,SampleRate*1e6,c,[X0 X1]*1e-2) ; 
          
     MyImage.F_R = MyImage.fourierz( MyImage.R ) ;   
-    [MyImage.F_R, MyImage.theta,MyImage.decimation] = MyImage.AddSinCos(MyImage.F_R) ;
-    FTF = MyImage.GetFourier(MyImage.F_R,MyImage.decimation ) ;
-    %figure; imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(FTF) );   
+    FILTER = MyImage.GetFILTER(2e-3);
+    MyImage.R   = MyImage.ifourierz((MyImage.F_R).*FILTER) ;
     
-    OriginIm = MyImage.ifourier(FTF) ;
+    [FTFx, ~  , decimation ] = MyImage.AddSinCos(MyImage.R) ;
+   
+    % resolution par iradon
+    % FTF = MyImage.GetAngles(MyImage.R , decimation , theta ) ;
+    DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
+    ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
+    %figure; imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(FTF) );   
+    [theta,M0,~,~,C]    = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , c) ;
+    close(gcf)
+    
+    OriginIm = MyImage.Retroprojection( real(FTFx) , X_m, MyImage.z , theta , M0 , decimation , dFx);
+    close(gcf)
+    
+    Hresconstruct = figure;
+    set(Hresconstruct,'WindowStyle','docked');
     imagesc(MyImage.x*1e3 + mean([X0,X1]),MyImage.z*1e3,real(OriginIm));
     ylim([0 Prof])
     xlabel('x(mm)')
     ylabel('z(mm)')
     title('OS reconstruct')
     cb = colorbar;
-    ylabel(cb,'AC tension (mV)')
+    ylabel(cb,'a.u')
     colormap(parula)
     set(findall(Hresconstruct,'-property','FontSize'),'FontSize',15) 
     
@@ -231,7 +250,7 @@ if SaveData == 1
 MainFolderName = 'D:\Data\Mai\';
 SubFolderName  = generateSubFolderName(MainFolderName);
 CommentName    = 'Ref2inclusions';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Noop',1500);
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence);
 savefig(Hf,FileName);
 saveas(Hf,FileName,'png');
 
@@ -240,11 +259,11 @@ switch TypeOfSequence
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
               ,'X0','X1','NTrig','Nlines','Prof','ScanParam','x','z','Datas','SampleRate','c','Range','TypeOfSequence','t_aquisition');
     case 'OP'
-save(FileName,'Volt','Delay','ActiveLIST','FreqSonde','NbHemicycle','Alphas'...
+save(FileName,'Volt','DelayLAWS','ActiveLIST','FreqSonde','NbHemicycle','Alphas'...
               ,'X0','X1','NTrig','Nlines','Prof','ScanParam','x','z','Datas','SampleRate','c','Range','TypeOfSequence','t_aquisition');
 saveas(Hresconstruct,[FileName,'_retrop'],'png');
     case 'OS'
-save(FileName,'Volt','Delay','ActiveLIST','FreqSonde','NbHemicycle','Alphas','NbX','dFx'...
+save(FileName,'Volt','DelayLAWS','ActiveLIST','FreqSonde','NbHemicycle','Alphas','NbX','dFx'...
                   ,'X0','X1','NTrig','Nlines','Prof','ScanParam','z','Datas','SampleRate','c','Range','TypeOfSequence','t_aquisition');
 
 saveas(Hresconstruct,[FileName,'_ifft'],'png');
@@ -265,3 +284,4 @@ end
 % rmpath('D:\legHAL')   ;  
 % rmpath('subfunctions');
 % rmpath('sequences')   ;
+% rmpath('D:\AO---softwares-and-developpement\radon inversion\shared functions folder');

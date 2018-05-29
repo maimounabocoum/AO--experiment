@@ -3,7 +3,7 @@
 % ATTENTION !! Même si la séquence US n'écoute pas, il faut quand même
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
-function [SEQ,Delay,MedElmtList,ActiveLIST,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig)
+function [SEQ,Delay,MedElmtList,ActiveLIST,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , X0 , X1 ,Prof, NTrig)
  clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
 
@@ -11,11 +11,6 @@ function [SEQ,Delay,MedElmtList,ActiveLIST,AlphaM] = AOSeqInit_OP(AixplorerIP, V
 % user defined parameters :
 
     ScanLength      = X1 - X0; % mm
-    
-% creation of vector for scan:       
-if dA > 0
-    AlphaM = sort(-abs(AlphaM):dA:abs(AlphaM));   % Planes waves angles (deg) 
-end
 
 %% System parameters import :
 % ======================================================================= %
@@ -25,7 +20,7 @@ NbElemts    = system.probe.NbElemts ;
 pitch       = system.probe.Pitch ;          % in mm
 MinNoop     = system.hardware.MinNoop;
 
-NoOp       = 500000;             % µs minimum time between two US pulses
+NoOp       = 500;             % µs minimum time between two US pulses
 
 % ======================================================================= %
 
@@ -52,7 +47,7 @@ Nbtot = ElmtBorns(2) - ElmtBorns(1) + 1 ;
 
 
 Delay = zeros(NbElemts,length(AlphaM)); %(µs)
-AlphaM = AlphaM*pi/180 ;
+
 
 for i = 1:length(AlphaM)
       
