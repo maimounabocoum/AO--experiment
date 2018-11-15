@@ -1,4 +1,4 @@
-function datas = RetreiveDatas( raw , Ntrig, Nlines,MedElmtList)
+function [datas,V] = RetreiveDatas( raw , Ntrig, Nlines,MedElmtList)
 % Retreiving average from raw datas
 %   Maïmouna Bocoum
 
@@ -17,7 +17,10 @@ fprintf('For current processed data : \r Nlines = %d , Ntrig = %d \r\n',Nlines, 
 datas = reshape(raw,size(raw,1),Nlines, Ntrig);
 % datas(:,Isorted,:) = datas(:,Iposition,:);
 % size(datas)
+V = var(datas,0,3);
 datas = mean(datas,3);
+
+
 end
 
 

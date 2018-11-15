@@ -4,10 +4,12 @@
 
 %% Fermeture et nettoyage de la memoire
 PolluxClose(Controller,COM_Port);
+
+%%
 close all
 clear all
 
-COM_Port   = 3 ;
+COM_Port   = 4 ;
 Controller = PolluxOpenAndInitialize(COM_Port) ;
 
 %% get axis number 

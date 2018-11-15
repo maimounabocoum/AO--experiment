@@ -17,20 +17,20 @@
  addPathLegHAL;
  
         TypeOfSequence  = 'OF';
-        Volt            = 50;
+        Volt            = 40;
         FreqSonde       = 3;
-        NbHemicycle     = 6;
+        NbHemicycle     = 3;
         
         
         AlphaM          = 20;
         dA              = 1;
         
-        Foc             = 25;
-        X0              = 10;
-        X1              = 25;
+        Foc             = 13;
+        X0              = 19.8;
+        X1              = 20;
         
-        NTrig           = 100;
-        Prof            = 50;
+        NTrig           = 1000;
+        Prof            = 30;
         SaveData        = 0 ; % set to 1 to save
 
 
@@ -80,7 +80,7 @@ transfer.Channel        = 1;
  
     %% ======================== start acquisition =============================
     SequenceDuration_us = 100 ; 
-    Nloop = 20 ;
+    Nloop = 100 ;
     
     
  for Iloop = 1:Nloop
@@ -134,7 +134,8 @@ transfer.Channel        = 1;
     Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
     z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
     x = MedElmtList*system.probe.Pitch;
-    imagesc(x,z,1e3*Datas)
+    %imagesc(x,z,1e3*Datas)
+    plot(z,1e3*Datas)
     xlabel('x (mm)')
     ylabel('z (mm)')
     title('Averaged raw datas')

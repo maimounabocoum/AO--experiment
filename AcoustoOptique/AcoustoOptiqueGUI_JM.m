@@ -25,17 +25,17 @@
        TypeOfSequence = 'JM';   % 'OF' , 'JM'
  
         Volt        = 15;       % 'OF' , 'OP' , 'JM'
-        FreqSonde   = 6;        % 'OF' , 'OP' , 'JM'
+        FreqSonde   = 15;        % 'OF' , 'OP' , 'JM'
         NbHemicycle = 250;      % 'OF' , 'OP' , 'JM'
-        Foc         = 23;       % 'OF' 
-        AlphaM      = 20;       % 'OP' 
+        Foc         = 5;       % 'OF' 
+        AlphaM      = 0;       % 'OP' 
         dA          = 1;        % 'OP' 
-        X0          = 12;        % 'OF' , 'OP' 
-        X1          = 25 ;      % 'OF' , 'OP' 
+        X0          = 0;        % 'OF' , 'OP' 
+        X1          = 13 ;      % 'OF' , 'OP' 
         NTrig       = 100;      % 'OF' , 'OP' , 'JM'
         Prof        = 200;      % 'OF' , 'OP' , 'JM'
         NbZ         = 3;        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 0;        % 20 Nb de composantes de Fourier en X, 'JM'
+        NbX         = 3;        % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;  % length in dimension x (us)
         
         SaveData = 1 ;          % set to 1 to save data
@@ -219,9 +219,9 @@ transfer.Channel        = 1;
    
 %% save datas :
 if SaveData == 1
-MainFolderName = 'D:\Data\Francois\';
+MainFolderName = 'D:\Data\Mai\';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'Verticale';
+CommentName    = '15MHz';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'NbZ',NbZ,'NbZ',NbX);
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','X0','X1',...
               'NTrig','Nlines','Prof','MedElmtList','Datas',...

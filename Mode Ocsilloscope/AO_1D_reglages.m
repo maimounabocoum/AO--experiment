@@ -32,16 +32,16 @@ AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
 % SEQ = remoteGetUserSequence(SRV);
 %=======================  US Parameters =====================
 
-Volt        = 30; % V
+Volt        = 40; % V
 FreqSonde   = 3;  % MHz
-NbHemicycle = 100;
+NbHemicycle = 10;
 X0          = 15;   % mm
-Foc         = 99;   % mm
-NTrig       = 5; %1000
-Prof        = 40;  % mm 800 gain
+Foc         = 25;   % mm
+NTrig       = 500; %1000
+Prof        = 50;  % mm 800 gain
 
 %%====================== Parameters loop
-Nloop = 300;
+Nloop = 10;
 
 %-----------------------------------------------------------
 %% Gage Init parmaters
@@ -113,8 +113,7 @@ for k = 1:Nloop
         transfer.Segment       = LineNumber ;                       
         [ret, datatmp, actual] = CsMl_Transfer(Hgage, transfer);    
                                                                     
-       
-       actual                                                            
+                                                                 
        MyMeasurement.Lines((1+actual.ActualStart):actual.ActualLength,LineNumber) = datatmp' ;
         
     end
@@ -129,7 +128,7 @@ for k = 1:Nloop
    
    switch AIXPLORER_Active
    case 'on'
-   SEQ = SEQ.stopSequence('Wait', 1);  
+   SEQ = SEQ.stopSequence('Wait',0);  
    end
    
 if MyMeasurement.IsRunning == 0
@@ -152,8 +151,8 @@ end
 %clear MyMeasurement
 
 %% ================================= quite remote ===========================================%%
-              SEQ = SEQ.quitRemote()      ;
-              ret = CsMl_FreeAllSystems   ;
+%               SEQ = SEQ.quitRemote()      ;
+%               ret = CsMl_FreeAllSystems   ;
 
 
 

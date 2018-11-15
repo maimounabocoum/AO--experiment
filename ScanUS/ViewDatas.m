@@ -1,6 +1,6 @@
 
 %% read saved datas
-Hf = figure;
+Hf = figure(1);
 set(Hf,'WindowStyle','docked'); 
 D=[1 1 1;0 0 1;0 1 0;1 1 0;1 0 0;];
 F=[0 0.25 0.5 0.75 1];
@@ -13,11 +13,11 @@ t = (1:MyScan.Npoints)*(1/(1e6*SampleRate));
 
 cc = jet(2);
 % view data with common z value
-for i = 1:length(MyScan.z)
+for i = 1:50%length(MyScan.z)
 zin = MyScan.z(i) ;
 
 % find index which position equals zin
-I_zin = find(MyScan.Positions(:,3) == zin);
+I_zin = find( abs(MyScan.Positions(:,3) - zin ) < 1e-6 );
 % extract x values with position zin
 X_zin = MyScan.Positions(I_zin,1);
 [X_zin,Isort] = sort(X_zin);
@@ -26,8 +26,8 @@ D_zin = MyScan.Datas(:,I_zin(Isort));
 
 imagesc(X_zin,t*1e6,D_zin)
 %plot(X_zin,sum(abs(D_zin),1),'color',cc(i,:))
-ylim([0 100])
-%xlim([min(MyScan.x) max(MyScan.x)])
+ylim([11 18])
+xlim([min(MyScan.x) max(MyScan.x)])
 %shading interp
 %view([0 90])
 xlabel('x(mm)')
@@ -79,10 +79,10 @@ signal_FT = fft(D_zin,N,1);
 signal_FT = abs(signal_FT(1:(N/2+1) , :) );
 
 imagesc(X_zin,frequencies,signal_FT )
-ylim([0 5])
+ylim([0 30])
 xlim([min(MyScan.x) max(MyScan.x)])
 %shading interp
-caxis([0 0.1])
+%caxis([0 0.1])
 xlabel('x(mm)')
 ylabel('f(MHz)')
 title(['z = ',num2str(zin)])

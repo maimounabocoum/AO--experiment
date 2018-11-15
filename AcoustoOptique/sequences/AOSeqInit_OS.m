@@ -27,8 +27,8 @@ Pause                  = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause 
 % ======================================================================= %
 %% Update of Scanning parameters :
 
-Lx = (X1 - X0)*1e-3;       % m
-dFx = 1/Lx ;               % m^-1
+Lx = NbElemts*(pitch*1e-3);       % m
+dFx = 1/Lx ;                      % m^-1
 
 if ~isempty(Nbx)
 NbX = [1;1;1;1]*(Nbx);     % probed frequencies 
@@ -143,15 +143,15 @@ for nbs = 1:Nscan
                'Delays',Delay(:,nbs),...
                0);                      
     
-    % Arbitrary TW
-    figure(100)
-    subplot(121)
-        imagesc(ActiveLIST(:,nbs)')
-        xlabel('x (mm)')
-        ylabel('z(mm)')
-        subplot(122)
-        plot(Delay(:,nbs))
-     drawnow
+
+%     figure(100)
+%     subplot(121)
+%         imagesc(ActiveLIST(:,nbs)')
+%         xlabel('x (mm)')
+%         ylabel('z(mm)')
+%         subplot(122)
+%         plot(Delay(:,nbs))
+%      drawnow
 
 
        

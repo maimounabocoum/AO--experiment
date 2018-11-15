@@ -28,17 +28,20 @@ c = 1540 ; % sound velocity in m/s
 %   1 = Waiting for trigger event
 %   2 = Triggered but still busy acquiring
 %   3 = Data transfer is in progress
-     SampleRate   =   20;
+     SampleRate   =   50; % 25
      Range        =   1 ;
      N_holdoff    =  0 ;
      Npoints      = 5000;
-     Naverage     = 100 ;
+     Naverage     = 50 ;
      TriggerSatus = 'on' ; % 'on' to activate external trig, 'off' : will trig on timout value
      
 [ret,Hgage,acqInfo,sysinfo] = InitRawGage(Naverage,Npoints,N_holdoff,SampleRate,Range,TriggerSatus) ;
 fprintf(' Segments last %4.2f us \n\r',1e6*acqInfo.SegmentSize/acqInfo.SampleRate);
 
 % Set transfer parameters
+SampleRate = acqInfo.SampleRate*1e-6;
+fprintf(' Sample rate is %4.2f MHz \n\r',1e-6*acqInfo.SampleRate);
+
 transfer.Mode           = CsMl_Translate('Default', 'TxMode');
 transfer.Start          = -acqInfo.TriggerHoldoff;
 transfer.Length         = acqInfo.SegmentSize;
@@ -50,12 +53,12 @@ transfer.Channel        = 1;
 Hf = figure;
 set(Hf,'WindowStyle','docked'); 
     %% ======================== start acquisition =============================
-    % GetPosition(Controller,'2')  position mm ?
+    % GetPosition(Controller,'1')  position mm ?
     % PolluxMoveCal(Controller,'2') mouvement absolue mm
     % PolluxDepRel(Controller,-5,'1') mouvement relatif mm
-x = 0+(0:0.5:30);%96 + (-10:0.50:10) ; % horizontal axis (1) in mm
-y = 0 ;
-z = 18+(-10:0.5:10);%0:0.5:30;    % vertical axis   (2) in mm
+x = 94 +(-5:0.1:5); %96 + (-10:0.50:10) ; % horizontal axis (1) in mm
+y = 7 ;
+z = 0:0.2:30;%0:0.5:30;    % vertical axis   (2) in mm
     
 N = 2^nextpow2(acqInfo.SegmentSize);
 raw   = zeros(N,Naverage);
@@ -144,7 +147,6 @@ tic
     signal = mean(raw(:,1:Naverage),2) ;
     MyScan.Datas(:,n_scan) = signal ;
 
-
     signal_FT = fft(signal,N);
     
     subplot(2,1,2)
@@ -161,6 +163,7 @@ tic
     
     Amplitude = abs( hilbert(signal_filtered) );
     %Amplitude = filter(H_lowpass, Amplitude);
+    
      subplot(2,1,1) 
      plot(t*1e6 , signal );
 %      hold on
@@ -186,7 +189,7 @@ end
 % save datas :
 if SaveData == 1
     
-MainFolderName = 'datas\Nathan';
+MainFolderName = 'datas\Sebastien';
 SubFolderName  = generateSubFolderName(MainFolderName);
 
 % savefig(Hf,FileName);
