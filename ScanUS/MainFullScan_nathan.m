@@ -5,15 +5,11 @@
 %% addpath and parameter for wave sequences :
 % ======================================================================= %
 addpath('..\AcoustoOptique\subfunctions');
-        ProbeType      = 'SignalProcessing4MHzPerpendicular';
-        SequenceType   = 'Burst';
+        ProbeType      = 'Probe4MHz';
+        SequenceType   = 'CW';
         NbCycle        = 1;
         Fburst         = 4 ;%MHz
-        AmpSeqGen      = '200 mVpp';
-        Fmin           = 1; %MHz
-        Fmax           = 5; %MHz
-        ChirpTime      = 1000; % us
-
+        AmpSeqGen      = 10;
         SaveData        = 1 ; % set to 1 to save
 
 
@@ -31,7 +27,7 @@ c = 1540 ; % sound velocity in m/s
      SampleRate   =   50; % 25
      Range        =   1 ;
      N_holdoff    =  0 ;
-     Npoints      = 5000;
+     Npoints      = 1000;
      Naverage     = 50 ;
      TriggerSatus = 'on' ; % 'on' to activate external trig, 'off' : will trig on timout value
      
@@ -56,9 +52,9 @@ set(Hf,'WindowStyle','docked');
     % GetPosition(Controller,'1')  position mm ?
     % PolluxMoveCal(Controller,'2') mouvement absolue mm
     % PolluxDepRel(Controller,-5,'1') mouvement relatif mm
-x = 94 +(-5:0.1:5); %96 + (-10:0.50:10) ; % horizontal axis (1) in mm
-y = 7 ;
-z = 0:0.2:30;%0:0.5:30;    % vertical axis   (2) in mm
+x = 70 ;% +(-5:0.1:5); %96 + (-10:0.50:10) ; % horizontal axis (1) in mm
+y = 0 ;
+z = 8:0.5:30;%0:0.5:30;    % vertical axis   (2) in mm
     
 N = 2^nextpow2(acqInfo.SegmentSize);
 raw   = zeros(N,Naverage);
@@ -189,7 +185,8 @@ end
 % save datas :
 if SaveData == 1
     
-MainFolderName = 'datas\Sebastien';
+%MainFolderName = 'datas\Sebastien';
+MainFolderName = 'C:\Users\AcoustoOptique\Dropbox\PPT - prez\routine matlab\calibration sonde Nathan\Maimouna_Bocoum_calibration_transducteur_4Mega\calibrationCuvierHydrophone';
 SubFolderName  = generateSubFolderName(MainFolderName);
 
 % savefig(Hf,FileName);
@@ -204,12 +201,12 @@ switch SequenceType
         
         save(FileName,'Fburst','NbCycle','AmpSeqGen','SequenceType','ProbeType'...
               ,'Naverage','Npoints','MyScan','SampleRate','c','Range');
-    case 'Chirp'
-        CommentName    = ['Sonde' ProbeType]; 
-        FileName       = generateSaveName(SubFolderName ,'name',CommentName,'',SequenceType...
-            ,'Fmin',Fmin,'Fmax',Fmax,'ChirpTime',ChirpTime);
+    case 'CW'
+        CommentName    = '100cycles' ; 
+        FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Volt',AmpSeqGen...
+            ,'FMHz',Fburst);
 
-        save(FileName,'Fmin','Fmax','ChirpTime','AmpSeqGen','SequenceType','ProbeType'...
+        save(FileName,'Fburst','AmpSeqGen','ProbeType'...
               ,'Naverage','Npoints','MyScan','SampleRate','c','Range');
 
 end

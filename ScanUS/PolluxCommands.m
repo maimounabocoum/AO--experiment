@@ -24,7 +24,7 @@ GetPitch(Controller,'2');
 GetMotionDirection(Controller,'1');
 
 GetPosition(Controller,'1')
-
+GetPosition(Controller,'2')
 
 GetVelocity(Controller,'1');
 GetAccelerationRamp(Controller,'1');
@@ -34,10 +34,12 @@ SetVelocity(Controller,4,'1'); % not working ??
 SetZeroHere(Controller,'1')
 
 % absolute move
-PolluxDepAbs(Controller,0,'2')
+PolluxDepAbs(Controller,-30,'2')
+PolluxDepAbs(Controller,0,'1')
+
 
 % relative move
-PolluxDepRel(Controller,-5,'2')
+PolluxDepRel(Controller,10,'2')
 PolluxDepRel(Controller,-5,'1')
 
 
@@ -54,8 +56,8 @@ GetSwitchStatus(Controller,'1')% not working, suppose to return  [0 , 0] format
 % software limit switches 
 % this function is overwritten after running PolluxMoveCal
 % this function is not updated if one is outside of the limit range
-Limits = GetSoftwareLim(Controller,'1')
-SetLimitRange(Controller,0,70,'2')
+Limits = GetSoftwareLim(Controller,'2')
+SetLimitRange(Controller,-35,50,'2')
 
 % emmergency stop motion
 StopMotion(Controller,'1')

@@ -13,7 +13,7 @@ t = (1:MyScan.Npoints)*(1/(1e6*SampleRate));
 
 cc = jet(2);
 % view data with common z value
-for i = 1:50%length(MyScan.z)
+for i = 1:length(MyScan.z)
 zin = MyScan.z(i) ;
 
 % find index which position equals zin
@@ -27,7 +27,7 @@ D_zin = MyScan.Datas(:,I_zin(Isort));
 imagesc(X_zin,t*1e6,D_zin)
 %plot(X_zin,sum(abs(D_zin),1),'color',cc(i,:))
 ylim([11 18])
-xlim([min(MyScan.x) max(MyScan.x)])
+%xlim([min(MyScan.x) (1+1e-5)*max(MyScan.x)])
 %shading interp
 %view([0 90])
 xlabel('x(mm)')
@@ -80,7 +80,7 @@ signal_FT = abs(signal_FT(1:(N/2+1) , :) );
 
 imagesc(X_zin,frequencies,signal_FT )
 ylim([0 30])
-xlim([min(MyScan.x) max(MyScan.x)])
+%xlim([min(MyScan.x) max(MyScan.x)])
 %shading interp
 %caxis([0 0.1])
 xlabel('x(mm)')

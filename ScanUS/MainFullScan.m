@@ -24,10 +24,10 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OS';
+        TypeOfSequence  = 'OF';
         Volt            = 15;
-        FreqSonde       = 2;
-        NbHemicycle     = 3;
+        FreqSonde       = 6;
+        NbHemicycle     = 2;
         
         
         AlphaM          = 0;
@@ -38,15 +38,15 @@
         NbX             = 1:20 ;     % 20 Nb de composantes de Fourier en X, 'JM'
         
         Foc             = 35;
-        X0              = 15; %10-25
-        X1              = 15;
+        X0              = 19.2; %10-25
+        X1              = 19.2;
         
         
         %NbHemicycle = 200;
         %NbZ         = 10;      % 4; % Nb de composantes de Fourier en Z, 'JM'
         %NbX         = 10;     % 5 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;
-        
+        Naverage        = 5 ;
         Prof            = 40;
         SaveData        = 1 ; % set to 1 to save
 
@@ -64,12 +64,13 @@ if strcmp(Aixplorer,'on')
 clear SEQ ScanParam raw Datas ActiveLIST Alphas Delay Z_m
 switch TypeOfSequence
     case 'OF'
-Volt = min(30,Volt); % security for OP routine  
+Volt = min(40,Volt); % security for OP routine  
 [SEQ,ScanParam] = AOSeqInit_OFL(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, Naverage);
     case 'OP'
         X0              = -1; %10-25
         X1              = 40;
-Volt = min(30,Volt); % security for OP routine       
+        ScanIndex       = 1 ;
+Volt = min(40,Volt); % security for OP routine       
 [SEQ,Delay,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OPL(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, Naverage);
 %[SEQ,Delay,ScanParam,Alphas] = AOSeqInit_OP_arbitrary(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'OS'
@@ -101,10 +102,10 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
      Range        =   1 ;
      N_holdoff    =  0 ;
      Npoints      = 5000;
-     Naverage     = 5 ;
      Nevent       = length(SEQ.InfoStruct.event);
      TriggerSatus = 'on' ; % 'on' to activate external trig, 'off' : will trig on timout value
-     
+
+SampleRate = acqInfo.SampleRate*1e-6;
 [ret,Hgage,acqInfo,sysinfo] = InitRawGage(Naverage*Nevent,Npoints,N_holdoff,SampleRate,Range,TriggerSatus) ;
 fprintf(' Segments last %4.2f us \n\r',1e6*acqInfo.SegmentSize/acqInfo.SampleRate);
 
@@ -120,9 +121,12 @@ transfer.Channel        = 1;
 Hf = figure;
 set(Hf,'WindowStyle','docked'); 
     %% ======================== start acquisition =============================
-x = 74 + (-30:0.5:35) ; % horizontal axis (1) in mm
+% GetPosition(Controller,'1')
+% GetPosition(Controller,'2')
+    
+x = 0 ;% + (-15:1:15) ; % horizontal axis (1) in mm
 y = 0 ;
-z = 0;    % vertical axis   (2) in mm
+z = - 8;% + (0:1:50);    % -30 vertical axis   (2) in mm , GetPosition(Controller,'2')
     
 N = 2^nextpow2(acqInfo.SegmentSize);
 raw   = zeros(N,Naverage);
@@ -246,6 +250,7 @@ MyScan = USscan(x,y,z,Naverage,N);
     signal_FT(frequencies > 100) = 0;
     plot( frequencies , abs(signal_FT( 1:(N/2+1) ) ) )
     xlabel('frequency MHz') 
+    
     % bandpass filter
     
     % hilbert transform of signal
@@ -255,6 +260,7 @@ MyScan = USscan(x,y,z,Naverage,N);
     %Amplitude = filter(H_lowpass, Amplitude);
      subplot(2,1,1) 
      plot(t*1e6 , signal );
+    axis([21 25 -0.5 1])
 %      hold on
 %      plot(t*1e6 , signal_filtered ,'color' , 'black' );
      %hold on
@@ -274,7 +280,7 @@ if SaveData == 1
     
 MainFolderName = 'datas';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'Sonde2MHz';
+CommentName    = 'Opt';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Noop',500);
 % savefig(Hf,FileName);
 % saveas(Hf,FileName,'png');
