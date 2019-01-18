@@ -242,19 +242,22 @@ Delay = Delay*1e-6;
 
 
 %%    Initialize remote on systems
-[SEQ NbAcq] = SEQ.buildRemote();
- display('Build OK')
+[SEQ , ~ ] = SEQ.buildRemote();
+ display('======= Build OK=============')
  
-
+ %% initialize communation with remote aixplorer and load sequence
+try
  SEQ = SEQ.initializeRemote('IPaddress',AixplorerIP);
- 
- display('Remote OK');
-
- % status :
+ display('============== Remote OK =============');
  display('Loading sequence to Hardware');
  SEQ = SEQ.loadSequence();
  disp('-------------Ready to use-------------------- ')
  
+catch e
+  fprintf(e.message);  
+end
+ 
+
 
 end
 
