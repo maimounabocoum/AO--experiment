@@ -3,7 +3,7 @@
 % ATTENTION !! Même si la séquence US n'écoute pas, il faut quand même
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
-function [SEQ,Delay,ScanParam,ActiveLIST,AlphaM,dFx] = AOSeqInit_OS(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , dA , Nbx , X0 , X1 ,Prof, NTrig,ScanIndex)
+function [SEQ,Delay,ScanParam,ActiveLIST,AlphaM,dFx] = AOSeqInit_OSusmeasure(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , dA , Nbx , X0 , X1 ,Prof, NTrig,ScanIndex)
  clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
 %% System parameters import :

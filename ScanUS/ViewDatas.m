@@ -26,7 +26,7 @@ D_zin = MyScan.Datas(:,I_zin(Isort));
 
 imagesc(X_zin,t*1e6,D_zin)
 %plot(X_zin,sum(abs(D_zin),1),'color',cc(i,:))
-ylim([11 18])
+%ylim([11 40])
 %xlim([min(MyScan.x) (1+1e-5)*max(MyScan.x)])
 %shading interp
 %view([0 90])

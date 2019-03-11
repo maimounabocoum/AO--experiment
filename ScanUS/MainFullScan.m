@@ -7,6 +7,7 @@
 
 % adresse Bastille : '192.168.0.20'
 % adresse Jussieu :  '192.168.1.16'
+clearvars;
 
  AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
  % path at Jussieu :
@@ -24,7 +25,7 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OF';
+        TypeOfSequence  = 'JM';
         Volt            = 15;
         FreqSonde       = 6;
         NbHemicycle     = 2;
@@ -35,29 +36,34 @@
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbX             = 1:20 ;     % 20 Nb de composantes de Fourier en X, 'JM'
+        NbZ         = 1:2;        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = 0;        % 20 Nb de composantes de Fourier en X, 'JM'
+        DurationWaveform = 20;  % length in dimension x (us)
+        Tau_cam          = 150 ;% camera integration time (us)
+                                %   n_rep is calculated by Tau_cam/DurationWaveform  
         
         Foc             = 35;
-        X0              = 19.2; %10-25
-        X1              = 19.2;
+        X0              = -10; %10-25
+        X1              = 50;
         
         
         %NbHemicycle = 200;
         %NbZ         = 10;      % 4; % Nb de composantes de Fourier en Z, 'JM'
         %NbX         = 10;     % 5 Nb de composantes de Fourier en X, 'JM'
-        DurationWaveform = 20;
-        Naverage        = 5 ;
-        Prof            = 40;
+
+        Naverage        = 10 ;
+        Prof            = 150;
         SaveData        = 1 ; % set to 1 to save
 
-
+Aixplorer = 'off' ;
+MotorControl = 'off';
 
 
 %% ============================   Initialize AIXPLORER
 % %% Sequence execution
 % % ============================================================================ %
 
-Aixplorer = 'on' ;
+
 
 if strcmp(Aixplorer,'on')
     
@@ -84,7 +90,10 @@ Volt = min(30,Volt); % security for OP routine
         X1              = 40;
         ScanIndex       = 10;%last11
 Volt = min(Volt,15) ; 
-[SEQ,ActiveLIST,NUX,NUZ] = AOSeqInit_OJMLusmeasure(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof,Naverage,DurationWaveform,ScanIndex);
+[SEQ,ActiveLIST,NUX,NUZ] = AOSeqInit_OJMLusmeasure(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Naverage ,DurationWaveform,Tau_cam);
+    case 'OC'
+Volt = min(15,Volt); % security for OP routine    
+[SEQ,MedElmtList,NUX,NUZ] = AOSeqInit_OC(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 , Naverage ,DurationWaveform , Tau_cam);
 
 end
 
@@ -100,13 +109,14 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
 %   3 = Data transfer is in progress
      SampleRate   =   50;
      Range        =   1 ;
-     N_holdoff    =  0 ;
-     Npoints      = 5000;
-     Nevent       = length(SEQ.InfoStruct.event);
+     Npoints      = 30000;
+     N_holdoff    =  0;
+     Nevent       = 1;% length(SEQ.InfoStruct.event);
      TriggerSatus = 'on' ; % 'on' to activate external trig, 'off' : will trig on timout value
 
-SampleRate = acqInfo.SampleRate*1e-6;
+
 [ret,Hgage,acqInfo,sysinfo] = InitRawGage(Naverage*Nevent,Npoints,N_holdoff,SampleRate,Range,TriggerSatus) ;
+SampleRate = acqInfo.SampleRate*1e-6;
 fprintf(' Segments last %4.2f us \n\r',1e6*acqInfo.SegmentSize/acqInfo.SampleRate);
 
 % Set transfer parameters
@@ -126,7 +136,7 @@ set(Hf,'WindowStyle','docked');
     
 x = 0 ;% + (-15:1:15) ; % horizontal axis (1) in mm
 y = 0 ;
-z = - 8;% + (0:1:50);    % -30 vertical axis   (2) in mm , GetPosition(Controller,'2')
+z = 0;% + (0:1:50);    % -30 vertical axis   (2) in mm , GetPosition(Controller,'2')
     
 N = 2^nextpow2(acqInfo.SegmentSize);
 raw   = zeros(N,Naverage);
@@ -136,29 +146,39 @@ MyScan = USscan(x,y,z,Naverage,N);
       for n_scan = 1:MyScan.Nscans
           
         % clear buffer and look for errors
-        GetLastError(Controller,'1');
-        GetLastError(Controller,'2');
-        if(Controller.BytesAvailable>0)
-            fscanf(Controller, '%s')  
+        if strcmp(MotorControl,'on')
+            
+            GetLastError(Controller,'1');
+            GetLastError(Controller,'2');
+            if(Controller.BytesAvailable>0)
+                fscanf(Controller, '%s')  
+            end
+            
         end
         
         % move to position
         % position x
         posX = MyScan.Positions(n_scan,1);
+        if strcmp(MotorControl,'on')
         PolluxDepAbs(Controller,posX,'1')
+        end
         %position y
         posY = MyScan.Positions(n_scan,2);
         % no motor associated
         
         % position z
         posZ = MyScan.Positions(n_scan,3);
+        if strcmp(MotorControl,'on')
         PolluxDepAbs(Controller,posZ,'2')
+        end
         
         
         
         % read position and update scan position list
+        if strcmp(MotorControl,'on')
         posX = GetPosition(Controller,'1') ;
         posZ = GetPosition(Controller,'2') ;
+        end
         
         % print current position
         disp(sprintf('Scan position X:%f,Y:%f,Z:%f',posX,posY,posZ));
@@ -176,18 +196,19 @@ MyScan = USscan(x,y,z,Naverage,N);
         SEQ = SEQ.stopSequence('Wait', 0);
 
         end
-    
-    % begin gage capture
-    ret = CsMl_Capture(Hgage);
-    CsMl_ErrorHandler(ret, 1, Hgage);
  
         % Start Aixplorer pre-loaded sequence
        
         if strcmp(Aixplorer,'on')
 
         SEQ = SEQ.startSequence();
-        
         end
+        
+    % begin gage capture
+    ret = CsMl_Capture(Hgage);
+    CsMl_ErrorHandler(ret, 1, Hgage);
+ 
+
 
     tic     
     % begin gage waiting for capture  
@@ -211,7 +232,7 @@ MyScan = USscan(x,y,z,Naverage,N);
         
         transfer.Segment       = SegmentNumber;                     % number of the memory segment to be read
         [ret, datatmp, actual] = CsMl_Transfer(Hgage, transfer);    % transfer                                                             % actual contains the actual length of the acquisition that may be                                                       % different from the requested one.
-        raw((1+actual.ActualStart):actual.ActualLength,SegmentNumber) = datatmp' ;
+        raw((1+actual.ActualStart):( actual.ActualStart + actual.ActualLength ),SegmentNumber) = datatmp' ;
         
     end
     
@@ -233,34 +254,47 @@ MyScan = USscan(x,y,z,Naverage,N);
     %raw(:,1) = rand(1)*sin(2*pi*(3e6)*t).*exp(-(t-20e-6).^2/(1e-6)^2)+ 0.5*rand(1,length(t));
     %raw(:,2) = rand(1)*sin(2*pi*(3e6)*t).*exp(-(t-20e-6).^2/(1e-6)^2)+ 0.5*rand(1,length(t));
     
+    % color screen each event
+    cc = jet(Nevent);
     
     % average datas
- 
+    for n_event = 1:Nevent
+    if Naverage == 1
+    signal(:,n_event) = raw(:,Naverage) ;    
+    else
+    signal(:,n_event) = ...
+        mean( raw(:,( (n_event-1)*Naverage + 2):n_event*Naverage ) , 2) ;
+    % start at + 2 because first value supposed to be offset
+    end
+    MyScan.Datas(:,n_scan) = signal(:,n_event) ;
+    
 
-    signal = mean(raw(:,2:Naverage),2) ;
-    MyScan.Datas(:,n_scan) = signal ;
-
-
-    signal_FT = fft(signal,N);
+    signal_FT(:,n_event) = fft(signal(:,n_event),N);
     
     subplot(2,1,2)
 
     frequencies = (0:N/2)*( SampleRate/(N) ) ;
-    signal_FT(frequencies < 0.2) = 0;
-    signal_FT(frequencies > 100) = 0;
-    plot( frequencies , abs(signal_FT( 1:(N/2+1) ) ) )
+    signal_FT(frequencies < 0.2,n_event) = 0;
+    signal_FT(frequencies > 100,n_event) = 0;
+    hold on
+    plot( frequencies , abs(signal_FT( 1:(N/2+1) , n_event) ) ,'color' , cc(n_event,:) )
+    hold off
+    xlim([5 7])
     xlabel('frequency MHz') 
+    ylabel('a.u.')
+    title('|FFT|')
     
     % bandpass filter
     
     % hilbert transform of signal
-    signal_filtered = ifft(signal_FT,'symmetric');
+    %signal_filtered(:,n_event) = ifft(signal_FT(:,n_event),'symmetric');
     
-    Amplitude = abs( hilbert(signal_filtered) );
-    %Amplitude = filter(H_lowpass, Amplitude);
      subplot(2,1,1) 
-     plot(t*1e6 , signal );
-    axis([21 25 -0.5 1])
+     hold on
+     plot(t*1e6 , signal(:,n_event) ,'color' , cc(n_event,:) );
+     hold off
+     
+    %axis([21 25 -0.5 1])
 %      hold on
 %      plot(t*1e6 , signal_filtered ,'color' , 'black' );
      %hold on
@@ -270,8 +304,10 @@ MyScan = USscan(x,y,z,Naverage,N);
      
     xlabel('time(\mus)')
     ylabel('Volt')
-    title('Single acquire')
+    title('Averaged signal')
     set(findall(Hf,'-property','FontSize'),'FontSize',15) 
+    end
+    
     
       end
 
@@ -280,7 +316,7 @@ if SaveData == 1
     
 MainFolderName = 'datas';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'Opt';
+CommentName    = 'TriangleSautdePhase50kHz_ref';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'Noop',500);
 % savefig(Hf,FileName);
 % saveas(Hf,FileName,'png');
@@ -296,8 +332,10 @@ save(FileName,'Volt','Delay','ActiveLIST','FreqSonde','NbHemicycle','Alphas'...
 save(FileName,'Volt','Delay','ActiveLIST','FreqSonde','NbHemicycle','Alphas','NbX','dFx'...
                   ,'X0','X1','Naverage','Npoints','Prof','ScanParam','z','MyScan','SampleRate','c','Range','TypeOfSequence','ScanIndex');
     case 'JM'
-save(FileName,'Volt','ActiveLIST','FreqSonde','NbHemicycle','NbX','NbZ','NUX','NUZ','dFx'...
-                  ,'X0','X1','Naverage','Npoints','Prof','z','MyScan','SampleRate','DurationWaveform','c','Range','TypeOfSequence','ScanIndex');
+% save(FileName,'Volt','ActiveLIST','FreqSonde','NbHemicycle','NbX','NbZ','NUX','NUZ','dFx'...
+%                   ,'X0','X1','Naverage','Npoints','Prof','z','MyScan','SampleRate','DurationWaveform','c','Range','TypeOfSequence','ScanIndex');
+save(FileName,'Volt','FreqSonde','NbHemicycle','NbX','NbZ'...
+                  ,'X0','X1','Naverage','Npoints','Prof','z','MyScan','SampleRate','DurationWaveform','c','Range','TypeOfSequence');
 
 % saveas(Hresconstruct,[FileName,'_ifft'],'png');
 end

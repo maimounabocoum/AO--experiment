@@ -3,7 +3,7 @@
 % ATTENTION !! Même si la séquence US n'écoute pas, il faut quand même
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
-function [SEQ,Delay,MedElmtList,ActiveLIST,AlphaM] = AOSeqInit_OPL(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig)
+function [SEQ,Delay,MedElmtList,ActiveLIST,AlphaM] = AOSeqInit_OPL(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , X0 , X1 ,Prof, NTrig)
  clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
 
@@ -11,11 +11,6 @@ function [SEQ,Delay,MedElmtList,ActiveLIST,AlphaM] = AOSeqInit_OPL(AixplorerIP, 
 % user defined parameters :
 
     ScanLength      = X1 - X0; % mm
-    
-% creation of vector for scan:       
-if dA > 0
-    AlphaM = sort(-abs(AlphaM):dA:abs(AlphaM));   % Planes waves angles (deg) 
-end
 
 %% System parameters import :
 % ======================================================================= %
@@ -25,7 +20,7 @@ NbElemts    = system.probe.NbElemts ;
 pitch       = system.probe.Pitch ;          % in mm
 MinNoop     = system.hardware.MinNoop;
 
-NoOp       = 10500;             % µs minimum time between two US pulses
+NoOp       = 100500;             % µs minimum time between two US pulses
 
 % ======================================================================= %
 
@@ -51,12 +46,13 @@ ElmtBorns   = sort(ElmtBorns) ; % in case X0 and X1 are mixed up
 Nbtot = ElmtBorns(2) - ElmtBorns(1) + 1 ;
 
 
-Delay = zeros(length(AlphaM),NbElemts); %(µs)
+Delay = zeros(NbElemts,length(AlphaM)); %(µs)
+
 
 for i = 1:length(AlphaM)
       
-    Delay(i,:) = 1000*(1/c)*tan(pi/180*AlphaM(i))*(1:NbElemts)'*(pitch); %s
-    Delay(i,:) = Delay(i,:) - min(Delay(i,:));
+    Delay(:,i) = 1000*(1/c)*sin(AlphaM(i))*(1:NbElemts)'*(pitch); %s
+    Delay(:,i) = Delay(:,i) - min(Delay(:,i));
     
 end
 %  
@@ -66,10 +62,6 @@ end
 %     Delay(:,i) = Delay(:,i) + max(Delay(:));
 %     
 % end
-
-
-DlySmpl = round(Delay/dt_s); % conversion in steps
-
 
 
 % waveform
@@ -106,7 +98,7 @@ for nbs = 1:length(AlphaM)
     TXList{nbs} = remote.tx_arbitrary(...
                'txClock180MHz', 1 ,...   % sampling rate = { 0 ,1 } = > {'90 MHz', '180 MHz'}
                'twId',1,...              % {0 [1 Inf]} = {'no waveform', 'id of the waveform'},
-               'Delays',Delay(nbs,:),...
+               'Delays',Delay(:,nbs),...
                0);                      
     
     % Arbitrary TW
@@ -185,7 +177,7 @@ TPC = remote.tpc( ...
 SEQ = usse.usse( ...
     'USSE', 'Plane Wave waveforms',...% first argument is the name of the object
     'TPC', TPC, ... 
-    'acmo', ACMOList, ...   'Loopidx',1, ...
+    'acmo', ACMOList, ...    'Loopidx',1, ...
     'Repeat', NTrig+1, ...  % sets the repetition number of USSE  [1 Inf].
     'DropFrames', 0, ...    % enables error message if acquisition were dropped : {0,1}
     'Loop', 1, ...          % 0 : sequence executed once, 1 : sequence looped
@@ -204,6 +196,9 @@ SEQ = usse.usse( ...
  
 % remoteGetUserSequence(SEQ.Server)
 % remoteGetStatus(SEQ.Server)
+
+% convert Delay matrix to us -> s
+Delay = Delay*1e-6;
 
  
  display('Remote OK');

@@ -1,72 +1,77 @@
-function [nuX,nuZ,t,Mat] = CalcMatHole(f0,nuX,nuZ,x,Fe,c)
+function [nuX,nuZ,t,Mat] = CalcMatHole(f0,nbX,nbZ,nuX0,nuZ0,x,Fe,c)
 % c input in m/s
 % f0  (en MHz) est la fréquence de porteuse
 % nuZ (en mm-1)
 % nuX (en mm-1)
-% Fe : sampling frequency in MHz ; 
+% Fe : sampling frequency of Aixplorer in MHz ; 
 % x  : coordinate vector in mm
 
-% conversion of all input to SI unitzs : 
+% conversion of all input to SI units : 
 Fe = Fe*1e6 ;   %MHz->Hz
 f0 = f0*1e6;    %MHz->Hz
-nuZ = 1e3*nuZ ; %mm-1->m-1
-nuX = 1e3*nuX ; %mm-1->m-1
+nuZ = 1e3*(nbZ*nuZ0) ; %mm-1->m-1
+nuX = 1e3*(nbX*nuX0); %mm-1->m-1
 x = x*1e-3;     %mm->m
 
 % conversion to temporal frequency along z
-fz = c*nuZ ;
+fz = c*nuZ ; %Hz
 
 dt = 1/Fe ; % in s
-Tmax = (20.1*1e-6);   % periode maximale d'un cycle élémentaire (en s)
+% Tmax = (20.1*1e-6);   % periode maximale d'un cycle élémentaire (en s)
 
 Tz = 1/fz;          % periode de l'envelloppe A in s
 T0 = 1/f0;          % periode de la porteuse A in s
 
 % si la période de la modulation de phase est plus grande que Tmax --> Manip impossible
 % (à remplacer par une exception..)
-if (Tz>Tmax) 
-   Mat = zeros(size(X));
-   return;
-end;
+% if (Tz>Tmax) 
+%    Mat = zeros(size(X));
+%    return;
+% end;
 
-
-Nrep = floor(Tmax/Tz);    % on essaie de se rapprocher au mieux de Tmax (essentially N = 1 for fundamental)
-N = round(Nrep*(Tz/dt));  % Nombre de point effectifs
+Nrep = nbZ;
+%Nrep = floor(Tmax/Tz);    % on essaie de se rapprocher au mieux de Tmax 
+                          % (essentially N = 1 for fundamental)
+                          
+% N = round(Nrep*(Tz/dt));  % Nombre de point effectifs
+N = nbZ*(Fe/fz);
 
 Tot = N*dt;        % durée totale de la séquence
 
-  if (Tz ~= Tot/Nrep)
-      d = 999 ; %??
-  end
+%   if (Tz ~= Tot/Nrep)
+%       d = 999 ; %??
+%   end
 
 Tz = Tot/Nrep;    % ré-ajustement de la période ??
 fz = 1/Tz   ;     % ré-ajustement de la fréquence (en MHz) ??
 nuZ = fz/c ;
 
 k = floor(Tot/T0); % nombre de cycles porteuse
- if (f0 ~= k/Tot)
-      d = 88888888888 ; %??
- end
+
+%  if (f0 ~= k/Tot)
+%       d = 88888888888 ; %??
+%  end
   
-f0 = k/Tot; % ré-ajustement de la fréquence porteuse
+ f0 = k/Tot; % ré-ajustement de la fréquence porteuse
+
 t = (0:N-1)*dt;  % time in us
 
-[X,T] = meshgrid(x,t);
+[X,T] = meshgrid(x-mean(x),t);
 
 alpha = nuX/fz;
 carrier = sin(2*pi*f0*T);
 
-Mat = sign(carrier).*(sin(2*pi*fz*(T-alpha*X))>0);
+Mat = sign(carrier).*(sin( 2*pi*fz*(T-alpha*X) )> 0 );
 
 % convert m-1->mm-1
 nuZ = 1e-3*nuZ;
 nuX = 1e-3*nuX;
 
-% print matrix
-figure(100)
-        imagesc(Mat)
-        xlabel('x (mm)')
-        ylabel('z(mm)')
-        drawnow
+%% print matrix
+% figure(100)
+%         imagesc(Mat)
+%         xlabel('x (mm)')
+%         ylabel('z(mm)')
+%         drawnow
 end
     

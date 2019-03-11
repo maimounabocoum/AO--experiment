@@ -10,6 +10,7 @@ function [SEQ,MedElmtList,NUX,NUZ] = AOSeqInit_OJM(AixplorerIP, Volt , f0 , NbHe
 % ======================================================================= %
 c           = common.constants.SoundSpeed ; %[m/s]
 SampFreq    = system.hardware.ClockFreq; %NE PAS MODIFIER % emitted signal sampling = 180 in [MHz]
+SampFreq    = double(SampFreq); % convert to double precision
 NbElemts    = system.probe.NbElemts ; 
 pitch       = system.probe.Pitch ; % in mm
 MinNoop     = system.hardware.MinNoop;
