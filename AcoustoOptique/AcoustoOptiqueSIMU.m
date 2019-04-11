@@ -36,7 +36,7 @@
         Volt            = 15; %Volt
         % 2eme contrainte : 
         % soit FreqSonde congrue à NUZ0 , soit entier*FreqSonde = NUech(=180e6)
-        FreqSonde       = 6; %MHz AO : 78 et 84 MHz to be multiple of 6
+        FreqSonde       = 3; %MHz AO : 78 et 84 MHz to be multiple of 6
         FreqSonde       = 180/round(180/FreqSonde); %MHz
         NbHemicycle     = 5 ;
         
@@ -61,13 +61,13 @@
         n_low = round( 180*DurationWaveform );
         NU_low = (180)/n_low;   % fundamental temporal frequency
         
-        Tau_cam          = 400 ;% camera integration time (us)
+        Tau_cam          = 20 ;% camera integration time (us)
         
         Foc             = 10; % mm
         X0              = -20; %0-40
         X1              = 40;
         
-        NTrig           = 100;
+        NTrig           = 1500;
         Prof            = 150;
         SaveData        = 0 ; % set to 1 to save
 
