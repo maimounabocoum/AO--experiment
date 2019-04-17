@@ -4,7 +4,7 @@
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
 
-function [SEQ,MedElmtList,NUX,NUZ] = AOSeqInit_OJM(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
+function [SEQ,MedElmtList,NUX,NUZ] = AOSeqInit_OJM(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
 
 %% System parameters import :
 % ======================================================================= %
@@ -15,7 +15,7 @@ NbElemts    = system.probe.NbElemts ;
 pitch       = system.probe.Pitch ; % in mm
 MinNoop     = system.hardware.MinNoop;
 
-NoOp       = 1500;             % µs minimum time between two US pulses
+NoOp       = 500;             % µs minimum time between two US pulses
 
 % ======================================================================= %
 
@@ -26,6 +26,10 @@ Pause                  = max( NoOp-ceil(PropagationTime) , MinNoop ); % pause du
 % ======================================================================= %
 %% Codage en arbitrary : delay matrix and waveform
 pulseDuration = NbHemicycle*(0.5/f0) ; % US inital pulse duration in us
+
+% DurationWaveform = 1/NU_low ;
+% n_rep = floor(Tau_cam*NU_low) ;
+
 
 %% ==================== Codage en arbitrary : preparation des acmos ==============
 % shooting elements 
@@ -39,7 +43,7 @@ Xs        = (0:Nbtot-1)*pitch;             % Echelle de graduation en X
 nuZ0 = 1/((c*1e3)*DurationWaveform*1e-6);  % Pas fréquence spatiale en Z (en mm-1)
 nuX0 = 1/(Nbtot*pitch);                  % Pas fréquence spatiale en X (en mm-1)
 
-[NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
+[NBX,NBZ] = meshgrid(NbX,NbZ);
 % initialization of empty frequency matrix
 NUX = zeros('like',NBX); 
 NUZ = zeros('like',NBZ); 
@@ -58,7 +62,7 @@ for nbs = 1:Nfrequencymodes
         % f0 : MHz
         % nuZ : en mm-1
         % nuX : en mm-1
-        [nuX,nuZ,~,Waveform] = CalcMatHole(f0,nuX,nuZ,Xs,SampFreq,c); % Calculer la matrice
+        [nuX,nuZ,~,Waveform] = CalcMatHole(f0,NBX(nbs),NBZ(nbs),nuX0,nuZ0,Xs,SampFreq,c); % Calculer la matrice
         % upgrade frequency map : 
         NUX(nbs) = nuX ;
         NUZ(nbs) = nuZ ;
@@ -79,7 +83,7 @@ for nbs = 1:Nfrequencymodes
     TWList{nbs} = remote.tw_arbitrary( ...
                     'Waveform',Waveform', ...
                     'RepeatCH', 0, ...
-                    'repeat',4 , ...
+                    'repeat',1 , ...
                     'repeat256', 0, ...
                     'ApodFct', 'none', ...
                     'TxElemts',ElmtBorns(1):ElmtBorns(2), ...
@@ -98,6 +102,8 @@ for nbs = 1:Nfrequencymodes
                     0);
     
     %ELUSEV
+    switch Master
+        case 'on'
 ELUSEV{nbs} = elusev.elusev( ...
                     'tx',           TXList{nbs}, ...
                     'tw',           TWList{nbs}, ...
@@ -109,6 +115,21 @@ ELUSEV{nbs} = elusev.elusev( ...
                     'TrigAll',      1, ...
                     'TrigOutDelay', 0, ...
                     0);
+        case 'off'
+            
+ELUSEV{nbs} = elusev.elusev( ...
+                    'tx',           TXList{nbs}, ...
+                    'tw',           TWList{nbs}, ...
+                    'fc',           FC,...
+                    'event',        EVENTList{nbs}, ...
+                    'rx',           RX,...
+                    'TrigOut',      0, ... 10 in us
+                    'TrigIn',       1,...
+                    'TrigAll',      1, ...
+                    'Repeat',       1,... %Nphase
+                    'TrigOutDelay', 0, ...
+                    0);            
+    end
 
     %
 end

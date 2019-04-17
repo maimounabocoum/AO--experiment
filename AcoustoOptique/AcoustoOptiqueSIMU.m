@@ -47,7 +47,7 @@
         % integer list > 0
         NbZ         = 10;        % 8; % Nb de composantes de Fourier en Z, 'JM'
         NbX         = 0;        % 20 Nb de composantes de Fourier en X, 'JM'
-        Phase       = [0,0.25,0.5,0.75] ; % phases per frequency in 2pi unit
+        Phase       = 0;%[0,0.25,0.5,0.75] ; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
         %        NUrep =   Nbz*(50kHz)         
@@ -67,7 +67,7 @@
         X0              = -20; %0-40
         X1              = 40;
         
-        NTrig           = 1500;
+        NTrig           = 5;
         Prof            = 150;
         SaveData        = 0 ; % set to 1 to save
 

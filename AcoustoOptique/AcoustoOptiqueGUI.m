@@ -25,9 +25,9 @@
  addPathLegHAL;
  
         TypeOfSequence  = 'OF'; % 'OP','OS'
-        Volt            = 30; %Volt
-        FreqSonde       = 6; %MHz
-        NbHemicycle     = 10;
+        Volt            = 40; %Volt
+        FreqSonde       = 3; %MHz
+        NbHemicycle     = 2;
         
         AlphaM          = 0; %(-20:20)*pi/180; specific OP
 
@@ -36,13 +36,13 @@
         % integer list > 0
         NbX             = [] ;     % 20 Nb de composantes de Fourier en X, 'OS'
         
-        Foc             = 30; % mm
-        X0              = 19; %0-40
-        X1              = 21;
+        Foc             = 20; % mm
+        X0              = 1; %0-40
+        X1              = 40;
         
-        NTrig           = 1000;
+        NTrig           = 500;
         Prof            = 40;
-        SaveData        = 0 ; % set to 1 to save
+        SaveData        = 1 ; % set to 1 to save
 
 
                  
@@ -177,7 +177,7 @@ transfer.Channel        = 1;
     ylabel(cb,'AC tension (mV)')
     colormap(parula)
     set(findall(Hf,'-property','FontSize'),'FontSize',15) 
-    %%  Radon inversion :
+    %  Radon inversion :
 % 
 % 
 %     %conv2(Datas,Mconv,'same')
@@ -256,10 +256,10 @@ xlim([X0 X1])
 %% save datas :
 if SaveData == 1
     
-MainFolderName = 'D:\Data\Caroline';
+MainFolderName = 'D:\Data\JM';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'Sable';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'param1',10);
+CommentName    = 'Water_lensPSF';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Nhc',NbHemicycle,'Foc',Foc,'PB',5);
 savefig(Hf,FileName);
 saveas(Hf,FileName,'png');
 

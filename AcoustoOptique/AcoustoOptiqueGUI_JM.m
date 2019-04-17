@@ -23,26 +23,27 @@
  addPathLegHAL;
  
        TypeOfSequence = 'JM';   % 'OF' , 'JM'
- 
+        
+        Master      = 'off';
         Volt        = 15;       % 'OF' , 'OP' , 'JM'
-        FreqSonde   = 15;        % 'OF' , 'OP' , 'JM'
+        FreqSonde   = 3;        % 'OF' , 'OP' , 'JM'
         NbHemicycle = 250;      % 'OF' , 'OP' , 'JM'
         Foc         = 5;       % 'OF' 
         AlphaM      = 0;       % 'OP' 
         dA          = 1;        % 'OP' 
-        X0          = 0;        % 'OF' , 'OP' 
-        X1          = 13 ;      % 'OF' , 'OP' 
+        X0          = -10;        % 'OF' , 'OP' 
+        X1          = 50 ;      % 'OF' , 'OP' 
         NTrig       = 100;      % 'OF' , 'OP' , 'JM'
         Prof        = 200;      % 'OF' , 'OP' , 'JM'
-        NbZ         = 3;        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 3;        % 20 Nb de composantes de Fourier en X, 'JM'
+        NbZ         = 1:10;        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = -10:10;        % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;  % length in dimension x (us)
         
-        SaveData = 1 ;          % set to 1 to save data
+        SaveData = 1;          % set to 1 to save data
         AIXPLORER_Active = 'on';% 'on' or 'off' 
 
  % estimation of loading time 
- fprintf('%i events, loading should take about %d seconds\n\r',(2*NbX+1)*NbZ,(2*NbX+1)*NbZ*3);
+ fprintf('%i events, loading should take about %d seconds\n\r',length(NbX)*length(NbZ)*3);
 
 %% ============================   Initialize AIXPLORER
 % %% Sequence execution
@@ -52,13 +53,14 @@ if strcmp(AIXPLORER_Active,'on')
 switch TypeOfSequence
     case 'OF'
 NbHemicycle = min(NbHemicycle,15);
-[SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
+[SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig,Master);
     case 'OP'
 NbHemicycle = min(NbHemicycle,15);
-[SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
+[SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig,Master);
     case 'JM'
 Volt = min(Volt,20) ; 
-[SEQ,MedElmtList,NUX,NUZ] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
+[SEQ,MedElmtList,NUX,NUZ] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
+
 
 end
 
@@ -81,7 +83,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
     if strcmp(AIXPLORER_Active,'on') 
  Nlines = length(SEQ.InfoStruct.event);  
     else
-        Nlines = (2*NbX+1)*NbZ ;
+        Nlines = (2*length(NbX)+1)*length(NbZ) ;
     end
  
 [ret,Hgage,acqInfo,sysinfo] = InitOscilloGage(NTrig*Nlines,Prof,SampleRate,Range,GageActive);
@@ -97,19 +99,9 @@ transfer.Channel        = 1;
     raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     
 
-    %% ======================== start acquisition =============================
+    %% ======================== start acquisitionMaster =============================
      
-     if strcmp(AIXPLORER_Active,'on')
-         
-         tic
-         SEQ = SEQ.loadSequence();
-
-         fprintf('Sequence has loaded in %f s \n\r',toc)
-         display('--------ready to use -------------');
-         
-     end
- 
-     
+   
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
     
@@ -155,11 +147,11 @@ transfer.Channel        = 1;
     
     fprintf('Data Transfer lasted %f s \n\r',toc);
     
-    if strcmp(AIXPLORER_Active,'on')
+    % if strcmp(AIXPLORER_Active,'on')
 
-        SEQ = SEQ.stopSequence('Wait', 0);  
+        % SEQ = SEQ.stopSequence('Wait', 0);  
   
-    end
+    % end
     
     
 %% ======================== data post processing =============================
@@ -203,8 +195,7 @@ transfer.Channel        = 1;
 
        Hfinal = figure(101);
        set(Hfinal,'WindowStyle','docked');
-       imagesc(X*1e3+mean([X0 X1]),Z,I);
-       xlim([5 35])
+       imagesc(X*1e3,Z,I);
        title('reconstructed image')
        xlabel('x (mm)')
        ylabel('z (mm)')
@@ -219,14 +210,14 @@ transfer.Channel        = 1;
    
 %% save datas :
 if SaveData == 1
-MainFolderName = 'D:\Data\Mai\';
+MainFolderName = 'D:\Data\JM';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = '15MHz';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'NbZ',NbZ,'NbZ',NbX);
+CommentName    = 'Agar';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'NbZ',max(NbZ),'NbZ',max(NbX));
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','X0','X1',...
               'NTrig','Nlines','Prof','MedElmtList','Datas',...
               'SampleRate','c','Range','TypeOfSequence','x','z',...
-              'NbX','NbZ','NUX','NUZ');
+              'NbX','NbZ','NUX','NUZ','Master');
 % save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
 %               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
 savefig(Hf,FileName);

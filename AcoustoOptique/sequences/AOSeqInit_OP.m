@@ -25,7 +25,7 @@ NoOp       = 500;             % 탎 minimum time between two US pulses
 % ======================================================================= %
 
 PropagationTime        = Prof/c*1e3 ;   % 1 / pulse frequency repetition [us]
-TrigOut                = 10;            % 탎
+TrigOut                = 30;            % 탎
 Pause                  = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause duration in 탎
 
 % ======================================================================= %
