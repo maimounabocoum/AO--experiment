@@ -36,7 +36,7 @@
         NTrig       = 100;      % 'OF' , 'OP' , 'JM'
         Prof        = 200;      % 'OF' , 'OP' , 'JM'
         NbZ         = 1:10;        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = -10:10;        % 20 Nb de composantes de Fourier en X, 'JM'
+        NbX         = -12:12;        % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;  % length in dimension x (us)
         
         SaveData = 1;          % set to 1 to save data
@@ -59,8 +59,10 @@ NbHemicycle = min(NbHemicycle,15);
 [SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig,Master);
     case 'JM'
 Volt = min(Volt,20) ; 
-[SEQ,MedElmtList,NUX,NUZ] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
-
+% check the coordinate of this function
+[SEQ,MedElmtList,NUX,NUZ,nuX0,nuZ0] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
+    case 'JMpulse'
+[SEQ,MedElmtList,NUX,NUZ,nuX0,nuZ0] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
 
 end
 
@@ -191,7 +193,7 @@ transfer.Channel        = 1;
                              NUX , NUZ ,...
                              x , z , ...
                              Datas , ...
-                             SampleRate , DurationWaveform, c , system.probe.Pitch*1e-3); 
+                             SampleRate , DurationWaveform, c , nuX0,nuZ0); 
 
        Hfinal = figure(101);
        set(Hfinal,'WindowStyle','docked');
@@ -217,7 +219,7 @@ FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSeque
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','X0','X1',...
               'NTrig','Nlines','Prof','MedElmtList','Datas',...
               'SampleRate','c','Range','TypeOfSequence','x','z',...
-              'NbX','NbZ','NUX','NUZ','Master');
+              'NbX','NbZ','NUX','NUZ','Master','DurationWaveform','nuX0','nuZ0');
 % save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
 %               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
 savefig(Hf,FileName);

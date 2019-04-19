@@ -4,7 +4,7 @@
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
 
-function [SEQ,MedElmtList,NUX,NUZ] = AOSeqInit_OJM(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
+function [SEQ,MedElmtList,NUX,NUZ,nuX0,nuZ0] = AOSeqInit_OJM(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
 
 %% System parameters import :
 % ======================================================================= %
@@ -41,7 +41,7 @@ Nbtot    = ElmtBorns(2) - ElmtBorns(1) + 1 ;
 Xs        = (0:Nbtot-1)*pitch;             % Echelle de graduation en X
 
 nuZ0 = 1/((c*1e3)*DurationWaveform*1e-6);  % Pas fréquence spatiale en Z (en mm-1)
-nuX0 = 1/(Nbtot*pitch);                  % Pas fréquence spatiale en X (en mm-1)
+nuX0 = 1/(Nbtot*pitch);                    % Pas fréquence spatiale en X (en mm-1)
 
 [NBX,NBZ] = meshgrid(NbX,NbZ);
 % initialization of empty frequency matrix
@@ -56,7 +56,7 @@ RX = remote.rx('fcId', 1, 'RxFreq', 60 , 'QFilter', 2, 'RxElemts', 1:128, 0);
 
 for nbs = 1:Nfrequencymodes
     
-        nuZ  = NBZ(nbs)*nuZ0; % fréquence de modulation de phase (en Hz) 
+        nuZ  = NBZ(nbs)*nuZ0;  % fréquence spatiale (en mm-1)
         nuX  = NBX(nbs)*nuX0;  % fréquence spatiale (en mm-1)
         
         % f0 : MHz
@@ -169,7 +169,7 @@ SEQ = usse.usse( ...
     'Popup', 0, ...
     0);
 
-[SEQ NbAcq] = SEQ.buildRemote();
+[SEQ , ~ ] = SEQ.buildRemote();
  display('Build OK')
  
 %%%    Do NOT CHANGE - Sequence execution

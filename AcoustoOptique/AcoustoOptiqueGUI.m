@@ -27,7 +27,7 @@
         TypeOfSequence  = 'OF'; % 'OP','OS'
         Volt            = 40; %Volt
         FreqSonde       = 3; %MHz
-        NbHemicycle     = 2;
+        NbHemicycle     = 10;
         
         AlphaM          = 0; %(-20:20)*pi/180; specific OP
 
@@ -36,12 +36,12 @@
         % integer list > 0
         NbX             = [] ;     % 20 Nb de composantes de Fourier en X, 'OS'
         
-        Foc             = 20; % mm
+        Foc             = 30; % mm
         X0              = 1; %0-40
         X1              = 40;
         
         NTrig           = 500;
-        Prof            = 40;
+        Prof            = 200;
         SaveData        = 1 ; % set to 1 to save
 
 
@@ -207,6 +207,7 @@ transfer.Channel        = 1;
      X_m = (1:NbElemts)*(pitch*1e-3) ;
      z = (1:actual.ActualLength)*(c/(1e6*SampleRate));
      x = ScanParam(:,2);
+     
     imagesc(x,z*1e3,1e3*Datas)   
     xlabel('order N_x')
     zlabel('z(mm)')
@@ -258,7 +259,7 @@ if SaveData == 1
     
 MainFolderName = 'D:\Data\JM';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'Water_lensPSF';
+CommentName    = 'Agar';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Nhc',NbHemicycle,'Foc',Foc,'PB',5);
 savefig(Hf,FileName);
 saveas(Hf,FileName,'png');
