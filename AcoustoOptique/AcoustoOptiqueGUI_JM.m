@@ -24,7 +24,7 @@
  
        TypeOfSequence = 'JM';   % 'OF' , 'JM'
         
-        Master      = 'off';
+        Master      = 'on';
         Volt        = 15;       % 'OF' , 'OP' , 'JM'
         FreqSonde   = 3;        % 'OF' , 'OP' , 'JM'
         NbHemicycle = 250;      % 'OF' , 'OP' , 'JM'
@@ -36,7 +36,7 @@
         NTrig       = 100;      % 'OF' , 'OP' , 'JM'
         Prof        = 200;      % 'OF' , 'OP' , 'JM'
         NbZ         = 1:10;        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = -12:12;        % 20 Nb de composantes de Fourier en X, 'JM'
+        NbX         = -10:10;        % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;  % length in dimension x (us)
         
         SaveData = 1;          % set to 1 to save data

@@ -24,8 +24,8 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OF'; % 'OP','OS'
-        Volt            = 40; %Volt
+        TypeOfSequence  = 'OP'; % 'OP','OS'
+        Volt            = 55; %Volt
         FreqSonde       = 3; %MHz
         NbHemicycle     = 10;
         
@@ -37,8 +37,8 @@
         NbX             = [] ;     % 20 Nb de composantes de Fourier en X, 'OS'
         
         Foc             = 30; % mm
-        X0              = 1; %0-40
-        X1              = 40;
+        X0              = 10; %0-40
+        X1              = 30;
         
         NTrig           = 500;
         Prof            = 200;
@@ -53,14 +53,14 @@
 clear SEQ ScanParam raw Datas ActiveLIST Alphas Delay Z_m
 switch TypeOfSequence
     case 'OF'
-Volt = min(50,Volt); % security for OP routine  
+Volt = min(60,Volt); % security for OP routine  
 [SEQ,ScanParam] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
     case 'OP'
-Volt = min(50,Volt); % security for OP routine       
+Volt = min(60,Volt); % security for OP routine       
 [SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof, NTrig);
 %[SEQ,Delay,ScanParam,Alphas] = AOSeqInit_OP_arbitrary(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'OS'
-Volt = min(50,Volt); % security for OP routine     
+Volt = min(60,Volt); % security for OP routine     
 [SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , NbX , X0 , X1 ,Prof, NTrig);
 
 end
@@ -182,7 +182,7 @@ transfer.Channel        = 1;
 % 
 %     %conv2(Datas,Mconv,'same')
     MyImage = OP(Datas,Alphas,z,SampleRate*1e6,c) ;
-    [I,z_out] = DataFiltering(MyImage) ;
+    [I,z_out] = DataFiltering(MyImage,10) ;
     NbElemts = system.probe.NbElemts ;
     pitch = system.probe.Pitch ; 
     X_m = (1:NbElemts)*(pitch*1e-3) ;
@@ -260,7 +260,7 @@ if SaveData == 1
 MainFolderName = 'D:\Data\JM';
 SubFolderName  = generateSubFolderName(MainFolderName);
 CommentName    = 'Agar';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Nhc',NbHemicycle,'Foc',Foc,'PB',5);
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Nhc',NbHemicycle,'Volt',Volt);
 savefig(Hf,FileName);
 saveas(Hf,FileName,'png');
 

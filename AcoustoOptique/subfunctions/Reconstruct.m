@@ -8,11 +8,11 @@ function [I,X,Z] = Reconstruct(NbX,NbZ,NUX,NUZ,x,z,Datas,SampleRate,durationWave
         Nfrequencymodes = length(NUX(:));
         XLambda = 1/nuZ0;
         XLambda_min = (1*XLambda+Origin_Z);
-        XLambda_max = (2*XLambda+Origin_Z);
+        XLambda_max = (3*XLambda+Origin_Z);
 
             % each line is the exponential for NBz
             % integrale is performed between 2*XLambda and 5*XLambda
-            ExpFunc                          =   exp(2*1i*pi*(NUZ(:)*(z-Origin_Z)));
+            ExpFunc                          =   exp(2*1i*pi*NUZ(:)*(z-Origin_Z) );
             ExpFunc( : , z <= XLambda_min )    =   0;
             ExpFunc( : , z > XLambda_max  )    =   0;
             
@@ -38,29 +38,28 @@ for nbs = 1:Nfrequencymodes
     s = exp(2i*pi*DecalZ*NBZ(nbs));
     
     tF( NtFs+NBZ(nbs), NtFs+NBX(nbs) ) = -conj(1j*s*Cnm(nbs));
-    %tF( NtFs+NBZ(nbs), NtFs+NBX(nbs) ) = I_fft( NtFs+NBZ(nbs), NtFs+NBX(nbs) ) ;
     tF( NtFs-NBZ(nbs), NtFs-NBX(nbs) ) = -s*1j*Cnm(nbs);
-    %tF(  NtFs-NBZ(nbs), NtFs-NBX(nbs) ) = I_fft(  NtFs-NBZ(nbs), NtFs-NBX(nbs) ) ;
     
 end
  
 
-%        figure(50);
-%        set(gcf,'WindowStyle','docked');
-%        imagesc(abs(tF));
-%        %surf(angle(tF));
-%        %surf(abs(tF));
-%        title('fourier transform I')
-%        xlabel('Ny')
-%        ylabel('Nz')
+       figure(50);
+       set(gcf,'WindowStyle','docked');
+       imagesc(abs(tF));
+       %surf(angle(tF));
+       %surf(abs(tF));
+       title('fourier transform I')
+       xlabel('Ny')
+       ylabel('Nz')
  
 %tF = abs(tF).*exp(1i*angle(I_fft));
-I2 = F.ifourier(tF);
+%I = F.ifourier(tF);
 
 I = ifft2(fftshift(tF));
-%I = I - ones(NtF,1)*I(1,:);
+I = I - ones(NtF,1)*I(1,:);
 I = ifftshift(I,2);
 
-X = (-NtF/2:(NtF/2-1))*dx;
-
-Z = (0:NtF-1)*durationWaveform*1.54/NtF;
+%X = (-NtF/2:(NtF/2-1))*dx;
+ X = F.x;
+ Z = F.z;
+% Z = (0:NtF-1)*durationWaveform*1.54/NtF;
