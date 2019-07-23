@@ -1,12 +1,12 @@
 function [I,X,Z] = Reconstruct(NbX,NbZ,NUX,NUZ,x,z,Datas,SampleRate,durationWaveform,c,nuX0,nuZ0)
 % all inputs are in SI units
 
-        Origin_Z = 25;
+        Origin_Z = 20e-3;
     %    Origin_Z = 20;
 
         [NBX,NBZ] = meshgrid(NbX,NbZ);
         Nfrequencymodes = length(NUX(:));
-        XLambda = 1/nuZ0;
+        XLambda = 1/nuZ0; % mm
         XLambda_min = (1*XLambda+Origin_Z);
         XLambda_max = (3*XLambda+Origin_Z);
 
@@ -46,8 +46,6 @@ end
        figure(50);
        set(gcf,'WindowStyle','docked');
        imagesc(abs(tF));
-       %surf(angle(tF));
-       %surf(abs(tF));
        title('fourier transform I')
        xlabel('Ny')
        ylabel('Nz')
