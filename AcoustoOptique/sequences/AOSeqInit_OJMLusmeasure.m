@@ -67,6 +67,7 @@ ParamList(1,:) = {'Event','nbX','nbZ','phase'};
 ParamList(2,:) = {'int','int','int','double'};
 ParamList(3:end,4) = num2cell(PHASE); % fill in phase parameters
 
+n_rep
 for nbs = 1:Nfrequencymodes
     
         nuZ  = NBZ(nbs)*nuZ0; % fréquence de modulation de phase (en Hz) 

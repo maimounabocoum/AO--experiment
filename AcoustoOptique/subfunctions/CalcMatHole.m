@@ -61,17 +61,21 @@ t = (0:N-1)*dt;  % time in us
 alpha = nuX/fz;
 carrier = sin(2*pi*f0*T);
 
-Mat = sign(carrier).*(sin( 2*pi*fz*(T-alpha*X) )> 0 );
+%  Mat = sign(carrier).*(sin( 2*pi*fz*(T-alpha*X) )> 0 );
+Am = mod(ceil(2*fz*(T-alpha*X)),4);
+Am(Am==2)=0;
+Am(Am==3)=-1;
+Mat = sign(carrier).*Am;
 
 % convert m-1->mm-1
 nuZ = 1e-3*nuZ;
 nuX = 1e-3*nuX;
 
 %% print matrix
-% figure(100)
-%         imagesc(Mat)
-%         xlabel('x (mm)')
-%         ylabel('z(mm)')
-%         drawnow
+figure(100)
+        imagesc(Mat)
+        xlabel('x (mm)')
+        ylabel('z(mm)')
+        drawnow
 end
     

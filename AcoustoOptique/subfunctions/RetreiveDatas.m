@@ -1,4 +1,4 @@
-function [datas,V] = RetreiveDatas( raw , Ntrig, Nlines,MedElmtList)
+function [datas_mu,datas_std,V] = RetreiveDatas( raw , Ntrig, Nlines,MedElmtList)
 % Retreiving average from raw datas
 %   Maïmouna Bocoum
 
@@ -18,8 +18,8 @@ datas = reshape(raw,size(raw,1),Nlines, Ntrig);
 % datas(:,Isorted,:) = datas(:,Iposition,:);
 % size(datas)
 V = var(datas,0,3);
-datas = mean(datas,3);
-
+datas_mu = mean(datas,3);
+datas_std = sqrt( var(datas,0,3) ); 
 
 end
 

@@ -1,14 +1,14 @@
 function [I,X,Z] = Reconstruct(NbX,NbZ,NUX,NUZ,x,z,Datas,SampleRate,durationWaveform,c,nuX0,nuZ0)
 % all inputs are in SI units
 
-        Origin_Z = 20e-3;
+        Origin_Z = 50e-3;
     %    Origin_Z = 20;
 
         [NBX,NBZ] = meshgrid(NbX,NbZ);
         Nfrequencymodes = length(NUX(:));
-        XLambda = 1/nuZ0; % mm
-        XLambda_min = (1*XLambda+Origin_Z);
-        XLambda_max = (3*XLambda+Origin_Z);
+        XLambda = 1/nuZ0; % m
+        XLambda_min = (0*XLambda+Origin_Z);
+        XLambda_max = (2*XLambda+Origin_Z);
 
             % each line is the exponential for NBz
             % integrale is performed between 2*XLambda and 5*XLambda
@@ -21,10 +21,16 @@ function [I,X,Z] = Reconstruct(NbX,NbZ,NUX,NUZ,x,z,Datas,SampleRate,durationWave
             % projection of fourrier composants:
             Cnm = conj(diag(ExpFunc*Datas))' ;
                
-        DecalZ  =   1.4; % ??
+        DecalZ  =   0.3; % ??
         NtF     =   2^10;
-        F = TF2D(NtF,(NtF-1)*nuX0,(NtF-1)*nuZ0);
-        dF = nuX0 ;
+%         
+%         F = TF2D(NtF,(NtF-1)*nuX0,(NtF-1)*nuZ0);
+%         dF = nuX0 ;
+        
+        dF = diff(NUX(:)) ;
+        dF = min(dF(dF>0));
+        
+        
         Fmax = (NtF/2)*dF;
         dx = 1e-3/abs(2*Fmax) ;
         
@@ -57,7 +63,8 @@ I = ifft2(fftshift(tF));
 I = I - ones(NtF,1)*I(1,:);
 I = ifftshift(I,2);
 
-%X = (-NtF/2:(NtF/2-1))*dx;
- X = F.x;
- Z = F.z;
-% Z = (0:NtF-1)*durationWaveform*1.54/NtF;
+X = (-NtF/2:(NtF/2-1))*dx;
+Z = (0:NtF-1)*durationWaveform*1.54/NtF;
+% X = F.x;
+% Z = F.z;
+

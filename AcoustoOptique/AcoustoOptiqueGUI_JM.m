@@ -31,12 +31,12 @@
         Foc         = 5;       % 'OF' 
         AlphaM      = 0;       % 'OP' 
         dA          = 1;        % 'OP' 
-        X0          = -10;        % 'OF' , 'OP' 
+        X0          = 0;        % 'OF' , 'OP' 
         X1          = 50 ;      % 'OF' , 'OP' 
-        NTrig       = 100;      % 'OF' , 'OP' , 'JM'
-        Prof        = 200;      % 'OF' , 'OP' , 'JM'
-        NbZ         = 1:10;        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = -10:10;        % 20 Nb de composantes de Fourier en X, 'JM'
+        NTrig       = 500;      % 'OF' , 'OP' , 'JM'
+        Prof        = 300;      % 'OF' , 'OP' , 'JM'
+        NbZ         = 1:8;    % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = -10:10;     % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;  % length in dimension x (us)
         
         SaveData = 1;          % set to 1 to save data
@@ -175,12 +175,12 @@ transfer.Channel        = 1;
 
    case 'JM'
         MedElmtList = 1:Nlines ;
-        Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
+        [Datas_mu,Datas_std, ~] = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
         % Calcul composante de Fourier
-        z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
+        z = (1:actual.ActualLength)*(c/(1e6*SampleRate));
         x = (1:Nlines);
         
-            imagesc(x,z,1e3*Datas)
+            imagesc(x,z*1e3,1e3*Datas_mu)
             xlabel('lines Nbx, Nbz')
             ylabel('z (mm)')    
             title('Averaged raw datas')
@@ -192,7 +192,7 @@ transfer.Channel        = 1;
        [I,X,Z] = Reconstruct(NbX , NbZ, ...
                              NUX , NUZ ,...
                              x , z , ...
-                             Datas , ...
+                             Datas_mu , ...
                              SampleRate , DurationWaveform, c , nuX0,nuZ0); 
 
        Hfinal = figure(101);
@@ -214,12 +214,12 @@ transfer.Channel        = 1;
 if SaveData == 1
 MainFolderName = 'D:\Data\JM';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'Agar';
+CommentName    = 'SansEffetTalbotRepeat4_InclusionMiddle';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'NbZ',max(NbZ),'NbZ',max(NbX));
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','X0','X1',...
-              'NTrig','Nlines','Prof','MedElmtList','Datas',...
+              'NTrig','Nlines','Prof','MedElmtList','Datas_mu','Datas_std',...
               'SampleRate','c','Range','TypeOfSequence','x','z',...
-              'NbX','NbZ','NUX','NUZ','Master','DurationWaveform','nuX0','nuZ0');
+              'NbX','NbZ','NUX','NUZ','Master','DurationWaveform','nuX0','nuZ0','t_aquisition','raw');
 % save(FileName,'Volt','FreqSonde','NbHemicycle','Foc','AlphaM','dA'...
 %               ,'X0','X1','NTrig','Nlines','Prof','MedElmtList','raw','SampleRate','c','Range','TypeOfSequence');
 savefig(Hf,FileName);

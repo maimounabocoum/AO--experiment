@@ -19,9 +19,9 @@ lambda=765;
 % concInkSolution=0;
 
 Youngmodulus=60;
-mu_sprime= 5;
+mu_sprime= 10;
 mu_a=0;
-massGel=5*5*3;
+massGel=5*5*5;
 
 
 

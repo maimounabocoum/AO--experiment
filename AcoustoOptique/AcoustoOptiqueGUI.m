@@ -24,26 +24,26 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OP'; % 'OP','OS'
-        Volt            = 55; %Volt
+        TypeOfSequence  = 'OF'; % 'OP','OS'
+        Volt            = 40; %Volt
         FreqSonde       = 3; %MHz
-        NbHemicycle     = 10;
+        NbHemicycle     = 6;
         
-        AlphaM          = 0; %(-20:20)*pi/180; specific OP
+        AlphaM          = (-20:20)*pi/180; % specific OP
 
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbX             = [] ;     % 20 Nb de composantes de Fourier en X, 'OS'
+        NbX             = [8] ;     % 20 Nb de composantes de Fourier en X, 'OS'
         
-        Foc             = 30; % mm
+        Foc             = 25; % mm
         X0              = 10; %0-40
-        X1              = 30;
+        X1              = 40;
         
         NTrig           = 500;
-        Prof            = 200;
-        SaveData        = 1 ; % set to 1 to save
-
+        Prof            = 60;
+        SaveData        = 1; % set to 1 to save
+        SaveRaw         = 0 ;
 
                  
 
@@ -60,7 +60,7 @@ Volt = min(60,Volt); % security for OP routine
 [SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof, NTrig);
 %[SEQ,Delay,ScanParam,Alphas] = AOSeqInit_OP_arbitrary(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'OS'
-Volt = min(60,Volt); % security for OP routine     
+Volt = min(50,Volt); % security for OP routine     
 [SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , NbX , X0 , X1 ,Prof, NTrig);
 
 end
@@ -106,6 +106,7 @@ transfer.Channel        = 1;
     
     status = CsMl_QueryStatus(Hgage);
     
+ 
     while status ~= 0
         status = CsMl_QueryStatus(Hgage);
     end
@@ -134,17 +135,18 @@ transfer.Channel        = 1;
     SEQ = SEQ.stopSequence('Wait', 0);  
     
     %% ======================== data post processing =============================
-    Hf = figure;
-    set(Hf,'WindowStyle','docked');
+    Hmu = figure;
+    set(Hmu,'WindowStyle','docked');
+
     
     switch TypeOfSequence
         case 'OF'
-    [Datas, Sigma] = RetreiveDatas(raw,NTrig,Nlines,ScanParam);
+    [Datas_mu,Datas_std, Datas_var] = RetreiveDatas(raw,NTrig,Nlines,ScanParam);
     z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
     NbElemts = system.probe.NbElemts ;
     pitch = system.probe.Pitch ; 
     x = ScanParam*pitch;
-    imagesc(x,z,1e3*Datas)
+    imagesc(x,z,1e3*Datas_mu)
     ylim([0 Prof])
     xlabel('x (mm)')
     ylabel('z (mm)')
@@ -152,20 +154,32 @@ transfer.Channel        = 1;
     cb = colorbar;
     ylabel(cb,'AC tension (mV)')
     colormap(parula)
-    set(findall(Hf,'-property','FontSize'),'FontSize',15) 
+    set(findall(Hmu,'-property','FontSize'),'FontSize',15) 
     
-%     figure;
-%     set(gcf,'WindowStyle','docked');
-%     imagesc(x,z,Datas./Sigma)
-%     ylim([0 Prof])
-%     xlabel('x (mm)')
-%     ylabel('z (mm)')
-%     title('S/N')
-%     cb = colorbar;
-%     ylabel(cb,'AC tension (mV)')
-%     colormap(parula)
-%     set(findall(Hf,'-property','FontSize'),'FontSize',15) 
-%     
+    Hstd = figure;
+    set(Hstd,'WindowStyle','docked');
+    imagesc(x,z,1e3*Datas_std)
+    ylim([0 Prof])
+    xlabel('x (mm)')
+    ylabel('z (mm)')
+    title('STD raw datas')
+    cb = colorbar;
+    ylabel(cb,'AC tension (mV)')
+    colormap(parula)
+    set(findall(Hstd,'-property','FontSize'),'FontSize',15) 
+    
+    Hsnr = figure;
+    set(Hsnr,'WindowStyle','docked');
+    imagesc(x,z,Datas_mu./Datas_std)
+    ylim([0 Prof])
+    xlabel('x (mm)')
+    ylabel('z (mm)')
+    title('SNR raw datas')
+    cb = colorbar;
+    ylabel(cb,'AC tension (mV)')
+    colormap(parula)
+    set(findall(Hsnr,'-property','FontSize'),'FontSize',15)    
+    
         case 'OP'
     Datas = RetreiveDatas(raw,NTrig,Nlines,ScanParam);
     z = (1:actual.ActualLength)*(c/(1e6*SampleRate));
@@ -176,7 +190,7 @@ transfer.Channel        = 1;
     cb = colorbar;
     ylabel(cb,'AC tension (mV)')
     colormap(parula)
-    set(findall(Hf,'-property','FontSize'),'FontSize',15) 
+    set(findall(Hstd,'-property','FontSize'),'FontSize',15) 
     %  Radon inversion :
 % 
 % 
@@ -225,7 +239,7 @@ transfer.Channel        = 1;
     DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
     ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
        
-    [theta,M0,~,~,C] = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , c) ;
+    [theta,~,~,C] = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , c) ;
 
 
 FTF = MyImage.InverseFourierX( FTFx  , decimation , theta , C ) ;
@@ -259,23 +273,33 @@ if SaveData == 1
     
 MainFolderName = 'D:\Data\JM';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'Agar';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Nhc',NbHemicycle,'Volt',Volt);
-savefig(Hf,FileName);
-saveas(Hf,FileName,'png');
+CommentName    = 'InclusionBottom';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Foc',Foc,'type',TypeOfSequence);
+savefig(Hmu,FileName);
+saveas(Hmu,FileName,'png');
 
 switch TypeOfSequence
     case 'OF'
+        if SaveRaw == 0
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
-              ,'X0','X1','NTrig','Nlines','Prof','ScanParam','pitch','NbElemts','x','z','Datas','SampleRate','c','Range','TypeOfSequence','t_aquisition');
-    case 'OP'
+              ,'X0','X1','NTrig','Nlines','Prof','ScanParam','pitch','NbElemts','x','z','Datas_mu','Datas_std','SampleRate','c','Range','TypeOfSequence','t_aquisition');
+        else
+save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
+              ,'X0','X1','NTrig','Nlines','Prof','ScanParam','pitch','NbElemts','x','z','raw','SampleRate','c','Range','TypeOfSequence','t_aquisition');            
+        end
+          
+          case 'OP'
 save(FileName,'Volt','DelayLAWS','ActiveLIST','FreqSonde','NbHemicycle','Alphas'...
               ,'X0','X1','NTrig','Nlines','Prof','ScanParam','pitch','NbElemts','x','z','Datas','SampleRate','c','Range','TypeOfSequence','t_aquisition');
 %saveas(Hresconstruct,[FileName,'_retrop'],'png');
     case 'OS'
+        if SaveRaw == 0
 save(FileName,'Volt','DelayLAWS','ActiveLIST','FreqSonde','pitch','NbElemts','NbHemicycle','Alphas','NbX','dFx'...
-                  ,'X0','X1','NTrig','Nlines','Prof','ScanParam','z','Datas','SampleRate','c','Range','TypeOfSequence','t_aquisition');
-
+                  ,'X0','X1','NTrig','Nlines','Prof','ScanParam','z','Datas_mu','Datas_std','SampleRate','c','Range','TypeOfSequence','t_aquisition');
+        else
+save(FileName,'Volt','DelayLAWS','ActiveLIST','FreqSonde','pitch','NbElemts','NbHemicycle','Alphas','NbX','dFx'...
+                  ,'X0','X1','NTrig','Nlines','Prof','ScanParam','z','raw','SampleRate','c','Range','TypeOfSequence','t_aquisition');    
+        end
 saveas(Hresconstruct,[FileName,'_ifft'],'png');
 
 end

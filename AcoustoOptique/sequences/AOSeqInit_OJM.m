@@ -15,7 +15,7 @@ NbElemts    = system.probe.NbElemts ;
 pitch       = system.probe.Pitch ; % in mm
 MinNoop     = system.hardware.MinNoop;
 
-NoOp       = 500;             % µs minimum time between two US pulses
+NoOp       = 1000;             % µs minimum time between two US pulses
 
 % ======================================================================= %
 
@@ -83,7 +83,7 @@ for nbs = 1:Nfrequencymodes
     TWList{nbs} = remote.tw_arbitrary( ...
                     'Waveform',Waveform', ...
                     'RepeatCH', 0, ...
-                    'repeat',2 , ...
+                    'repeat',4 , ...
                     'repeat256', 0, ...
                     'ApodFct', 'none', ...
                     'TxElemts',ElmtBorns(1):ElmtBorns(2), ...
@@ -172,6 +172,13 @@ SEQ = usse.usse( ...
 [SEQ , ~ ] = SEQ.buildRemote();
  display('Build OK')
  
+ 
+% convert to SI unit
+nuX0 = nuX0*1e3;
+nuZ0 = nuZ0*1e3;
+NUX = NUX*1e3;
+NUZ = NUZ*1e3;
+
 %%%    Do NOT CHANGE - Sequence execution
  %% initialize communation with remote aixplorer and load sequence
 try

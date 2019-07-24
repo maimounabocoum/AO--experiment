@@ -36,7 +36,7 @@
         Volt            = 15; %Volt
         % 2eme contrainte : 
         % soit FreqSonde congrue à NUZ0 , soit entier*FreqSonde = NUech(=180e6)
-        FreqSonde       = 3; %MHz AO : 78 et 84 MHz to be multiple of 6
+        FreqSonde       = 6; %MHz AO : 78 et 84 MHz to be multiple of 6
         FreqSonde       = 180/round(180/FreqSonde); %MHz
         NbHemicycle     = 5 ;
         
@@ -45,9 +45,9 @@
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbZ         = 10;        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 0;        % 20 Nb de composantes de Fourier en X, 'JM'
-        Phase       = 0;%[0,0.25,0.5,0.75] ; % phases per frequency in 2pi unit
+        NbZ         = 1:15;        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = -5:5;        % 20 Nb de composantes de Fourier en X, 'JM'
+        Phase       = [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
         %        NUrep =   Nbz*(50kHz)         
@@ -61,13 +61,13 @@
         n_low = round( 180*DurationWaveform );
         NU_low = (180)/n_low;   % fundamental temporal frequency
         
-        Tau_cam          = 20 ;% camera integration time (us)
+        Tau_cam          = 250 ;% camera integration time (us)
         
         Foc             = 10; % mm
         X0              = -20; %0-40
         X1              = 40;
         
-        NTrig           = 5;
+        NTrig           = 100;
         Prof            = 150;
         SaveData        = 0 ; % set to 1 to save
 
@@ -129,16 +129,17 @@ title(['shot Number = ',num2str(Nactive)])
 
 SEQ.InfoStruct.event(Nactive).duration
 
-%% write log file to share between applications (Labview)
+%% write log file to share between applications (Labview) as csv format
 
 % list of data type : isDataType
-% isfloat
+% isfloat H:\
 % islogical
 % isstring
-MainFolderName     = 'D:\Data\Mai';
-SubFolderName      = generateSubFolderName(MainFolderName);
+SubFolderNameLocal         = generateSubFolderName('D:\Data\Mai'); % localhost save
+SubFolderNameHollande      = generateSubFolderName('H:\Mai'); % 10.10.10.36 - holland save
 % FileName_txt       = [SubFolderName,'\LogFile.txt'];
-FileName_csv       = [SubFolderName,'\LogFile.csv'];
+FileNameLocal_csv          = [SubFolderNameLocal,'\LogFile.csv'];
+FileNameHollande_csv       = [SubFolderNameHollande,'\LogFile.csv'];
 
 %  fid = fopen(FileName_txt,'w');
 %  [rows,cols]=size(ParamList);
@@ -171,8 +172,9 @@ FileName_csv       = [SubFolderName,'\LogFile.csv'];
  HearderCell(:,11) = {'nuZ0'; nuZ0};
  
  FinalCell = joincell( HearderCell , ParamList ) ;
- 
- cell2csv(FileName_csv,  FinalCell , ';' ,'2015' ,'.' ) ;
+
+ cell2csv(FileNameLocal_csv,  FinalCell , ';' ,'2015' ,'.' ) ;
+ cell2csv(FileNameHollande_csv,  FinalCell , ';' ,'2015' ,'.' ) ;
  
  switch TypeOfSequence
      case {'OC','JM'}
@@ -197,8 +199,16 @@ FileName_csv       = [SubFolderName,'\LogFile.csv'];
 
 %fwritecell('exptable.txt',ParamList);
 %%
+% Get system status
+%  Msg    = struct('name', 'get_status');
+%  Status = remoteSendMessage(SEQ.Server, Msg);
+%  Status.rfsequencetype
+% 
+%  Msg = struct('name', 'start_stop_sequence', 'start', 1);
+%  Status = remoteSendMessage(SEQ.Server, Msg)
+
 % SEQ = SEQ.startSequence();
-% SEQ = SEQ.stopSequence('Wait', 0);
+% SEQ = SEQ.stopSequence('Wait',0);
 
 
 
