@@ -25,9 +25,9 @@
  addPathLegHAL;
  
         TypeOfSequence  = 'OF'; % 'OP','OS'
-        Volt            = 40; %Volt
-        FreqSonde       = 3; %MHz
-        NbHemicycle     = 6;
+        Volt            = 15; %Volt
+        FreqSonde       = 6; %MHz
+        NbHemicycle     = 2;
         
         AlphaM          = (-20:20)*pi/180; % specific OP
 
@@ -36,12 +36,12 @@
         % integer list > 0
         NbX             = [8] ;     % 20 Nb de composantes de Fourier en X, 'OS'
         
-        Foc             = 25; % mm
-        X0              = 10; %0-40
+        Foc             = 23; % mm
+        X0              = 0; %0-40
         X1              = 40;
         
         NTrig           = 500;
-        Prof            = 60;
+        Prof            = 40;
         SaveData        = 1; % set to 1 to save
         SaveRaw         = 0 ;
 
@@ -170,7 +170,7 @@ transfer.Channel        = 1;
     
     Hsnr = figure;
     set(Hsnr,'WindowStyle','docked');
-    imagesc(x,z,Datas_mu./Datas_std)
+    imagesc(x,z,abs(Datas_mu./Datas_std))
     ylim([0 Prof])
     xlabel('x (mm)')
     ylabel('z (mm)')
@@ -271,9 +271,9 @@ xlim([X0 X1])
 %% save datas :
 if SaveData == 1
     
-MainFolderName = 'D:\Data\JM';
+MainFolderName = 'D:\Data\Mai';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'InclusionBottom';
+CommentName    = 'Lens5cm_2papers';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Foc',Foc,'type',TypeOfSequence);
 savefig(Hmu,FileName);
 saveas(Hmu,FileName,'png');
