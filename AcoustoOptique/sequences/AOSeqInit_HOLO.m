@@ -57,7 +57,7 @@ for nbs = 1:Nfrequencymodes
         % f0 : MHz
         % nuZ : en mm-1
         % nuX : en mm-1
-        [nuX,nuZ,~,Waveform] = CalcMatHole(f0,nuX,nuZ,Xs,SampFreq,c); % Calculer la matrice
+        [nuX,nuZ,~,Waveform] = CalcMatHole(f0,NBX(nbs),NBZ(nbs),nuX0,nuZ0,Xs,SampFreq,c); % Calculer la matrice
         % upgrade frequency map : 
         NUX(nbs) = nuX ;
         NUZ(nbs) = nuZ ;

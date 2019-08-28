@@ -38,16 +38,16 @@
         % soit FreqSonde congrue à NUZ0 , soit entier*FreqSonde = NUech(=180e6)
         FreqSonde       = 6; %MHz AO : 78 et 84 MHz to be multiple of 6
         FreqSonde       = 180/round(180/FreqSonde); %MHz
-        NbHemicycle     = 5 ;
+        NbHemicycle     = 250 ;
         
         AlphaM          = 0; %(-20:20)*pi/180; specific OP
 
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbZ         = 1:15;        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = -5:5;        % 20 Nb de composantes de Fourier en X, 'JM'
-        Phase       = [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
+        NbZ         = 8;        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = 0;        % 20 Nb de composantes de Fourier en X, 'JM'
+        Phase       = 0;%[0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
         %        NUrep =   Nbz*(50kHz)         
@@ -64,10 +64,10 @@
         Tau_cam          = 250 ;% camera integration time (us)
         
         Foc             = 10; % mm
-        X0              = -20; %0-40
+        X0              = 0; %0-40
         X1              = 40;
         
-        NTrig           = 100;
+        NTrig           = 7000;
         Prof            = 150;
         SaveData        = 0 ; % set to 1 to save
 

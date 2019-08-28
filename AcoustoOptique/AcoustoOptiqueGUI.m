@@ -24,8 +24,8 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OF'; % 'OP','OS'
-        Volt            = 15; %Volt
+        TypeOfSequence  = 'OP'; % 'OP','OS'
+        Volt            = 40; %Volt
         FreqSonde       = 6; %MHz
         NbHemicycle     = 2;
         
@@ -34,14 +34,14 @@
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbX             = [8] ;     % 20 Nb de composantes de Fourier en X, 'OS'
+        decimation             = [8] ;     % 20 Nb de composantes de Fourier en X, 'OS'
         
-        Foc             = 23; % mm
-        X0              = 0; %0-40
+        Foc             = 25; % mm
+        X0              = 0; %13-27
         X1              = 40;
         
         NTrig           = 500;
-        Prof            = 40;
+        Prof            = 50;
         SaveData        = 1; % set to 1 to save
         SaveRaw         = 0 ;
 
@@ -61,7 +61,7 @@ Volt = min(60,Volt); % security for OP routine
 %[SEQ,Delay,ScanParam,Alphas] = AOSeqInit_OP_arbitrary(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'OS'
 Volt = min(50,Volt); % security for OP routine     
-[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , NbX , X0 , X1 ,Prof, NTrig);
+[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , decimation , X0 , X1 ,Prof, NTrig);
 
 end
 
@@ -273,7 +273,7 @@ if SaveData == 1
     
 MainFolderName = 'D:\Data\Mai';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'Lens5cm_2papers';
+CommentName    = 'Lens5cm_1paper';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Foc',Foc,'type',TypeOfSequence);
 savefig(Hmu,FileName);
 saveas(Hmu,FileName,'png');
@@ -294,10 +294,10 @@ save(FileName,'Volt','DelayLAWS','ActiveLIST','FreqSonde','NbHemicycle','Alphas'
 %saveas(Hresconstruct,[FileName,'_retrop'],'png');
     case 'OS'
         if SaveRaw == 0
-save(FileName,'Volt','DelayLAWS','ActiveLIST','FreqSonde','pitch','NbElemts','NbHemicycle','Alphas','NbX','dFx'...
+save(FileName,'Volt','DelayLAWS','ActiveLIST','FreqSonde','pitch','NbElemts','NbHemicycle','Alphas','decimation','dFx'...
                   ,'X0','X1','NTrig','Nlines','Prof','ScanParam','z','Datas_mu','Datas_std','SampleRate','c','Range','TypeOfSequence','t_aquisition');
         else
-save(FileName,'Volt','DelayLAWS','ActiveLIST','FreqSonde','pitch','NbElemts','NbHemicycle','Alphas','NbX','dFx'...
+save(FileName,'Volt','DelayLAWS','ActiveLIST','FreqSonde','pitch','NbElemts','NbHemicycle','Alphas','decimation','dFx'...
                   ,'X0','X1','NTrig','Nlines','Prof','ScanParam','z','raw','SampleRate','c','Range','TypeOfSequence','t_aquisition');    
         end
 saveas(Hresconstruct,[FileName,'_ifft'],'png');

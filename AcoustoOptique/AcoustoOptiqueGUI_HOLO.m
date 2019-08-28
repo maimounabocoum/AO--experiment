@@ -22,19 +22,19 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-       TypeOfSequence = 'OP';   % 'OF' , 'JM'
- 
-        Volt        = 20;       % 'OF' , 'OP' , 'JM'
-        FreqSonde   = 3;        % 'OF' , 'OP' , 'JM'
-        NbHemicycle = 200;      % 'OF' , 'OP' , 'JM'
+       TypeOfSequence = 'JM';   % 'OF' , 'JM'
+        Master      = 'off'; 
+        Volt        = 15;       % 'OF' , 'OP' , 'JM'
+        FreqSonde   = 6;        % 'OF' , 'OP' , 'JM'
+        NbHemicycle = 250;      % 'OF' , 'OP' , 'JM'
         Foc         = 23;       % 'OF' 
         AlphaM      = 20;       % 'OP' 
         dA          = 1;        % 'OP' 
-        X0          = 12;        % 'OF' , 'OP' 
-        X1          = 25 ;      % 'OF' , 'OP' 
-        NTrig       = 10;      % 'OF' , 'OP' , 'JM'
+        X0          = 0;        % 'OF' , 'OP' 
+        X1          = 50 ;      % 'OF' , 'OP' 
+        NTrig       = 1000;     % 'OF' , 'OP' , 'JM'
         Prof        = 200;      % 'OF' , 'OP' , 'JM'
-        NbZ         = 1;        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbZ         = 8;        % 8; % Nb de composantes de Fourier en Z, 'JM'
         NbX         = 0;        % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;  % length in dimension x (us)
         
@@ -57,7 +57,7 @@ NbHemicycle = min(NbHemicycle,15);
 [SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'JM'
 Volt = min(Volt,20) ; 
-[SEQ,MedElmtList,NUX,NUZ] = AOSeqInit_HOLO(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform);
+[SEQ,MedElmtList,NUX,NUZ] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
 
 end
 
