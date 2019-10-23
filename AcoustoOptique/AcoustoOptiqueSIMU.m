@@ -33,21 +33,22 @@
  % 'OC' : Ondes Chirpées
  
         TypeOfSequence  = 'JM'; % 'OP','OS','JM','OC'
+        Master          = 'on';
         Volt            = 15; %Volt
         % 2eme contrainte : 
         % soit FreqSonde congrue à NUZ0 , soit entier*FreqSonde = NUech(=180e6)
         FreqSonde       = 6; %MHz AO : 78 et 84 MHz to be multiple of 6
         FreqSonde       = 180/round(180/FreqSonde); %MHz
-        NbHemicycle     = 250 ;
+        NbHemicycle     = 10 ;
         
         AlphaM          = 0; %(-20:20)*pi/180; specific OP
 
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbZ         = 8;        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbZ         = 10;        % 8; % Nb de composantes de Fourier en Z, 'JM'
         NbX         = 0;        % 20 Nb de composantes de Fourier en X, 'JM'
-        Phase       = 0;%[0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
+        Phase       = 0;[0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
         %        NUrep =   Nbz*(50kHz)         
@@ -67,8 +68,8 @@
         X0              = 0; %0-40
         X1              = 40;
         
-        NTrig           = 7000;
-        Prof            = 150;
+        NTrig           = 3000;
+        Prof            = 60;
         SaveData        = 0 ; % set to 1 to save
 
 %% default parameters for user input (used for saving)
@@ -87,14 +88,14 @@ Volt = min(50,Volt); % security for OP routine
 [SEQ,ScanParam] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
     case 'OP'
 Volt = min(50,Volt); % security for OP routine       
-[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OPL(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof, NTrig);
+[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof, NTrig,'on');
 %[SEQ,Delay,ScanParam,Alphas] = AOSeqInit_OP_arbitrary(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'OS'
 Volt = min(50,Volt); % security for OP routine     
 [SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , NbX , X0 , X1 ,Prof, NTrig);
     case 'JM'
 Volt = min(Volt,20) ; 
-[SEQ,ActiveLIST,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OJMLusmeasure(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig ,NU_low,Tau_cam , Phase);
+[SEQ,ActiveLIST,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OJMLusmeasure(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig ,NU_low,Tau_cam , Phase ,Master);
     case 'OC'
 Volt = min(Volt,15) ; 
 [SEQ,MedElmtList,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OC(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 , NTrig ,DurationWaveform,Tau_cam);
@@ -136,7 +137,7 @@ SEQ.InfoStruct.event(Nactive).duration
 % islogical
 % isstring
 SubFolderNameLocal         = generateSubFolderName('D:\Data\Mai'); % localhost save
-SubFolderNameHollande      = generateSubFolderName('H:\Mai'); % 10.10.10.36 - holland save
+SubFolderNameHollande      = generateSubFolderName('Z:\Mai'); % 10.10.10.36 - holland save
 % FileName_txt       = [SubFolderName,'\LogFile.txt'];
 FileNameLocal_csv          = [SubFolderNameLocal,'\LogFile.csv'];
 FileNameHollande_csv       = [SubFolderNameHollande,'\LogFile.csv'];
@@ -199,7 +200,7 @@ FileNameHollande_csv       = [SubFolderNameHollande,'\LogFile.csv'];
 
 %fwritecell('exptable.txt',ParamList);
 %%
-% Get system status
+%  Get system status
 %  Msg    = struct('name', 'get_status');
 %  Status = remoteSendMessage(SEQ.Server, Msg);
 %  Status.rfsequencetype
@@ -207,8 +208,8 @@ FileNameHollande_csv       = [SubFolderNameHollande,'\LogFile.csv'];
 %  Msg = struct('name', 'start_stop_sequence', 'start', 1);
 %  Status = remoteSendMessage(SEQ.Server, Msg)
 
-% SEQ = SEQ.startSequence();
-% SEQ = SEQ.stopSequence('Wait',0);
+  SEQ = SEQ.startSequence();
+%  SEQ = SEQ.stopSequence('Wait',0);
 
 
 

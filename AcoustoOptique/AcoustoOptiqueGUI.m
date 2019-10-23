@@ -25,24 +25,24 @@
  addPathLegHAL;
  
         TypeOfSequence  = 'OP'; % 'OP','OS'
-        Volt            = 40; %Volt
-        FreqSonde       = 6; %MHz
-        NbHemicycle     = 2;
+        Volt            = 15; %Volt
+        FreqSonde       = 8; %MHz
+        NbHemicycle     = 10;
         
-        AlphaM          = (-20:20)*pi/180; % specific OP
+        AlphaM          = 0*pi/180; % specific OP
 
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
         decimation             = [8] ;     % 20 Nb de composantes de Fourier en X, 'OS'
         
-        Foc             = 25; % mm
-        X0              = 0; %13-27
+        Foc             = 35; % mm
+        X0              = 20; %13-27
         X1              = 40;
         
-        NTrig           = 500;
-        Prof            = 50;
-        SaveData        = 1; % set to 1 to save
+        NTrig           = 3000;
+        Prof            = 60;
+        SaveData        = 0; % set to 1 to save
         SaveRaw         = 0 ;
 
                  
@@ -57,7 +57,7 @@ Volt = min(60,Volt); % security for OP routine
 [SEQ,ScanParam] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
     case 'OP'
 Volt = min(60,Volt); % security for OP routine       
-[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof, NTrig);
+[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof, NTrig,'on');
 %[SEQ,Delay,ScanParam,Alphas] = AOSeqInit_OP_arbitrary(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'OS'
 Volt = min(50,Volt); % security for OP routine     
@@ -271,10 +271,10 @@ xlim([X0 X1])
 %% save datas :
 if SaveData == 1
     
-MainFolderName = 'D:\Data\Mai';
+MainFolderName = 'D:\Data\Louis';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'Lens5cm_1paper';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Foc',Foc,'type',TypeOfSequence);
+CommentName    = 'SL102_Intralipide10pourcent';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Foc',Foc,'type',TypeOfSequence,'Freq',FreqSonde);
 savefig(Hmu,FileName);
 saveas(Hmu,FileName,'png');
 

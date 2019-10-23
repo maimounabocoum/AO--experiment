@@ -7,52 +7,51 @@ function [nuX,nuZ,t,Mat] = CalcMatHole(f0,nbX,nbZ,nuX0,nuZ0,x,Fe,c)
 % x  : coordinate vector in mm
 
 % conversion of all input to SI units : 
-Fe = Fe*1e6 ;   %MHz->Hz
-f0 = f0*1e6;    %MHz->Hz
-nuZ = 1e3*(nbZ*nuZ0) ; %mm-1->m-1
-nuX = 1e3*(nbX*nuX0); %mm-1->m-1
-x = x*1e-3;     %mm->m
+
+Fe = Fe*1e6 ;           % MHz->Hz
+f0 = f0*1e6;            % MHz->Hz
+nuZ = 1e3*(nbZ*nuZ0) ;  % mm-1->m-1
+nuX = 1e3*(nbX*nuX0);   % mm-1->m-1
+x = x*1e-3;             % mm->m
 
 % conversion to temporal frequency along z
-fz = c*nuZ ; %Hz
+fz0 = c*nuZ0*1e3  ;      % fondamental frequency in Hz
+fz  = c*nuZ ;            % harmonic frequency in Hz
+dt  = 1/Fe ;             % in s
 
-dt = 1/Fe ; % in s
-% Tmax = (20.1*1e-6);   % periode maximale d'un cycle élémentaire (en s)
 
-Tz = 1/fz;          % periode de l'envelloppe A in s
-T0 = 1/f0;          % periode de la porteuse A in s
+% 2 constraints are imposed on the repeating patter:
+% fz*Tot should be integer
+% f0*Tot should be integer
+% where Tot is the temporal windows of the fondamental pattern
+% since Tot = N*(1/Fe)
+% this forces the following constraints:
+% N*fz0/Fe should be integer
+% N*f0/Fe should be integer
 
-% si la période de la modulation de phase est plus grande que Tmax --> Manip impossible
-% (à remplacer par une exception..)
-% if (Tz>Tmax) 
-%    Mat = zeros(size(X));
-%    return;
-% end;
+% consequently, if fz0/Fe and f0/Fe are integers, than:
 
-Nrep = nbZ;
-%Nrep = floor(Tmax/Tz);    % on essaie de se rapprocher au mieux de Tmax 
-                          % (essentially N = 1 for fundamental)
-                          
-% N = round(Nrep*(Tz/dt));  % Nombre de point effectifs
-N = nbZ*(Fe/fz);
-
+N   = (Fe/fz0);    % 
 Tot = N*dt;        % durée totale de la séquence
+
+% Tz = 1/fz;          % periode de l'envelloppe A in s
+% T0 = 1/f0;          % periode de la porteuse A in s
+
+
+                  
+
+
 
 %   if (Tz ~= Tot/Nrep)
 %       d = 999 ; %??
 %   end
 
-Tz = Tot/Nrep;    % ré-ajustement de la période ??
-fz = 1/Tz   ;     % ré-ajustement de la fréquence (en MHz) ??
-nuZ = fz/c ;
+% Tz = Tot/nbZ;    % ré-ajustement de la période ??
+% fz = 1/Tz   ;     % ré-ajustement de la fréquence (en MHz) ??
+% nuZ = fz/c ;
 
-k = floor(Tot/T0); % nombre de cycles porteuse
-
-%  if (f0 ~= k/Tot)
-%       d = 88888888888 ; %??
-%  end
-  
- f0 = k/Tot; % ré-ajustement de la fréquence porteuse
+% k = floor(Tot/T0); % nombre de cycles porteuse
+% f0 = k/Tot; % ré-ajustement de la fréquence porteuse
 
 t = (0:N-1)*dt;  % time in us
 
@@ -61,11 +60,15 @@ t = (0:N-1)*dt;  % time in us
 alpha = nuX/fz;
 carrier = sin(2*pi*f0*T);
 
-%  Mat = sign(carrier).*(sin( 2*pi*fz*(T-alpha*X) )> 0 );
-Am = mod(ceil(2*fz*(T-alpha*X)),4);
-Am(Am==2)=0;
-Am(Am==3)=-1;
-Mat = sign(carrier).*Am;
+if nbZ==0
+   Mat = sign(carrier) ;
+else
+   Mat = sign(carrier).*(sin( 2*pi*fz*(T-alpha*X) )> 0 );   
+end
+% Am = mod(ceil(2*fz*(T-alpha*X)),4);
+% Am(Am==2)=0;
+% Am(Am==3)=-1;
+% Mat = sign(carrier).*Am;
 
 % convert m-1->mm-1
 nuZ = 1e-3*nuZ;

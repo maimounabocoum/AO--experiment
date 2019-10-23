@@ -26,7 +26,7 @@
         
         Master      = 'on';
         Volt        = 15;       % 'OF' , 'OP' , 'JM'
-        FreqSonde   = 3;        % 'OF' , 'OP' , 'JM'
+        FreqSonde   = 6;        % 'OF' , 'OP' , 'JM'
         NbHemicycle = 250;      % 'OF' , 'OP' , 'JM'
         Foc         = 5;       % 'OF' 
         AlphaM      = 0;       % 'OP' 
@@ -39,7 +39,7 @@
         NbX         = 0;     % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;  % length in dimension x (us)
         
-        SaveData = 1;          % set to 1 to save data
+        SaveData = 0;          % set to 1 to save data
         AIXPLORER_Active = 'on';% 'on' or 'off' 
 
  % estimation of loading time 
@@ -80,7 +80,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
      
      SampleRate    =   10;
      Range         =   1;
-     GageActive = 'on' ; % on to activate external trig, off : will trig on timout value
+     GageActive = 'off' ; % on to activate external trig, off : will trig on timout value
      
     if strcmp(AIXPLORER_Active,'on') 
  Nlines = length(SEQ.InfoStruct.event);  
@@ -103,9 +103,10 @@ transfer.Channel        = 1;
 
     %% ======================== start acquisitionMaster =============================
      
-   
+   if strcmp(GageActive,'on')
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
+   end
     
     if strcmp(AIXPLORER_Active,'on')
 
@@ -119,13 +120,15 @@ transfer.Channel        = 1;
 %     buffer = SEQ.getData('Realign', 1);
 %     figure
 %     imagesc(double(mean(buffer.data,3)))
-    
-    tic
-    status = CsMl_QueryStatus(Hgage);
-    
-    while status ~= 0
+    if strcmp(GageActive,'on')
+        tic
         status = CsMl_QueryStatus(Hgage);
-    end
+
+        while status ~= 0
+            status = CsMl_QueryStatus(Hgage);
+        end
+    
+    
 
     fprintf('Aquisition lasted %f s \n\r',toc);
     
@@ -149,6 +152,7 @@ transfer.Channel        = 1;
     
     fprintf('Data Transfer lasted %f s \n\r',toc);
     
+    end
     % if strcmp(AIXPLORER_Active,'on')
 
         % SEQ = SEQ.stopSequence('Wait', 0);  
