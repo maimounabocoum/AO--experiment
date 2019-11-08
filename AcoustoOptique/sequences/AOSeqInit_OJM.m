@@ -6,6 +6,7 @@
 
 function [SEQ,MedElmtList,NUX,NUZ,nuX0,nuZ0] = AOSeqInit_OJM(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
 
+Phase       = 0;
 %% System parameters import :
 % ======================================================================= %
 c           = common.constants.SoundSpeed ; %[m/s]
@@ -15,17 +16,17 @@ NbElemts    = system.probe.NbElemts ;
 pitch       = system.probe.Pitch ; % in mm
 MinNoop     = system.hardware.MinNoop;
 
-NoOp       = 100000;             % µs minimum time between two US pulses
+NoOp       = 80000;             % µs minimum time between two US pulses
 
 % ======================================================================= %
 
 PropagationTime        = Prof/c*1e3 ;  % 1 / pulse frequency repetition [us]
-TrigOut                = 10;  %µs
 Pause                  = max( NoOp-ceil(PropagationTime) , MinNoop ); % pause duration in µs
 
 % ======================================================================= %
 %% Codage en arbitrary : delay matrix and waveform
 pulseDuration = NbHemicycle*(0.5/f0) ; % US inital pulse duration in us
+Nphase        = max(1,length(Phase))
 
 % DurationWaveform = 1/NU_low ;
 % n_rep = floor(Tau_cam*NU_low) ;
@@ -54,6 +55,17 @@ MedElmtList = 1:Nfrequencymodes ;
 FC = remote.fc('Bandwidth', 90 , 0); %FIR receiving bandwidth [%] - center frequency = f0 : 90
 RX = remote.rx('fcId', 1, 'RxFreq', 60 , 'QFilter', 2, 'RxElemts', 1:128, 0);
 
+
+%% updata log param struct
+%% add phase variable
+PHASE = repmat(Phase(:),Nfrequencymodes,1);
+% data types : int,str,double,bool
+ParamList = cell(Nfrequencymodes*Nphase + 2,4); % 1 line header + 1 line data type
+ParamList(1,:) = {'Event','nbX','nbZ','phase'};
+ParamList(2,:) = {'int','int','int','double'};
+ParamList(3:end,4) = num2cell(PHASE); % fill in phase parameters
+
+
 for nbs = 1:Nfrequencymodes
     
         nuZ  = NBZ(nbs)*nuZ0;  % fréquence spatiale (en mm-1)
@@ -66,6 +78,14 @@ for nbs = 1:Nfrequencymodes
         % upgrade frequency map : 
         NUX(nbs) = nuX ;
         NUZ(nbs) = nuZ ;
+
+               % save parameters in SI unit
+       ParamBLOCK = repmat({sprintf('%i',nbs),...
+                            sprintf('%i',NBX(nbs)),...
+                            sprintf('%i',NBZ(nbs))}, Nphase , 1 );
+ 
+                        
+       ParamList((3 + (nbs-1)*Nphase): (2 + nbs*Nphase) ,1:3) = ParamBLOCK ;
        
 %       fprintf('waveform is lasting %4.2f us \n\r',size(Waveform,1)/SampFreq)
 %       imagesc(Waveform);
@@ -110,7 +130,7 @@ ELUSEV{nbs} = elusev.elusev( ...
                     'fc',           FC,...
                     'event',        EVENTList{nbs}, ...
                     'rx',           RX,...
-                    'TrigOut',      TrigOut, ... 0,...
+                    'TrigOut',      10, ... 0,...
                     'TrigIn',       0,...
                     'TrigAll',      1, ...
                     'TrigOutDelay', 0, ...

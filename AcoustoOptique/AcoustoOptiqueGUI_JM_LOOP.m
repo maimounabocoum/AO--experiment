@@ -75,17 +75,8 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
         Nlines = (2*NbX+1)*NbZ ;
     end
  
-[ret,Hgage,acqInfo,sysinfo] = InitOscilloGage(NTrig*Nlines,Prof,SampleRate,Range,TriggerActive);
-
-fprintf(' Segments last %4.2f us \n\r',1e6*acqInfo.SegmentSize/acqInfo.SampleRate);
-
-% Set transfer parameters
-transfer.Mode           = CsMl_Translate('Default', 'TxMode');
-transfer.Start          = -acqInfo.TriggerHoldoff;
-transfer.Length         = acqInfo.SegmentSize;
-transfer.Channel        = 1;
-
-    raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
+[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig*Nlines,Prof,SampleRate,Range,TriggerActive);
+raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     
 
     %% ======================== start acquisition =============================

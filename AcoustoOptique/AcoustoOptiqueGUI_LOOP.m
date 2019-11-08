@@ -64,16 +64,9 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
      GageActive = 'on' ; % 'on' to activate external trig, 'off' : will trig on timout value
      
  Nlines = length(SEQ.InfoStruct.event);    
-[ret,Hgage,acqInfo,sysinfo] = InitOscilloGage(NTrig*Nlines,Prof,SampleRate,Range,GageActive);
-fprintf(' Segments last %4.2f us \n\r',1e6*acqInfo.SegmentSize/acqInfo.SampleRate);
+[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig*Nlines,Prof,SampleRate,Range,GageActive);
 
-% Set transfer parameters
-transfer.Mode           = CsMl_Translate('Default', 'TxMode');
-transfer.Start          = -acqInfo.TriggerHoldoff;
-transfer.Length         = acqInfo.SegmentSize;
-transfer.Channel        = 1;
-
-    raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
+raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     
    
 

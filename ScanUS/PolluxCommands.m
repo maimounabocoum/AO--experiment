@@ -13,11 +13,24 @@
  % resolution theorique : 1nm
  % 
 
-%%  ========================================== initialization of Pollux  ==
+%%  ========================= initialization of Pollux  ==
 
-COM_Port   = 4 ;
+COM_Port   = 3 ;
 Controller = PolluxOpenAndInitialize(COM_Port);
 fprintf(Controller,['1' 'gnv']); 
+
+%% ===============   calibration des rails
+
+% command redefinit le zero
+fprintf(Controller,['1','ncal'])
+fprintf(Controller,['2','ncal'])
+fprintf(Controller,['1','nrm'])
+fprintf(Controller,['2','nrm'])
+
+
+GetPosition(Controller,'1')
+GetPosition(Controller,'2')
+
 %% set current position as 0
 
 GetPitch(Controller,'2');

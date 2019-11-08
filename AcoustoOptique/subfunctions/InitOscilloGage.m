@@ -1,4 +1,4 @@
-function [ret,handle,acqInfo,sysinfo] = InitOscilloGage(NTrig,Prof,SamplingRate,Range,TriggerSatus)
+function [ret,handle,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Prof,SamplingRate,Range,TriggerSatus)
 % Set the acquisition, channel and trigger parameters for the system and
 % commit the parameters to the driver.
 % AO     = structure with the different parameters
@@ -181,3 +181,11 @@ CsMl_ErrorHandler(ret, 1, handle);
 CsMl_ResetTimeStamp(handle);
 
 ret = 1;
+
+fprintf(' Segments last %4.2f us \n\r',1e6*acqInfo.SegmentSize/acqInfo.SampleRate);
+
+% Set transfer parameters
+transfer.Mode           = CsMl_Translate('Default', 'TxMode');
+transfer.Start          = -acqInfo.TriggerHoldoff;
+transfer.Length         = acqInfo.SegmentSize;
+transfer.Channel        = 1;

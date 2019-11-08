@@ -8,40 +8,29 @@
 % adresse Bastille : '192.168.0.20'
 % adresse Jussieu :  '192.168.1.16'
 
- AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
- % path at Jussieu :
- if strcmp(AixplorerIP,'192.168.1.16')
- addpath('D:\AO---softwares-and-developpement\radon inversion\shared functions folder')
- end
- % path at Bastille :
- if strcmp(AixplorerIP,'192.168.0.20')
- addpath('D:\GIT\AO---softwares-and-developpement\radon inversion\shared functions folder');
- end
- 
  addpath('sequences');
  addpath('subfunctions');
  addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
- addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OP'; % 'OP','OS'
-        Volt            = 15; %Volt
-        FreqSonde       = 8; %MHz
-        NbHemicycle     = 10;
+        TypeOfSequence  = 'OF'; % 'OP','OS'
+        Volt            = 40; %Volt
+        FreqSonde       = 6; %MHz
+        NbHemicycle     = 2;
         
-        AlphaM          = 0*pi/180; % specific OP
+        AlphaM          = (-20:20)*pi/180; % specific OP
 
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
         decimation             = [8] ;     % 20 Nb de composantes de Fourier en X, 'OS'
         
-        Foc             = 35; % mm
-        X0              = 20; %13-27
+        Foc             = 25; % mm
+        X0              = 0; %13-27
         X1              = 40;
         
-        NTrig           = 3000;
-        Prof            = 60;
+        NTrig           = 500;
+        Prof            = 50;
         SaveData        = 0; % set to 1 to save
         SaveRaw         = 0 ;
 
@@ -50,23 +39,23 @@
 %% ============================   Initialize AIXPLORER
 % %% Sequence execution
 % % ============================================================================ %
-clear SEQ ScanParam raw Datas ActiveLIST Alphas Delay Z_m
-switch TypeOfSequence
-    case 'OF'
-Volt = min(60,Volt); % security for OP routine  
-[SEQ,ScanParam] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
-    case 'OP'
-Volt = min(60,Volt); % security for OP routine       
-[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof, NTrig,'on');
-%[SEQ,Delay,ScanParam,Alphas] = AOSeqInit_OP_arbitrary(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
-    case 'OS'
-Volt = min(50,Volt); % security for OP routine     
-[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , decimation , X0 , X1 ,Prof, NTrig);
+% clear SEQ ScanParam raw Datas ActiveLIST Alphas Delay Z_m
+% switch TypeOfSequence
+%     case 'OF'
+% Volt = min(60,Volt); % security for OP routine  
+% [SEQ,ScanParam] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
+%     case 'OP'
+% Volt = min(60,Volt); % security for OP routine       
+% [SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof, NTrig);
+% %[SEQ,Delay,ScanParam,Alphas] = AOSeqInit_OP_arbitrary(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
+%     case 'OS'
+% Volt = min(50,Volt); % security for OP routine     
+% [SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , decimation , X0 , X1 ,Prof, NTrig);
+% 
+% end
 
-end
 
-
-c = common.constants.SoundSpeed ; % sound velocity in m/s
+c = 1540; % sound velocity in m/s
                     
 %%  ========================================== Init Gage ==================
 % Possible return values for status are:
@@ -74,13 +63,13 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
 %   1 = Waiting for trigger event
 %   2 = Triggered but still busy acquiring
 %   3 = Data transfer is in progress
-
      SampleRate    =   10;
      Range         =   1; %Volt
      GageActive = 'on' ; % 'on' to activate external trig, 'off' : will trig on timout value
      
- Nlines = length(SEQ.InfoStruct.event);    
+ Nlines = 1;    
 [ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig*Nlines,Prof,SampleRate,Range,GageActive);
+
 raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     
    
@@ -88,14 +77,13 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
  
     %% ======================== start acquisition =============================
     %SEQinfosPrint( SEQ )        % printout SEQ infos
-    SEQ = SEQ.stopSequence('Wait', 0);
+
     
     ret = CsMl_Capture(Hgage);
     CsMl_ErrorHandler(ret, 1, Hgage);
     
     tic 
     
-    SEQ = SEQ.startSequence();
     
     status = CsMl_QueryStatus(Hgage);
     
@@ -125,7 +113,7 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     
     CsMl_ErrorHandler(ret, 1, Hgage);
     
-    SEQ = SEQ.stopSequence('Wait', 0);  
+
     
     %% ======================== data post processing =============================
     Hmu = figure;
@@ -134,15 +122,13 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     
     switch TypeOfSequence
         case 'OF'
-    [Datas_mu,Datas_std, Datas_var] = RetreiveDatas(raw,NTrig,Nlines,ScanParam);
+    Datas_mu  = mean(raw,2);
+    Datas_std = sqrt( var(raw,0,2) );
     z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
     NbElemts = system.probe.NbElemts ;
-    pitch = system.probe.Pitch ; 
-    x = ScanParam*pitch;
-    imagesc(x,z,1e3*Datas_mu)
-    ylim([0 Prof])
-    xlabel('x (mm)')
-    ylabel('z (mm)')
+    plot(z,1e3*Datas_mu)
+    xlabel('z (mm)')
+    ylabel('signal')
     title('Averaged raw datas')
     cb = colorbar;
     ylabel(cb,'AC tension (mV)')
@@ -151,27 +137,15 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     
     Hstd = figure;
     set(Hstd,'WindowStyle','docked');
-    imagesc(x,z,1e3*Datas_std)
-    ylim([0 Prof])
+    plot(z,1e3*Datas_std)
     xlabel('x (mm)')
-    ylabel('z (mm)')
     title('STD raw datas')
     cb = colorbar;
     ylabel(cb,'AC tension (mV)')
     colormap(parula)
     set(findall(Hstd,'-property','FontSize'),'FontSize',15) 
     
-    Hsnr = figure;
-    set(Hsnr,'WindowStyle','docked');
-    imagesc(x,z,abs(Datas_mu./Datas_std))
-    ylim([0 Prof])
-    xlabel('x (mm)')
-    ylabel('z (mm)')
-    title('SNR raw datas')
-    cb = colorbar;
-    ylabel(cb,'AC tension (mV)')
-    colormap(parula)
-    set(findall(Hsnr,'-property','FontSize'),'FontSize',15)    
+
     
         case 'OP'
     Datas = RetreiveDatas(raw,NTrig,Nlines,ScanParam);
@@ -213,9 +187,8 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
      pitch = system.probe.Pitch ; 
      X_m = (1:NbElemts)*(pitch*1e-3) ;
      z = (1:actual.ActualLength)*(c/(1e6*SampleRate));
-     x = ScanParam(:,2);
      
-    imagesc(x,z*1e3,1e3*Datas)   
+    plot(z*1e3,1e3*Datas)   
     xlabel('order N_x')
     zlabel('z(mm)')
     cb = colorbar;
@@ -264,10 +237,10 @@ xlim([X0 X1])
 %% save datas :
 if SaveData == 1
     
-MainFolderName = 'D:\Data\Louis';
+MainFolderName = 'D:\Data\Mai';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'SL102_Intralipide10pourcent';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Foc',Foc,'type',TypeOfSequence,'Freq',FreqSonde);
+CommentName    = 'Lens5cm_1paper';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Foc',Foc,'type',TypeOfSequence);
 savefig(Hmu,FileName);
 saveas(Hmu,FileName,'png');
 

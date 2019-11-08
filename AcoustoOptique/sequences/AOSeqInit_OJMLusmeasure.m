@@ -11,25 +11,28 @@ function [SEQ,MedElmtList,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OJMLusmeasure
 % ======================================================================= %
 c           = common.constants.SoundSpeed ; %[m/s]
 SampFreq    = system.hardware.ClockFreq; %NE PAS MODIFIER % emitted signal sampling = 180 in [MHz]
+SampFreq    = double(SampFreq);
 NbElemts    = system.probe.NbElemts ; 
 pitch       = system.probe.Pitch ; % in mm
 MinNoop     = system.hardware.MinNoop;
 
-NoOp       = 1000;             % µs minimum time between two US pulses
+NoOp       = 50000;             % µs minimum time between two US pulses
 
-% ======================================================================= %
-DurationWaveform = 1/NU_low ;
+
+%% ======================================================================= %
 n_rep = floor(Tau_cam*NU_low) ;
+PropagationTime        = ( n_rep + 2 )/NU_low  ;  % 1 / pulse frequency repetition [us]38.96;%
+Pause                  = max( NoOp-ceil(PropagationTime) , MinNoop ); % pause duration in µs
+
+
+%% ===== Codage en arbitrary : delay matrix and waveform ===========
+pulseDuration = NbHemicycle*(0.5/f0) ; % US inital pulse duration in us
+Nphase        = max(1,length(Phase));
+
+%DurationWaveform = 1/NU_low ;
 %( n_rep + 2 ) : we chose 2 to make shure the full emission sequence will
 % be issued (long overshoot in the beginning)
 
-PropagationTime        = ( n_rep + 2 )/NU_low  ;  % 1 / pulse frequency repetition [us]
-Pause                  = max( NoOp-ceil(PropagationTime) , MinNoop ); % pause duration in µs
-
-% ======================================================================= %
-%% Codage en arbitrary : delay matrix and waveform
-pulseDuration = NbHemicycle*(0.5/f0) ; % US inital pulse duration in us
-Nphase        = max(1,length(Phase));
 
 %% ==================== Codage en arbitrary : preparation des acmos ==============
 % shooting elements 
@@ -42,7 +45,7 @@ Xs        = (0:Nbtot-1)*pitch;             % Echelle de graduation en mm
 
 
 nuZ0 = (NU_low*1e6)/(c*1e3);                 % Pas fréquence spatiale en Z (en mm-1)
-nuX0 = 1/(2*Nbtot*pitch);                    % Pas fréquence spatiale en X (en mm-1)
+nuX0 = 1/(Nbtot*pitch);                      % Pas fréquence spatiale en X (en mm-1)
 
 [NBX,NBZ] = meshgrid(NbX,NbZ);
 % initialization of empty frequency matrix
@@ -67,7 +70,9 @@ ParamList(1,:) = {'Event','nbX','nbZ','phase'};
 ParamList(2,:) = {'int','int','int','double'};
 ParamList(3:end,4) = num2cell(PHASE); % fill in phase parameters
 
-n_rep
+
+fprintf('Sequence is repeated %f times \n\r',n_rep)
+
 for nbs = 1:Nfrequencymodes
     
         nuZ  = NBZ(nbs)*nuZ0; % fréquence de modulation de phase (en Hz) 
@@ -108,7 +113,7 @@ for nbs = 1:Nfrequencymodes
     TWList{nbs} = remote.tw_arbitrary( ...
                     'Waveform',Waveform', ...
                     'RepeatCH', 0, ...
-                    'repeat',n_rep , ...
+                    'repeat',n_rep, ... %nrep
                     'repeat256', 0, ...
                     'ApodFct', 'none', ...
                     'TxElemts',ElmtBorns(1):ElmtBorns(2), ...
@@ -140,7 +145,7 @@ for nbs = 1:Nfrequencymodes
                         'TrigOut',      0, ... 10 in us
                         'TrigIn',       1,...
                         'TrigAll',      1, ...
-                        'Repeat',       Nphase,... %Nphase
+                        'Repeat',       Nphase,...
                         'TrigOutDelay', 0, ...
                         0);
 
@@ -155,35 +160,21 @@ for nbs = 1:Nfrequencymodes
                     'duration', EvtDur, ...
                     0);
            
-    ELUSEV{nbs} = elusev.elusev( ...
-                        'tx',           TXList{nbs}, ...
-                        'tw',           TWList{nbs}, ...
-                        'fc',           FC,...
-                        'event',        EVENTList{nbs}, ...
-                        'rx',           RX,...
-                        'TrigOut',      10, ... 0,...
-                        'TrigIn',       0,...
-                        'TrigAll',      1, ...
-                        'TrigOutDelay', 0, ...
-                        0);                
-            
-    end
-    
-    %ELUSEV
 ELUSEV{nbs} = elusev.elusev( ...
                     'tx',           TXList{nbs}, ...
                     'tw',           TWList{nbs}, ...
                     'fc',           FC,...
                     'event',        EVENTList{nbs}, ...
                     'rx',           RX,...
-                    'TrigOut',      0, ... 10 in us
-                    'TrigIn',       1,...
+                    'TrigOut',      10, ... 0,...
+                    'TrigIn',       0,...
                     'TrigAll',      1, ...
-                    'Repeat',       Nphase,... %Nphase
-                    'TrigOutDelay', 0, ...
-                    0);
+                    'TrigOutDelay', 10, ...
+                    'Repeat',       Nphase,...
+                    0);            
+            
+    end
 
-    %
 end
 
 % ======================================================================= %
@@ -239,8 +230,8 @@ try
  display('============== Remote OK =============');
  display('Loading sequence to Hardware'); tic ;
  SEQ = SEQ.loadSequence();
-     fprintf('Sequence has loaded in %f s \n\r',toc)
-     display('--------ready to use -------------');
+ fprintf('Sequence has loaded in %f s \n\r',toc)
+ display('--------ready to use -------------');
  
 catch e
   fprintf(e.message);  
