@@ -219,7 +219,7 @@ end
 %  SEQ = SEQ.stopSequence('Wait',0);
 
 % ======================== data post processing =============================
-SaveData        = 1 ; % set to 1 to save
+SaveData        = 0 ; % set to 1 to save
 
 h = 6.6e-34;
 lambda = 780e-9;
@@ -231,7 +231,7 @@ if strcmp(GageActive,'on')
     Hmu = figure;
     set(Hmu,'WindowStyle','docked');
 
-    [Datas_mu1,Datas_std1, Datas_mu2 , Datas_std2] = AverageDataBothWays( raw/(0.45*1e5) );
+    [Datas_mu1,Datas_std1,Datas_mu2,Datas_std2] = AverageDataBothWays( raw/(0.45*1e5) );
 
     t = (1:actual.ActualLength)*(1/SampleRate);
     NbElemts = system.probe.NbElemts ;
