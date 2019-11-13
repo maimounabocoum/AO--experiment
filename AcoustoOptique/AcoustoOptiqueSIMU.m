@@ -66,7 +66,7 @@
         
         NTrig           = 1000;
         Prof            = (1e-3*1540)*100; % last digits in us 
-        SaveData        = 1 ; % set to 1 to save
+        SaveData        = 0 ; % set to 1 to save
 
 %% default parameters for user input (used for saving)
 [nuX0,nuZ0] = EvalNu0( X0 , X1 , NU_low );      
@@ -219,7 +219,7 @@ end
 %  SEQ = SEQ.stopSequence('Wait',0);
 
 % ======================== data post processing =============================
-SaveData        = 1 ; % set to 1 to save
+SaveData        = 0 ; % set to 1 to save
 
 h = 6.6e-34;
 lambda = 780e-9;
@@ -305,7 +305,7 @@ ax2 = axes('Position',ax1_pos,...
     
 %  
 end
-PmuW = 50;
+PmuW = 0;
 % autosave
 
 % save datas :
