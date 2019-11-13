@@ -231,7 +231,7 @@ if strcmp(GageActive,'on')
     Hmu = figure;
     set(Hmu,'WindowStyle','docked');
 
-    [Datas_mu1,Datas_std1, Datas_mu2 , Datas_std2] = AverageDataBothWays( raw/(0.45*1e5) );
+    [Datas_mu1,Datas_std1,Datas_mu2,Datas_std2] = AverageDataBothWays( raw/(0.45*1e5) );
 
     t = (1:actual.ActualLength)*(1/SampleRate);
     NbElemts = system.probe.NbElemts ;
