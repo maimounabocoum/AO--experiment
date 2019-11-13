@@ -95,7 +95,7 @@
     [freq1 , psdx1 ] = CalculateDoublePSD( raw , 10e6 );
     [freq2 , psdx2 ] = CalculateDoublePSD( raw' , 100e3 );
     line(freq2*1e-3,10*log10(100e3*psdx2),'Color','r')
-    ylim([-52 -30])
+    ylim([-52 -40])
     xlabel('Frequency (kHz)')
     ylabel('Power (dB)')
     ax1 = gca; % current axes

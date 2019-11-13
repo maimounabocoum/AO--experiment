@@ -64,7 +64,7 @@
         X0              = 0; %0-40
         X1              = 40;
         
-        NTrig           = 1000;
+        NTrig           = 100;
         Prof            = (1e-3*1540)*100; % last digits in us 
         SaveData        = 0 ; % set to 1 to save
 
@@ -219,7 +219,7 @@ end
 %  SEQ = SEQ.stopSequence('Wait',0);
 
 % ======================== data post processing =============================
-SaveData        = 0 ; % set to 1 to save
+SaveData        = 1 ; % set to 1 to save
 
 h = 6.6e-34;
 lambda = 780e-9;
@@ -238,7 +238,7 @@ if strcmp(GageActive,'on')
     pitch = system.probe.Pitch ; 
     x = 1:(Nlines*NTrig) ;
     
-    subplot(223)
+    subplot(221)
     %imagesc(1:size(raw,2),t,1e6*raw/(0.45*1e5))
     imagesc(1:size(raw,2),t,1e6*raw/(0.45*1e5))
     xlabel('index')
@@ -247,12 +247,12 @@ if strcmp(GageActive,'on')
     ylabel(cb,'\mu W')
     colormap(parula)
     
-    subplot(221)
-    line(1:length(Datas_std1),1e6*Datas_std1,'Color','r'); hold on 
-    line(1:length(Datas_std1),1e6*sqrt(Ephoton*(10e6)*Datas_mu1),'Color','r');hold off
-    ylabel('\sigma (\mu W)over short ')
-    xlabel('index')
-    ylim([0.05 0.5])
+    subplot(223)
+    line((1:length(Datas_std1))*1e-2,1e6*Datas_std1,'Color','r'); hold on 
+    line((1:length(Datas_std1))*1e-2,1e6*sqrt(Ephoton*(10e6)*Datas_mu1),'Color','r'); hold off
+    ylabel('\sigma (\mu W) over short ')
+    xlabel('time (ms)')
+    ylim([0 5])
     ax1 = gca; % current axes
     set(ax1,'XColor','r');
     set(ax1,'YColor','r');
@@ -267,9 +267,9 @@ if strcmp(GageActive,'on')
     xlabel('time (\mu s)')
     
     subplot(222)
-    line(1:length(Datas_std1),1e6*Datas_mu1,'Color','r'); hold on 
+    line((1:length(Datas_std1))*1e-2,1e6*Datas_mu1,'Color','r'); hold on 
     ylabel('\mu (\mu W)over short ')
-    xlabel('index')
+    xlabel('time (ms)')
     ax1 = gca; % current axes
     set(ax1,'XColor','r');
     set(ax1,'YColor','r');
@@ -285,11 +285,11 @@ if strcmp(GageActive,'on')
 
     subplot(224)
     [freq1 , psdx1 ] = CalculateDoublePSD( raw , 10e6 );
-    [freq2 , psdx2 ] = CalculateDoublePSD( raw' , 100e3 );
-    line(freq1*1e-6,10*log10(10e6*psdx1),'Color','r')
-    ylim([-52 -40])
-    xlabel('Frequency (MHz)')
-    ylabel('Power/Frequency (dB/MHz)')
+    [freq2 , psdx2 ] = CalculateDoublePSD( raw' , 100 );
+    line(freq2*1e-3,10*log10(100*psdx2),'Color','r')
+    ylim([-52 -5])
+    xlabel('Frequency (kHz)')
+    ylabel('Power (dB)')
     ax1 = gca; % current axes
     set(ax1,'XColor','r');
     set(ax1,'YColor','r');
@@ -298,10 +298,10 @@ ax2 = axes('Position',ax1_pos,...
     'XAxisLocation','top',...
     'YAxisLocation','right',...
     'Color','none');
-    line(freq2*1e-3,10*log10(100e3*psdx2),'Parent',ax2,'Color','k')
+    line(freq1*1e-6,10*log10(10e6*psdx1),'Parent',ax2,'Color','k')
     set(ax2,'Ylim',get(ax1,'Ylim'));
-    xlabel('Frequency (kHZ)')
-    ylabel('Power/Frequency (dB/kHz)')
+    xlabel('Frequency (MHz)')
+    ylabel('Power (dB)')
     
 %  
 end
@@ -313,7 +313,7 @@ if SaveData == 1
     
 MainFolderName = 'D:\Data\Mai';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'Signal_CH1CH2';
+CommentName    = 'RefOnly_100Hz_CCD';%_CH1_86MHz
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'RepHz',100);
 savefig(Hmu,FileName);
 saveas(Hmu,FileName,'png');
