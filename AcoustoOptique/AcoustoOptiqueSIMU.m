@@ -28,7 +28,7 @@
  % 'OC' : Ondes Chirpées
  
         TypeOfSequence  = 'JM'; % 'OP','OS','JM','OC'
-        Master          = 'on';
+        Master          = 'off';
         GageActive      = 'on' ; 
         Volt            = 15; %Volt
         % 2eme contrainte : 
@@ -64,7 +64,7 @@
         X0              = 0; %0-40
         X1              = 40;
         
-        NTrig           = 100;
+        NTrig           = 1000;
         Prof            = (1e-3*1540)*100; % last digits in us 
         SaveData        = 0 ; % set to 1 to save
 
@@ -101,6 +101,7 @@ end
 
 c = common.constants.SoundSpeed ; % sound velocity in m/s
 
+SEQ = SEQ.startSequence();
 %% view sequence GUI
 fprintf('============================= SEQ ANALYSIS =======================\n');
 
@@ -224,6 +225,7 @@ SaveData        = 1 ; % set to 1 to save
 h = 6.6e-34;
 lambda = 780e-9;
 Ephoton = h*(3e8/lambda);
+F_aq = 100; %Hz
 
 if strcmp(GageActive,'on')
 
@@ -233,14 +235,16 @@ if strcmp(GageActive,'on')
 
     [Datas_mu1,Datas_std1,Datas_mu2,Datas_std2] = AverageDataBothWays( raw/(0.45*1e5) );
 
-    t = (1:actual.ActualLength)*(1/SampleRate);
+    t_fast = (1:actual.ActualLength)*(1/SampleRate);
+    t_slow = (1:length(Datas_std1))/F_aq;
+    
     NbElemts = system.probe.NbElemts ;
     pitch = system.probe.Pitch ; 
     x = 1:(Nlines*NTrig) ;
     
     subplot(221)
     %imagesc(1:size(raw,2),t,1e6*raw/(0.45*1e5))
-    imagesc(1:size(raw,2),t,1e6*raw/(0.45*1e5))
+    imagesc(1:size(raw,2),t_fast,1e6*raw/(0.45*1e5))
     xlabel('index')
     ylabel('time (\mu s)')
     cb = colorbar;
@@ -248,11 +252,11 @@ if strcmp(GageActive,'on')
     colormap(parula)
     
     subplot(223)
-    line((1:length(Datas_std1))*1e-2,1e6*Datas_std1,'Color','r'); hold on 
-    line((1:length(Datas_std1))*1e-2,1e6*sqrt(Ephoton*(10e6)*Datas_mu1),'Color','r'); hold off
+    line(t_slow*1e3,1e6*Datas_std1,'Color','r'); hold on 
+    line(t_slow*1e3,1e6*sqrt(Ephoton*(10e6)*Datas_mu1),'Color','r'); hold off
     ylabel('\sigma (\mu W) over short ')
     xlabel('time (ms)')
-    ylim([0 5])
+    ylim([0 0.03])
     ax1 = gca; % current axes
     set(ax1,'XColor','r');
     set(ax1,'YColor','r');
@@ -261,13 +265,13 @@ if strcmp(GageActive,'on')
     'XAxisLocation','top',...
     'YAxisLocation','right',...
     'Color','none');
-    line(t,1e6*Datas_std2,'Parent',ax2,'Color','k')
+    line(t_fast,1e6*Datas_std2,'Parent',ax2,'Color','k')
     set(ax2,'Ylim',get(ax1,'Ylim'));
     ylabel('\sigma (nW) over long')
     xlabel('time (\mu s)')
     
     subplot(222)
-    line((1:length(Datas_std1))*1e-2,1e6*Datas_mu1,'Color','r'); hold on 
+    line(t_slow*1e3,1e6*Datas_mu1,'Color','r'); hold on 
     ylabel('\mu (\mu W)over short ')
     xlabel('time (ms)')
     ax1 = gca; % current axes
@@ -284,10 +288,10 @@ if strcmp(GageActive,'on')
     xlabel('time (\mu s)')
 
     subplot(224)
-    [freq1 , psdx1 ] = CalculateDoublePSD( raw , 10e6 );
-    [freq2 , psdx2 ] = CalculateDoublePSD( raw' , 100 );
+    [freq1 , psdx1 ] = CalculateDoublePSD( raw , SampleRate*1e6 );
+    [freq2 , psdx2 ] = CalculateDoublePSD( raw' , F_aq );
     line(freq2*1e-3,10*log10(100*psdx2),'Color','r')
-    ylim([-52 -5])
+    ylim([-65 20])
     xlabel('Frequency (kHz)')
     ylabel('Power (dB)')
     ax1 = gca; % current axes
@@ -313,13 +317,13 @@ if SaveData == 1
     
 MainFolderName = 'D:\Data\Mai';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'RefOnly_100Hz_CCD';%_CH1_86MHz
+CommentName    = 'RefOnly_100Hz_Filter';%RefOnly_100Hz_noFilter
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'RepHz',100);
 savefig(Hmu,FileName);
 saveas(Hmu,FileName,'png');
 
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
-              ,'X0','X1','NTrig','Nlines','Prof','ActiveLIST','pitch','NbElemts','x','t','raw','SampleRate','c','Range','TypeOfSequence','PmuW');
+              ,'X0','X1','NTrig','Nlines','Prof','F_aq','ActiveLIST','pitch','NbElemts','x','t_fast','t_slow','raw','SampleRate','c','Range','TypeOfSequence','PmuW');
 
 fprintf('Data has been saved under : \r %s \r\n',FileName);
 
