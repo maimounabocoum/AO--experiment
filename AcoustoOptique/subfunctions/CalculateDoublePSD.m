@@ -2,7 +2,9 @@ function [freq , psdx ] = CalculateDoublePSD( raw , Fs )
 %Created by maimouna bocoum - 07-11-2019
 %% test to see o raw as the rigth number of column :
 
-s = raw ;%mean( raw , 2 );
+% exit unit for PSD is in [raw]^2/Hz
+
+s = raw ;% mean( raw , 2 );
 
 N               = size(s,1);
 XDFT            = fft(s);
