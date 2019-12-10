@@ -64,7 +64,7 @@
         X0              = 0; %0-40
         X1              = 40;
         
-        NTrig           = 1000;
+        NTrig           = 100;
         Prof            = (1e-3*1540)*100; % last digits in us 
         SaveData        = 0 ; % set to 1 to save
 
@@ -101,7 +101,7 @@ end
 
 c = common.constants.SoundSpeed ; % sound velocity in m/s
 
-SEQ = SEQ.startSequence();
+% SEQ = SEQ.startSequence();
 %% view sequence GUI
 fprintf('============================= SEQ ANALYSIS =======================\n');
 
@@ -220,96 +220,15 @@ end
 %  SEQ = SEQ.stopSequence('Wait',0);
 
 % ======================== data post processing =============================
-SaveData        = 1 ; % set to 1 to save
+SaveData        = 1; % set to 1 to save
 
-h = 6.6e-34;
-lambda = 780e-9;
+h       = 6.6e-34;
+lambda  = 780e-9;
 Ephoton = h*(3e8/lambda);
-F_aq = 100; %Hz
-
-if strcmp(GageActive,'on')
-
-    %
-    Hmu = figure;
-    set(Hmu,'WindowStyle','docked');
-
-    [Datas_mu1,Datas_std1,Datas_mu2,Datas_std2] = AverageDataBothWays( raw/(0.45*1e5) );
-
-    t_fast = (1:actual.ActualLength)*(1/SampleRate);
-    t_slow = (1:length(Datas_std1))/F_aq;
-    
-    NbElemts = system.probe.NbElemts ;
-    pitch = system.probe.Pitch ; 
-    x = 1:(Nlines*NTrig) ;
-    
-    subplot(221)
-    %imagesc(1:size(raw,2),t,1e6*raw/(0.45*1e5))
-    imagesc(1:size(raw,2),t_fast,1e6*raw/(0.45*1e5))
-    xlabel('index')
-    ylabel('time (\mu s)')
-    cb = colorbar;
-    ylabel(cb,'\mu W')
-    colormap(parula)
-    
-    subplot(223)
-    line(t_slow*1e3,1e6*Datas_std1,'Color','r'); hold on 
-    line(t_slow*1e3,1e6*sqrt(Ephoton*(10e6)*Datas_mu1),'Color','r'); hold off
-    ylabel('\sigma (\mu W) over short ')
-    xlabel('time (ms)')
-    ylim([0 0.03])
-    ax1 = gca; % current axes
-    set(ax1,'XColor','r');
-    set(ax1,'YColor','r');
-    ax1_pos = get(ax1,'Position'); % position of first axes
-    ax2 = axes('Position',ax1_pos,...
-    'XAxisLocation','top',...
-    'YAxisLocation','right',...
-    'Color','none');
-    line(t_fast,1e6*Datas_std2,'Parent',ax2,'Color','k')
-    set(ax2,'Ylim',get(ax1,'Ylim'));
-    ylabel('\sigma (nW) over long')
-    xlabel('time (\mu s)')
-    
-    subplot(222)
-    line(t_slow*1e3,1e6*Datas_mu1,'Color','r'); hold on 
-    ylabel('\mu (\mu W)over short ')
-    xlabel('time (ms)')
-    ax1 = gca; % current axes
-    set(ax1,'XColor','r');
-    set(ax1,'YColor','r');
-    ax1_pos = get(ax1,'Position'); % position of first axes
-    ax2 = axes('Position',ax1_pos,...
-    'XAxisLocation','top',...
-    'YAxisLocation','right',...
-    'Color','none');
-    line(t,1e6*Datas_mu2,'Parent',ax2,'Color','k')
-    set(ax2,'Ylim',get(ax1,'Ylim'));
-    ylabel('\mu (\mu W)over  long')
-    xlabel('time (\mu s)')
-
-    subplot(224)
-    [freq1 , psdx1 ] = CalculateDoublePSD( raw , SampleRate*1e6 );
-    [freq2 , psdx2 ] = CalculateDoublePSD( raw' , F_aq );
-    line(freq2*1e-3,10*log10(100*psdx2),'Color','r')
-    ylim([-65 20])
-    xlabel('Frequency (kHz)')
-    ylabel('Power (dB)')
-    ax1 = gca; % current axes
-    set(ax1,'XColor','r');
-    set(ax1,'YColor','r');
-ax1_pos = get(ax1,'Position'); % position of first axes
-ax2 = axes('Position',ax1_pos,...
-    'XAxisLocation','top',...
-    'YAxisLocation','right',...
-    'Color','none');
-    line(freq1*1e-6,10*log10(10e6*psdx1),'Parent',ax2,'Color','k')
-    set(ax2,'Ylim',get(ax1,'Ylim'));
-    xlabel('Frequency (MHz)')
-    ylabel('Power (dB)')
-    
-%  
-end
-PmuW = 0;
+F_aq    = 100; %Hz
+Pmain = 9;
+Pref = 2;
+AcoustoOptiqueDATA_ANALYSES;
 % autosave
 
 % save datas :
@@ -317,13 +236,13 @@ if SaveData == 1
     
 MainFolderName = 'D:\Data\Mai';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'RefOnly_100Hz_Filter';%RefOnly_100Hz_noFilter
+CommentName    = 'Ref_100Hz_41uW_nofilter_main2uW';%RefOnly_100Hz_noFilter
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'RepHz',100);
 savefig(Hmu,FileName);
 saveas(Hmu,FileName,'png');
 
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
-              ,'X0','X1','NTrig','Nlines','Prof','F_aq','ActiveLIST','pitch','NbElemts','x','t_fast','t_slow','raw','SampleRate','c','Range','TypeOfSequence','PmuW');
+              ,'X0','X1','NTrig','Nlines','Prof','F_aq','ActiveLIST','Pref','NbElemts','t1','t2','raw','Pmain','SampleRate','c','Range','TypeOfSequence');
 
 fprintf('Data has been saved under : \r %s \r\n',FileName);
 

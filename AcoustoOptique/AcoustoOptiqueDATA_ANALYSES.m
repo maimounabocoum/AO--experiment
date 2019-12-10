@@ -1,9 +1,9 @@
 %% =============== add subfolders ===============  %%
 
- addpath('..\..\AO--commons\shared functions folder')
- addpath('gui');
- addpath('sequences');
- addpath('subfunctions');
+%  addpath('..\..\AO--commons\shared functions folder')
+%  addpath('gui');
+%  addpath('sequences');
+%  addpath('subfunctions');
  
  %% =============== load datas ===============  %%
  
@@ -17,13 +17,13 @@
      lambda = 780e-9;
      Ephoton = h*(3e8/lambda);
      Fs1 = SampleRate*1e6 ; % gage sampling frequncy
-     Fs2 = 100 ;            % triggerbox sampling frequency
+     Fs2 = F_aq ;            % triggerbox sampling frequency
      % definition of 2 structure for data analyses:
      MyStat1 = stats_t( Fs1 );
      MyStat2 = stats_t( Fs2 );
      
-    Hmu = figure(1);
-    % set(Hmu,'WindowStyle','docked'); 
+    Hmu = figure;
+    set(Hmu,'WindowStyle','docked'); 
     % raw/(0.45*1e5)  [V]unit x [W/V] = [W]unit
    
 %     [t1,Datas_mu1]   = MyStat1.average( raw/(0.45*1e5) );
@@ -48,7 +48,7 @@ line( t1*1e3,1e6*Datas_std1,'Color','r'); hold on
 line( t1*1e3,1e6*sqrt(Ephoton*Fs1*Datas_mu1),'Color','r'); hold off
     ylabel('\sigma (\mu W) over short ')
     xlabel('time (ms)')
-    ylim([0 0.2])
+    ylim([0 0.5])
     ax1 = gca; % current axes
     set(ax1,'XColor','r');
     set(ax1,'YColor','r');
