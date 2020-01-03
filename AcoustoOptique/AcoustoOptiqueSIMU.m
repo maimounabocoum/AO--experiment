@@ -157,16 +157,16 @@ FileNameHollande_csv       = [SubFolderNameHollande,'\LogFile.csv'];
  
  HearderCell(:,1) = {'TypeOfSequence';TypeOfSequence};
  HearderCell(:,2) = {'Volt';Volt};
- HearderCell(:,2) = {'FreqSonde';FreqSonde*1e6};
- HearderCell(:,3) = {'NbHemicycle';NbHemicycle};
- HearderCell(:,4) = {'Tau_cam';Tau_cam};
- HearderCell(:,5) = {'DurWaveform';DurationWaveform*1e-6};
- HearderCell(:,6) = {'Prof';Prof*1e-3};
- HearderCell(:,7) = {'Nevent';Nevent};
- HearderCell(:,8) = {'NTrig';NTrig};
- HearderCell(:,9) = {'X0'; X0};
- HearderCell(:,10) = {'nuX0'; nuX0};
- HearderCell(:,11) = {'nuZ0'; nuZ0};
+ HearderCell(:,3) = {'FreqSonde';FreqSonde*1e6};
+ HearderCell(:,4) = {'NbHemicycle';NbHemicycle};
+ HearderCell(:,5) = {'Tau_cam';Tau_cam};
+ HearderCell(:,6) = {'DurWaveform';DurationWaveform*1e-6};
+ HearderCell(:,7) = {'Prof';Prof*1e-3};
+ HearderCell(:,8) = {'Nevent';Nevent};
+ HearderCell(:,9) = {'NTrig';NTrig};
+ HearderCell(:,10) = {'X0'; X0};
+ HearderCell(:,11) = {'nuX0'; nuX0};
+ HearderCell(:,12) = {'nuZ0'; nuZ0};
  
  FinalCell = joincell( HearderCell , ParamList ) ;
 
