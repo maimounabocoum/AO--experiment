@@ -28,23 +28,23 @@
  % 'OC' : Ondes Chirpées
  
         TypeOfSequence  = 'JM'; % 'OP','OS','JM','OC'
-        Master          = 'off';
+        Master          = 'on';
         GageActive      = 'on' ; 
         Volt            = 15; %Volt
         % 2eme contrainte : 
         % soit FreqSonde congrue à NUZ0 , soit entier*FreqSonde = NUech(=180e6)
         FreqSonde       = 6; %MHz AO : 78 et 84 MHz to be multiple of 6
         FreqSonde       = 180/round(180/FreqSonde); %MHz
-        NbHemicycle     = 10 ;
+        NbHemicycle     = 500 ;
         
         AlphaM          = 0; %(-20:20)*pi/180; specific OP
 
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbZ         = 0;        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 0;        % 20 Nb de composantes de Fourier en X, 'JM'
-        Phase       = 0; % phases per frequency in 2pi unit
+        NbZ         = 1:10;        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = -3:3;        % 20 Nb de composantes de Fourier en X, 'JM'
+        Phase       = [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
         %        NUrep =   Nbz*(50kHz)         
@@ -58,13 +58,13 @@
         n_low = round( 180*DurationWaveform );
         NU_low = (180)/n_low;   % fundamental temporal frequency
         
-        Tau_cam          = 500 ;% camera integration time (us)
+        Tau_cam          = 100 ;% camera integration time (us)
         
         Foc             = 5; % mm
         X0              = 0; %0-40
         X1              = 40;
         
-        NTrig           = 100;
+        NTrig           = 2;
         Prof            = (1e-3*1540)*100; % last digits in us 
         SaveData        = 0 ; % set to 1 to save
 
@@ -101,7 +101,7 @@ end
 
 c = common.constants.SoundSpeed ; % sound velocity in m/s
 
-% SEQ = SEQ.startSequence();
+ % SEQ = SEQ.startSequence();
 %% view sequence GUI
 fprintf('============================= SEQ ANALYSIS =======================\n');
 
@@ -133,7 +133,7 @@ SEQ.InfoStruct.event(Nactive).duration
 % isfloat H:\
 % islogical
 % isstring
-SubFolderNameLocal         = generateSubFolderName('D:\Data\Mai');  % localhost save
+SubFolderNameLocal         = generateSubFolderName('\\AMIENS\Data\Mai');  % localhost save
 SubFolderNameHollande      = generateSubFolderName('Z:\Mai');       % 10.10.10.36 - holland save
 FileNameLocal_csv          = [SubFolderNameLocal,'\LogFile.csv'];
 FileNameHollande_csv       = [SubFolderNameHollande,'\LogFile.csv'];
@@ -181,6 +181,9 @@ FileNameHollande_csv       = [SubFolderNameHollande,'\LogFile.csv'];
 %   2 = Triggered but still busy acquiring
 %   3 = Data transfer is in progress
 
+%SEQ = SEQ.startSequence();
+
+%%
 if strcmp(GageActive,'on')
      SampleRate    =   10;
      Range         =   2; %Volt
@@ -192,6 +195,9 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
 %%%%%%%%%%%%%%%%%%%  lauch gage acquisition %%%%%%%%%%%%%%%%%%%
 
  ret = CsMl_Capture(Hgage);
+ 
+ 
+ 
  CsMl_ErrorHandler(ret, 1, Hgage);
  status = CsMl_QueryStatus(Hgage);
  while status ~= 0
