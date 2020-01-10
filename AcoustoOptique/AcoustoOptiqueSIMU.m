@@ -42,8 +42,8 @@
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbZ         = 1:10;        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = -3:3;        % 20 Nb de composantes de Fourier en X, 'JM'
+        NbZ         = [1,1:10];        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = [-10:10];        % 20 Nb de composantes de Fourier en X, 'JM'
         Phase       = [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
@@ -58,14 +58,14 @@
         n_low = round( 180*DurationWaveform );
         NU_low = (180)/n_low;   % fundamental temporal frequency
         
-        Tau_cam          = 100 ;% camera integration time (us)
+        Tau_cam          = 200 ;% camera integration time (us)
         
         Foc             = 5; % mm
         X0              = 0; %0-40
         X1              = 40;
         
-        NTrig           = 2;
-        Prof            = (1e-3*1540)*100; % last digits in us 
+        NTrig           = 1; % repeat 2 time not allowed
+        Prof            = (1e-3*1540)*400; % last digits in us 
         SaveData        = 0 ; % set to 1 to save
 
 %% default parameters for user input (used for saving)
@@ -105,7 +105,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
 %% view sequence GUI
 fprintf('============================= SEQ ANALYSIS =======================\n');
 
-Nactive = 1;
+Nactive = 1
 
 % total number of sequences :
 Nevent = length(SEQ.InfoStruct.event);
@@ -181,7 +181,7 @@ FileNameHollande_csv       = [SubFolderNameHollande,'\LogFile.csv'];
 %   2 = Triggered but still busy acquiring
 %   3 = Data transfer is in progress
 
-%SEQ = SEQ.startSequence();
+
 
 %%
 if strcmp(GageActive,'on')
@@ -196,10 +196,11 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
 
  ret = CsMl_Capture(Hgage);
  
- 
- 
  CsMl_ErrorHandler(ret, 1, Hgage);
  status = CsMl_QueryStatus(Hgage);
+ 
+ SEQ = SEQ.startSequence();
+
  while status ~= 0
   status = CsMl_QueryStatus(Hgage);
  end
@@ -213,7 +214,9 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     end
     
 end
-%
+figure;imagesc(raw)
+colormap(parula)
+
 %  Get system status
 %  Msg    = struct('name', 'get_status');
 %  Status = remoteSendMessage(SEQ.Server, Msg);
@@ -225,19 +228,18 @@ end
 %  SEQ = SEQ.startSequence();
 %  SEQ = SEQ.stopSequence('Wait',0);
 
-% ======================== data post processing =============================
-SaveData        = 1; % set to 1 to save
+%% ======================== data post processing =============================
+% SaveData        = 0; % set to 1 to save
+% 
+% h       = 6.6e-34;
+% lambda  = 780e-9;
+% Ephoton = h*(3e8/lambda);
+% F_aq    = 100; %Hz
+% Pmain = 9;
+% Pref = 2;
+% AcoustoOptiqueDATA_ANALYSES;
 
-h       = 6.6e-34;
-lambda  = 780e-9;
-Ephoton = h*(3e8/lambda);
-F_aq    = 100; %Hz
-Pmain = 9;
-Pref = 2;
-AcoustoOptiqueDATA_ANALYSES;
-% autosave
-
-% save datas :
+%% save datas :
 if SaveData == 1
     
 MainFolderName = 'D:\Data\Mai';
