@@ -42,8 +42,8 @@
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbZ         = 1:10;        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = -3:3;        % 20 Nb de composantes de Fourier en X, 'JM'
+        NbZ         = [1,1:10];        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = -5:5;        % 20 Nb de composantes de Fourier en X, 'JM'
         Phase       = [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
@@ -226,7 +226,7 @@ end
 %  SEQ = SEQ.stopSequence('Wait',0);
 
 % ======================== data post processing =============================
-SaveData        = 1; % set to 1 to save
+SaveData        = 0; % set to 1 to save
 
 h       = 6.6e-34;
 lambda  = 780e-9;
