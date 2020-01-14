@@ -42,8 +42,8 @@
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbZ         = [1,1:10];        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = [-10:10];        % 20 Nb de composantes de Fourier en X, 'JM'
+        NbZ         = [11,1:10];        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = [-5:5];        % 20 Nb de composantes de Fourier en X, 'JM'
         Phase       = [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
@@ -65,7 +65,7 @@
         X1              = 40;
         
         NTrig           = 1; % repeat 2 time not allowed
-        Prof            = (1e-3*1540)*400; % last digits in us 
+        Prof            = (1e-3*1540)*800; % last digits in us 
         SaveData        = 0 ; % set to 1 to save
 
 %% default parameters for user input (used for saving)
@@ -105,7 +105,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
 %% view sequence GUI
 fprintf('============================= SEQ ANALYSIS =======================\n');
 
-Nactive = 1
+Nactive = 1 ;
 
 % total number of sequences :
 Nevent = length(SEQ.InfoStruct.event);
@@ -133,7 +133,7 @@ SEQ.InfoStruct.event(Nactive).duration
 % isfloat H:\
 % islogical
 % isstring
-SubFolderNameLocal         = generateSubFolderName('\\AMIENS\Data\Mai');  % localhost save
+SubFolderNameLocal         = generateSubFolderName('D:\Data\Mai');  % localhost save
 SubFolderNameHollande      = generateSubFolderName('Z:\Mai');       % 10.10.10.36 - holland save
 FileNameLocal_csv          = [SubFolderNameLocal,'\LogFile.csv'];
 FileNameHollande_csv       = [SubFolderNameHollande,'\LogFile.csv'];
@@ -198,8 +198,8 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
  
  CsMl_ErrorHandler(ret, 1, Hgage);
  status = CsMl_QueryStatus(Hgage);
- 
- SEQ = SEQ.startSequence();
+  SEQ = SEQ.startSequence();
+
 
  while status ~= 0
   status = CsMl_QueryStatus(Hgage);
@@ -229,25 +229,26 @@ colormap(parula)
 %  SEQ = SEQ.stopSequence('Wait',0);
 
 %% ======================== data post processing =============================
-% SaveData        = 0; % set to 1 to save
+% SaveData        = 1; % set to 1 to save
 % 
 % h       = 6.6e-34;
 % lambda  = 780e-9;
 % Ephoton = h*(3e8/lambda);
-% F_aq    = 100; %Hz
-% Pmain = 9;
-% Pref = 2;
-% AcoustoOptiqueDATA_ANALYSES;
+ F_aq    = 100; %Hz
+ Pmain = 9;
+ Pref = 2;
+ AcoustoOptiqueDATA_ANALYSES;
 
-%% save datas :
+% save datas :
+SaveData = 1;
 if SaveData == 1
     
 MainFolderName = 'D:\Data\Mai';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'Ref_100Hz_41uW_nofilter_main2uW';%RefOnly_100Hz_noFilter
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'RepHz',100);
-savefig(Hmu,FileName);
-saveas(Hmu,FileName,'png');
+CommentName    = 'NbXNbZ';%RefOnly_100Hz_noFilter
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Tau_cam',Tau_cam);
+% savefig(Hmu,FileName);
+% saveas(Hmu,FileName,'png');
 
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
               ,'X0','X1','NTrig','Nlines','Prof','F_aq','ActiveLIST','Pref','NbElemts','t1','t2','raw','Pmain','SampleRate','c','Range','TypeOfSequence');
