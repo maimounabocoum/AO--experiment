@@ -55,7 +55,7 @@ NUZ = zeros('like',NBZ);
 %% adding an offset for first trigged elements:
 
 Nfrequencymodes = length(NBX(:));
-MedElmtList = 1:Nfrequencymodes ;
+MedElmtList     = 1:Nfrequencymodes ;
 %% Arbitrary definition of US events
 FC = remote.fc('Bandwidth', 90 , 0); %FIR receiving bandwidth [%] - center frequency = f0 : 90
 RX = remote.rx('fcId', 1, 'RxFreq', 60 , 'QFilter', 2, 'RxElemts', 1:128, 0);

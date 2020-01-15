@@ -27,13 +27,13 @@
  % 'JM' : Ondes Jean-Michel
  % 'OC' : Ondes Chirpées
  
-        TypeOfSequence  = 'JM'; % 'OP','OS','JM','OC'
+        TypeOfSequence  = 'OFJM'; % 'OP','OS','JM','OC','OFJM'
         Master          = 'on';
         GageActive      = 'on' ; 
         Volt            = 15; %Volt
         % 2eme contrainte : 
         % soit FreqSonde congrue à NUZ0 , soit entier*FreqSonde = NUech(=180e6)
-        FreqSonde       = 6; %MHz AO : 78 et 84 MHz to be multiple of 6
+        FreqSonde       = 6; % MHz AO : 78 et 84 MHz to be multiple of 6
         FreqSonde       = 180/round(180/FreqSonde); %MHz
         NbHemicycle     = 500 ;
         
@@ -43,7 +43,7 @@
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
         NbZ         = [20,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = [-10:10];        % 20 Nb de composantes de Fourier en X, 'JM'
+        NbX         = [-4:4];        % 20 Nb de composantes de Fourier en X, 'JM'
         Phase       = [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
@@ -51,7 +51,7 @@
         
         % on choisira DurationWaveform telle que DurationWaveform*(180MHz)
         
-        DurationWaveform = 20;
+        DurationWaveform = 20; % fundamental temporal duration
         
         % contrainte : 
         % soit un multiple de 180 MHz
@@ -60,9 +60,10 @@
         
         Tau_cam          = 200 ;% camera integration time (us)
         
-        Foc             = 5; % mm
-        X0              = 0; %0-40
-        X1              = 40;
+        Foc             = 15; % mm
+        X0              = 10; %0-40
+        X1              = 14;
+        step            = 1; % in mm
         
         NTrig           = 1; % repeat 2 time not allowed
         Prof            = (1e-3*1540)*800; % last digits in us 
@@ -93,7 +94,7 @@ Volt = min(Volt,20) ;
 %[SEQ,MedElmtList,NUX,NUZ,nuX0,nuZ0] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
     case 'OFJM'
 Volt = min(Volt,20) ; 
- [SEQ,ActiveLIST,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OFJMLusmeasure(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig ,NU_low,Tau_cam , Phase ,Master);
+ [SEQ,ActiveLIST,dX0,nuZ0,NUZ,ParamList] = AOSeqInit_OFJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc , NbZ , X0 , X1 , step , NTrig ,NU_low,Tau_cam , Phase ,Master);
 %[SEQ,MedElmtList,NUX,NUZ,nuX0,nuZ0] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
   
     case 'OC'
@@ -109,7 +110,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
 %% view sequence GUI
 fprintf('============================= SEQ ANALYSIS =======================\n');
 
-Nactive = 1 ;
+Nactive = 10 ;
 
 % total number of sequences :
 Nevent = length(SEQ.InfoStruct.event);

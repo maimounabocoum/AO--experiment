@@ -36,11 +36,8 @@ TxWidth         = Foc/2;           % mm : effective width for focus line
 PropagationTime = (Prof)/(c)*1e3 ; % duration for one line in \mu s
 
 
-NoOp         = 2000;         % 탎 minimum time between two US pulses, (5 by default ??)
-FIRBandwidth = 90;          % FIR receiving bandwidth [%] - center frequency = UF.TwFreq
-RxFreq       = 6;           % Receiving center frequency MHz , ??
-
-TrigOut    = 50;            % trigger duration 탎
+NoOp       = 2000;         % 탎 minimum time between two US pulses, (5 by default ??)
+TrigOut    = 50;           % trigger duration 탎
 Pause      = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause duration in 탎
 
 % ======================================================================= %
@@ -64,8 +61,8 @@ DelayLaw = sqrt(Foc^2+(TxWidth/2)^2)/(c*1e-3) ...
  DlySmpl = round(DelayLaw/dt_s); 
 
  % common waveform for emission, square envoppe - non apodized:
- T_Wf = 0:dt_s:0.5*NbHemicycle/f0;
- Wf = sin(2*pi*f0*T_Wf); 
+ t_Wf = 0:dt_s:0.5*NbHemicycle/f0;
+ Wf = sin(2*pi*f0*t_Wf); 
  
  % number of time-points necessary = points in waveform + maximum DelayLaw
  % offset necessary for DelayLaw law
@@ -90,12 +87,11 @@ DelayLaw = sqrt(Foc^2+(TxWidth/2)^2)/(c*1e-3) ...
 
 % ======================================================================= %
 %% Arbitrary definition of US events
-% 
-% % Elusev
 
-% 
- FC = remote.fc('Bandwidth', FIRBandwidth , 0);
- RX = remote.rx('fcId', 1, 'RxFreq', RxFreq, 'QFilter', 2, 'RxElemts', 0, 0);
+ FC = remote.fc('Bandwidth', 90 , 0);
+ % FIRBandwidth : FIR receiving bandwidth [%] - center frequency = UF.TwFreq
+
+ RX = remote.rx('fcId', 1, 'RxFreq', f0 , 'QFilter', 2, 'RxElemts', 0, 0);
 
     if round((X0+ScanLength)/pitch) > NbElemts
         warning('Scan length too long, set to maximum value');
@@ -121,8 +117,6 @@ MedElmtList = ElmtBorns(1):ElmtBorns(2)  ;
 
 for Nloop = 1:length(MedElmtList)
     
-    %PosX     = X0 + (MedElmtList(Nloop)-1)*pitch; % unit to mm
-
     MedElmt  = MedElmtList(Nloop); %round(PosX/pitch);
        
     % actual active element
@@ -229,20 +223,23 @@ SEQ = usse.usse( ...
  
 %%%    Do NOT CHANGE - Sequence execution 
 %%%    Initialize remote on systems
- SEQ = SEQ.initializeRemote('IPaddress',AixplorerIP);
  %SEQ.Server
  %SEQ.InfoStruct.event
  
 % remoteGetUserSequence(SEQ.Server)
 % remoteGetStatus(SEQ.Server)
-
- 
- display('Remote OK');
-
- % status :
- display('Loading sequence to Hardware');
+ %% initialize communation with remote aixplorer and load sequence
+try
+ SEQ = SEQ.initializeRemote('IPaddress',AixplorerIP);
+ display('============== Remote OK =============');
+ display('Loading sequence to Hardware'); tic ;
  SEQ = SEQ.loadSequence();
- disp('-------------Ready to use-------------------- ')
+ fprintf('Sequence has loaded in %f s \n\r',toc)
+ display('--------ready to use -------------');
+ 
+catch e
+  fprintf(e.message);  
+end
  
  
  

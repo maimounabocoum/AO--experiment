@@ -4,7 +4,7 @@
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
 
-function [SEQ,MedElmtList,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OJMLusmeasure(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig, NU_low , Tau_cam , Phase , Master)
+function [SEQ,MedElmtList,pitch,nuZ0,NUZ,ParamList] = AOSeqInit_OFJM(AixplorerIP, Volt , f0 , NbHemicycle , Foc , NbZ , X0 , X1 , step , NTrig, NU_low , Tau_cam , Phase , Master)
 
 
 %% System parameters import :
@@ -24,7 +24,16 @@ n_rep = floor(Tau_cam*NU_low) ;
 PropagationTime        = ( n_rep + 2 )/NU_low  ;  % 1 / pulse frequency repetition [us]38.96;%
 Pause                  = max( NoOp-ceil(PropagationTime) , MinNoop ); % pause duration in µs
 
+%% Focusing parameters
+% ======================================================================= %
+TxWidth         = Foc/2;           % mm : effective width for focus line
 
+%% DelayLaw Law [us]
+% ======================================================================= %
+% c[m/s] -> [mm/us] ; eg factor 1e-3 in the above expression
+DelayLaw = sqrt(Foc^2+(TxWidth/2)^2)/(c*1e-3) ...
+        - 1/(c*1e-3)*sqrt(Foc^2+((0:pitch:TxWidth)-TxWidth/2).^2);
+   
 %% ===== Codage en arbitrary : delay matrix and waveform ===========
 pulseDuration = NbHemicycle*(0.5/f0) ; % US inital pulse duration in us
 Nphase        = max(1,length(Phase));
@@ -35,26 +44,26 @@ Nphase        = max(1,length(Phase));
 
 
 %% ==================== Codage en arbitrary : preparation des acmos ==============
+
 % shooting elements 
 ElmtBorns   = [min(NbElemts,max(1,round(X0/pitch))),max(1,min(NbElemts,round(X1/pitch)))];
 ElmtBorns   = sort(ElmtBorns) ; % in case X0 and X1 are mixed up
+% convert step in unit
+step = max(1,step/pitch);
+step = min(step,ElmtBorns(2)-ElmtBorns(1));
+MedElmtList = ElmtBorns(1):step:ElmtBorns(2)  ;
 
-
-Nbtot    = ElmtBorns(2) - ElmtBorns(1) + 1 ;
-Xs        = (0:Nbtot-1)*pitch;             % Echelle de graduation en mm
-
-
+%% modulation along z : fundamental frequency
 nuZ0 = (NU_low*1e6)/(c*1e3);                 % Pas fréquence spatiale en Z (en mm-1)
-nuX0 = 1/(Nbtot*pitch);                      % Pas fréquence spatiale en X (en mm-1)
 
-[X,NBZ] = meshgrid(Xs,NbZ);
+[MEdElmtList,NBZ] = meshgrid(MedElmtList,NbZ);
+
 % initialization of empty frequency matrix
-NUX = zeros('like',NBX); 
 NUZ = zeros('like',NBZ); 
 
 %% adding an offset for first trigged elements:
 
-Nfrequencymodes = length(NBX(:));
+Nfrequencymodes = length(NBZ(:));
 MedElmtList = 1:Nfrequencymodes ;
 %% Arbitrary definition of US events
 FC = remote.fc('Bandwidth', 90 , 0); %FIR receiving bandwidth [%] - center frequency = f0 : 90
@@ -67,8 +76,8 @@ PHASE = repmat(Phase(:),Nfrequencymodes,1);
 %% updata log param struct
 % data types : int,str,double,bool
 ParamList = cell(Nfrequencymodes*Nphase + 2,4); % 1 line header + 1 line data type
-ParamList(1,:) = {'Event','nbX','nbZ','phase'};
-ParamList(2,:) = {'int','int','int','double'};
+ParamList(1,:) = {'Event','Xs','nbZ','phase'};
+ParamList(2,:) = {'int','double','int','double'};
 ParamList(3:end,4) = num2cell(PHASE); % fill in phase parameters
 
 
@@ -80,20 +89,22 @@ fprintf('Sequence is repeated %f times \n\r',n_rep)
 
 for nbs = 1:Nfrequencymodes
     
-        nuZ  = NBZ(nbs)*nuZ0; % fréquence de modulation de phase (en Hz) 
-        nuX  = NBX(nbs)*nuX0;  % fréquence spatiale (en mm-1)
-        
+        MedElmt  = MEdElmtList(nbs); % emission center index 
+       
+        % actual active element
+        TxElemts = MedElmt-round(TxWidth/(2*pitch)):...
+                   MedElmt+floor(TxWidth/(2*pitch));        
         % f0 : MHz
         % nuZ : en mm-1
         % nuX : en mm-1
-        [nuX,nuZ,~,Waveform] = CalcMatHole(f0, NBX(nbs),NBZ(nbs),nuX0,nuZ0,Xs,SampFreq,c); % Calculer la matrice
+        [nuZ,~,Waveform] = CalcMat_OFJM(f0,NBZ(nbs),nuZ0,SampFreq,c,DelayLaw); % Calculer la matrice
         % upgrade frequency map : 
-        NUX(nbs) = nuX ;
+
         NUZ(nbs) = nuZ ;
        
        % save parameters in SI unit
        ParamBLOCK = repmat({sprintf('%i',nbs),...
-                            sprintf('%i',NBX(nbs)),...
+                            sprintf('%i',pitch*MEdElmtList(nbs)),...
                             sprintf('%i',NBZ(nbs))}, Nphase , 1 );
  
                         
@@ -108,10 +119,7 @@ for nbs = 1:Nfrequencymodes
     EvtDur   = ceil(pulseDuration + PropagationTime);   
     
     % Flat TX{nbs}
-    TXList{nbs} = remote.tx_arbitrary(...
-                    'txClock180MHz', 1,...
-                    'twId',1,...
-                    'Delays',0);
+    TXList{nbs} = remote.tx_arbitrary('txClock180MHz', 1,'twId',1,'Delays',0);
     
     % Arbitrary TW
     % RepeatCH = 1 : repeat singe waveform on all channels{nbs} 
@@ -121,7 +129,7 @@ for nbs = 1:Nfrequencymodes
                     'repeat',n_rep, ... %nrep
                     'repeat256', 0, ...
                     'ApodFct', 'none', ...
-                    'TxElemts',ElmtBorns(1):ElmtBorns(2), ...
+                    'TxElemts',TxElemts( TxElemts>0 & TxElemts <= NbElemts ), ...
                     'DutyCycle', 1, ...
                     0);
 
@@ -256,7 +264,6 @@ SEQ = usse.usse( ...
  
  
 % convert to SI unit
-nuX0 = nuX0*1e3;
 nuZ0 = nuZ0*1e3;
 
 
