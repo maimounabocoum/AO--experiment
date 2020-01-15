@@ -42,8 +42,8 @@
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbZ         = [11,1:10];        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = [-5:5];        % 20 Nb de composantes de Fourier en X, 'JM'
+        NbZ         = [20,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = [-10:10];        % 20 Nb de composantes de Fourier en X, 'JM'
         Phase       = [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
@@ -91,7 +91,11 @@ Volt = min(50,Volt); % security for OP routine
 Volt = min(Volt,20) ; 
  [SEQ,ActiveLIST,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OJMLusmeasure(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig ,NU_low,Tau_cam , Phase ,Master);
 %[SEQ,MedElmtList,NUX,NUZ,nuX0,nuZ0] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
- 
+    case 'OFJM'
+Volt = min(Volt,20) ; 
+ [SEQ,ActiveLIST,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OFJMLusmeasure(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig ,NU_low,Tau_cam , Phase ,Master);
+%[SEQ,MedElmtList,NUX,NUZ,nuX0,nuZ0] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
+  
     case 'OC'
 Volt = min(Volt,15) ; 
 [SEQ,MedElmtList,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OC(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 , NTrig ,DurationWaveform,Tau_cam);
@@ -240,7 +244,7 @@ colormap(parula)
  AcoustoOptiqueDATA_ANALYSES;
 
 % save datas :
-SaveData = 1;
+SaveData = 0;
 if SaveData == 1
     
 MainFolderName = 'D:\Data\Mai';
