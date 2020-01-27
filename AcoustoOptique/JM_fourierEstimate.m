@@ -1,6 +1,6 @@
 %% simulation of fourier traces :
-        NbZ         = 3;     % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = [-3,3];     % 20 Nb de composantes de Fourier en X, 'JM'
+        NbZ         = 9;     % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = 0;     % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;
         SampFreq = 180; % aixplorer sample in MHz
         Nbtot     = 192;

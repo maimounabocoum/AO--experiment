@@ -60,15 +60,24 @@ t = (0:N-1)*dt;  % time in us
 alpha = nuX/fz;
 carrier = sin(2*pi*f0*T);
 
-if nbZ==0
-   Mat = sign(carrier) ;
-else
-   Mat = sign(carrier).*(sin( 2*pi*fz*(T-alpha*X) )> 0 );   
-end
-% Am = mod(ceil(2*fz*(T-alpha*X)),4);
-% Am(Am==2)=0;
-% Am(Am==3)=-1;
-% Mat = sign(carrier).*Am;
+% if nbZ==0
+%    Mat = sign(carrier) ;
+% else
+%    Mat = sign(carrier).*(sin( 2*pi*fz*(T-alpha*X) )> 0 );   
+% end
+
+Am = mod(ceil(2*fz*(T-alpha*X)),4);
+Am(Am==2)=0;
+Am(Am==3)=-1;
+Mat = sign(carrier).*Am;
+
+% if nbZ==0
+%    Mat = sign(carrier) ;
+% else
+%    Mat = sign(carrier).*(sin( 2*pi*fz*(T-alpha*X) )> 0 ).*sign(sin( pi*fz*(T-alpha*X) ));   
+%    %Mat = sign(sin( pi*fz*(T-alpha*X) ));
+% end
+
 
 % convert m-1->mm-1
 nuZ = 1e-3*nuZ;

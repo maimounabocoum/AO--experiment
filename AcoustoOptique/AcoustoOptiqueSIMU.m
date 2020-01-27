@@ -30,7 +30,7 @@
         TypeOfSequence  = 'JM'; % 'OP','OS','JM','OC','OFJM'
         Master          = 'on';
         GageActive      = 'on' ; 
-        Volt            = 10; %Volt
+        Volt            = 15; %Volt
         % 2eme contrainte : 
         % soit FreqSonde congrue à NUZ0 , soit entier*FreqSonde = NUech(=180e6)
         FreqSonde       = 6; % MHz AO : 78 et 84 MHz to be multiple of 6
@@ -42,9 +42,9 @@
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbZ         = [11,1:7];        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = [-7:7];        % 20 Nb de composantes de Fourier en X, 'JM'
-        Phase       = [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
+        NbZ         = 9;%[6,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = 0;%[-10:10];        % 20 Nb de composantes de Fourier en X, 'JM'
+        Phase       = [0,0];%[0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
         %        NUrep =   Nbz*(50kHz)         
@@ -66,7 +66,7 @@
         step            = 1;     % in mm
         TxWidth         = 40;
         
-        NTrig           = 1;   % repeat 2 time not allowed
+        NTrig           = 100;   % repeat 2 time not allowed
         Prof            = (1e-3*1540)*800; % last digits in us 
         SaveData        = 0 ; % set to 1 to save
 
@@ -253,7 +253,7 @@ if SaveData == 1
     
 MainFolderName = 'D:\Data\Mai';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'NbXnBz';%RefOnly_100Hz_noFilter
+CommentName    = 'NbXnBzAvecSautPhase';%RefOnly_100Hz_noFilter
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence);
 % savefig(Hmu,FileName);
 % saveas(Hmu,FileName,'png');
