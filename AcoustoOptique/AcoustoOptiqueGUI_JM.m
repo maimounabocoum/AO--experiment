@@ -38,6 +38,9 @@
         NbZ         = 8;    % 8; % Nb de composantes de Fourier en Z, 'JM'
         NbX         = 0;     % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;  % length in dimension x (us)
+        n_low = round( 180*DurationWaveform );
+        NU_low = (180)/n_low;   % fundamental temporal frequency
+        
         
         SaveData = 0;          % set to 1 to save data
         AIXPLORER_Active = 'on';% 'on' or 'off' 
