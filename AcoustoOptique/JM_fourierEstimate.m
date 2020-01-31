@@ -1,7 +1,13 @@
+ addpath('sequences');
+ addpath('subfunctions');
+
 %% simulation of fourier traces :
-        NbZ         = 9;     % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 10;     % 20 Nb de composantes de Fourier en X, 'JM'
+        NbZ         = 11;     % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = 0;     % 20 Nb de composantes de Fourier en X, 'JM'
         DurationWaveform = 20;
+        n_low = round( 180*DurationWaveform );
+        NU_low = (180)/n_low;    % fundamental temporal frequency
+        
         SampFreq = 180; % aixplorer sample in MHz
         Nbtot     = 192;
         pitch     = 0.2;

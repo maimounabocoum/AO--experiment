@@ -4,7 +4,7 @@
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
 
-function [SEQ,MedElmtList,pitch,nuZ0,NUZ,ParamList] = AOSeqInit_OFJM(AixplorerIP, Volt , f0 , NbHemicycle , Foc , NbZ , X0 , X1 , LWidth ,step , NTrig, NU_low , Tau_cam , Phase , Master)
+function [SEQ,MedElmtList,pitch,nuZ0,NUZ,ParamList] = AOSeqInit_OFJM(AixplorerIP, Volt , f0 , NbHemicycle , Foc , NbZ , X0 , X1 , LWidth ,step , NTrig, NU_low , Tau_cam , Phase , frep , frep , Master)
 
 
 %% System parameters import :
@@ -16,7 +16,7 @@ NbElemts    = system.probe.NbElemts ;
 pitch       = system.probe.Pitch ; % in mm
 MinNoop     = system.hardware.MinNoop;
 
-NoOp       = 10000;             % µs minimum time between two US pulses
+NoOp       = 1e6/frep;             % µs minimum time between two US pulses
 
 
 %% ======================================================================= %
