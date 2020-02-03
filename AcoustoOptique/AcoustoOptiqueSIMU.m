@@ -43,9 +43,9 @@
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbZ         = 11;  % [6,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 20 ;    % [-10:10];        % 20    Nb de composantes de Fourier en X, 'JM'
-        Phase       = 0 ;% [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
+        NbZ         = 1:5;  % [6,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = -10:10 ;    % [-10:10];        % 20    Nb de composantes de Fourier en X, 'JM'
+        Phase       = [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
         %        NUrep =   Nbz*(50kHz)         
@@ -68,9 +68,9 @@
         TxWidth         = 40;
         
         Frep            =  max(2,100) ; % in Hz
-        NTrig           = 1000;   % repeat 2 time not allowed
+        NTrig           = 1;   % repeat 2 time not allowed
         Prof            = (1e-3*1540)*1000; % last digits in us 
-        SaveData        = 0 ; % set to 1 to save
+        SaveData        = 1 ; % set to 1 to save
 
 %% default parameters for user input (used for saving)
 [nuX0,nuZ0] = EvalNu0( X0 , X1 , NU_low );      
@@ -243,7 +243,7 @@ colormap(parula)
 %  SEQ = SEQ.startSequence();
 %  SEQ = SEQ.stopSequence('Wait',0);
 
-%% ======================== data post processing =============================
+% ======================== data post processing =============================
 % SaveData        = 1; % set to 1 to save
 % 
 % h       = 6.6e-34;
@@ -260,13 +260,13 @@ if SaveData == 1
     
 MainFolderName = 'D:\Data\Mai';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'NbxNBzAvecSautPhase';%RefOnly_100Hz_noFilter
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'NbZ',NbZ);
+CommentName    = 'AvecSautPhaseNbZ11';%RefOnly_100Hz_noFilter
+FileName       = generateSaveName(SubFolderName ,'name',CommentName);
 % savefig(Hmu,FileName);
 % saveas(Hmu,FileName,'png');
 
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
-              ,'X0','X1','NTrig','Nlines','Prof','Frep','ActiveLIST','Pref','NbElemts','t1','t2','raw','Pmain','SampleRate','c','Range','TypeOfSequence');
+              ,'X0','X1','NTrig','Nlines','Prof','Frep','ActiveLIST','Pref','NbElemts','t1','t2','raw','Pmain','SampleRate','c','Range','TypeOfSequence','Bacules');
 
 fprintf('Data has been saved under : \r %s \r\n',FileName);
 
