@@ -43,8 +43,8 @@
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbZ         = 1:5;  % [6,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = -10:10 ;    % [-10:10];        % 20    Nb de composantes de Fourier en X, 'JM'
+        NbZ         = [6,1:5];  % [6,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = (-14:14) ;    % [-10:10];        % 20    Nb de composantes de Fourier en X, 'JM'
         Phase       = [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
@@ -70,7 +70,7 @@
         Frep            =  max(2,100) ; % in Hz
         NTrig           = 1;   % repeat 2 time not allowed
         Prof            = (1e-3*1540)*1000; % last digits in us 
-        SaveData        = 1 ; % set to 1 to save
+        SaveData        = 0 ; % set to 1 to save
 
 %% default parameters for user input (used for saving)
 [nuX0,nuZ0] = EvalNu0( X0 , X1 , NU_low );      
@@ -260,7 +260,7 @@ if SaveData == 1
     
 MainFolderName = 'D:\Data\Mai';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'AvecSautPhaseNbZ11';%RefOnly_100Hz_noFilter
+CommentName    = 'PJ';%RefOnly_100Hz_noFilter
 FileName       = generateSaveName(SubFolderName ,'name',CommentName);
 % savefig(Hmu,FileName);
 % saveas(Hmu,FileName,'png');

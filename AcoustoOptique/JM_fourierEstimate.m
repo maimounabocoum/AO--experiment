@@ -4,6 +4,7 @@
 %% simulation of fourier traces :
         NbZ         = 11;     % 8; % Nb de composantes de Fourier en Z, 'JM'
         NbX         = 0;     % 20 Nb de composantes de Fourier en X, 'JM'
+        Bascule     = 'off';
         DurationWaveform = 20;
         n_low = round( 180*DurationWaveform );
         NU_low = (180)/n_low;    % fundamental temporal frequency
@@ -32,7 +33,7 @@
         % f0 : MHz
         % nuZ : en mm-1
         % nuX : en mm-1
-        [nuX,nuZ,~,Waveform] = CalcMatHole(f0, NBX(nbs),NBZ(nbs),nuX0,nuZ0,Xs,SampFreq,c); % Calculer la matrice
+        [nuX,nuZ,~,Waveform] = CalcMatHole(f0, NBX(nbs),NBZ(nbs),nuX0,nuZ0,Xs,SampFreq,c,Bascule); % Calculer la matrice
                 
         figure;imagesc(Waveform); colormap(parula)
         end
