@@ -4,7 +4,7 @@
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
 
-function [SEQ,MedElmtList,pitch,nuZ0,NUZ,ParamList] = AOSeqInit_OFJM(AixplorerIP, Volt , f0 , NbHemicycle , Foc , NbZ , X0 , X1 , step , NTrig, NU_low , Tau_cam , Phase , Master)
+function [SEQ,MedElmtList,pitch,nuZ0,NUZ,ParamList] = AOSeqInit_OFJM(AixplorerIP, Volt , f0 , NbHemicycle , Foc , NbZ , X0 , X1 , LWidth ,step , NTrig, NU_low , Tau_cam , Phase , Master)
 
 
 %% System parameters import :
@@ -26,7 +26,7 @@ Pause                  = max( NoOp-ceil(PropagationTime) , MinNoop ); % pause du
 
 %% Focusing parameters
 % ======================================================================= %
-TxWidth         = Foc/2;           % mm : effective width for focus line
+TxWidth         = min( LWidth , (NbElemts-1)*pitch );           % mm : effective width for focus line
 
 %% DelayLaw Law [us]
 % ======================================================================= %
@@ -51,7 +51,11 @@ ElmtBorns   = sort(ElmtBorns) ; % in case X0 and X1 are mixed up
 % convert step in unit
 step = max(1,step/pitch);
 step = min(step,ElmtBorns(2)-ElmtBorns(1));
+if step == 0
+MedElmtList = ElmtBorns(1)  ;
+else
 MedElmtList = ElmtBorns(1):step:ElmtBorns(2)  ;
+end
 
 %% modulation along z : fundamental frequency
 nuZ0 = (NU_low*1e6)/(c*1e3);                 % Pas fréquence spatiale en Z (en mm-1)
@@ -77,7 +81,7 @@ PHASE = repmat(Phase(:),Nfrequencymodes,1);
 % data types : int,str,double,bool
 ParamList = cell(Nfrequencymodes*Nphase + 2,4); % 1 line header + 1 line data type
 ParamList(1,:) = {'Event','Xs','nbZ','phase'};
-ParamList(2,:) = {'int','double','int','double'};
+ParamList(2,:) = {'int','int','int','double'};
 ParamList(3:end,4) = num2cell(PHASE); % fill in phase parameters
 
 
@@ -104,7 +108,7 @@ for nbs = 1:Nfrequencymodes
        
        % save parameters in SI unit
        ParamBLOCK = repmat({sprintf('%i',nbs),...
-                            sprintf('%i',pitch*MEdElmtList(nbs)),...
+                            sprintf('%i',MEdElmtList(nbs)),...
                             sprintf('%i',NBZ(nbs))}, Nphase , 1 );
  
                         
@@ -124,7 +128,7 @@ for nbs = 1:Nfrequencymodes
     % Arbitrary TW
     % RepeatCH = 1 : repeat singe waveform on all channels{nbs} 
     TWList{nbs}= remote.tw_arbitrary( ...
-                    'Waveform',Waveform', ...
+                    'Waveform',Waveform(:, TxElemts( TxElemts>0 & TxElemts <= NbElemts ) )', ...
                     'RepeatCH', 0, ...
                     'repeat',n_rep, ... %nrep
                     'repeat256', 0, ...
