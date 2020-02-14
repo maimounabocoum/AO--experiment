@@ -28,7 +28,7 @@
  % 'OC' : Ondes Chirpées
  
         TypeOfSequence  = 'JM'; % 'OP','OS','JM','OC','OFJM'
-        Bacules         = 'on';
+        Bacules         = 'off';
         Master          = 'on';
         GageActive      = 'on' ; 
         Volt            = 15; %Volt
@@ -43,9 +43,9 @@
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbZ         = [6,1:5];  % [6,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = (-14:14) ;    % [-10:10];        % 20    Nb de composantes de Fourier en X, 'JM'
-        Phase       = [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
+        NbZ         = 10;    % [6,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = 0 ;    % [-10:10];        % 20    Nb de composantes de Fourier en X, 'JM'
+        Phase       = 0; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
         %        NUrep =   Nbz*(50kHz)         
@@ -68,7 +68,7 @@
         TxWidth         = 40;
         
         Frep            =  max(2,100) ; % in Hz
-        NTrig           = 1;   % repeat 2 time not allowed
+        NTrig           = 1000;             % repeat 2 time not allowed
         Prof            = (1e-3*1540)*1000; % last digits in us 
         SaveData        = 0 ; % set to 1 to save
 

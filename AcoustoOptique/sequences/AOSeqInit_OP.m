@@ -3,7 +3,7 @@
 % ATTENTION !! Même si la séquence US n'écoute pas, il faut quand même
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
-function [SEQ,Delay,MedElmtList,ActiveLIST,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , X0 , X1 ,Prof, NTrig,Master)
+function [SEQ,Delay,MedElmtList,ActiveLIST,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , X0 , X1 ,Prof, NTrig,frep,Master)
  clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
 
@@ -20,7 +20,7 @@ NbElemts    = system.probe.NbElemts ;
 pitch       = system.probe.Pitch ;          % in mm
 MinNoop     = system.hardware.MinNoop;
 
-NoOp       = 1000;             % µs minimum time between two US pulses
+NoOp       = 1e6/frep;                      % µs minimum time between two US pulses
 
 % ======================================================================= %
 
@@ -137,7 +137,7 @@ ELUSEV{nbs} = elusev.elusev( ...
     'TrigOut',      TrigOut, ... 0,...
     'TrigIn',       0,...
     'TrigAll',      1, ...
-    'TrigOutDelay', 0, ...
+    'TrigOutDelay', 20, ...
     0);
             case 'off'
 
