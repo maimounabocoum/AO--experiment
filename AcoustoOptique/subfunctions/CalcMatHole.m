@@ -1,4 +1,4 @@
-function [nuX,nuZ,t,Mat] = CalcMatHole(f0,nbX,nbZ,nuX0,nuZ0,x,Fe,c)
+function [nuX,nuZ,t,Mat] = CalcMatHole(f0,nbX,nbZ,nuX0,nuZ0,x,Fe,c,Bascule)
 % c input in m/s
 % f0  (en MHz) est la fréquence de porteuse
 % nuZ (en mm-1)
@@ -31,10 +31,15 @@ dt  = 1/Fe ;             % in s
 
 % consequently, if fz0/Fe and f0/Fe are integers, than:
 
-N   = (Fe/fz0);    % 
+if strcmp(Bascule,'on')
+N   = 2*(Fe/fz0);    % 
+else
+N   = (Fe/fz0);    %    
+end
+
 Tot = N*dt;        % durée totale de la séquence
 
-% Tz = 1/fz;          % periode de l'envelloppe A in s
+ Tz = 1/fz;          % periode de l'envelloppe A in s
 % T0 = 1/f0;          % periode de la porteuse A in s
 
 
@@ -59,17 +64,28 @@ t = (0:N-1)*dt;  % time in us
 
 alpha = nuX/fz;
 carrier = sin(2*pi*f0*T);
+%carrier = sin(2*pi*f0*Tz*(1+sawtooth(pi*T/Tz)));
+% 
+% figure; plot(T)
+% hold on ; plot(Tz*(1+sawtooth(pi*T/Tz)))
 
-% if nbZ==0
-%    Mat = sign(carrier) ;
-% else
-%    Mat = sign(carrier).*(sin( 2*pi*fz*(T-alpha*X) )> 0 );   
-% end
 
-Am = mod(ceil(2*fz*(T-alpha*X)),4);
-Am(Am==2)=0;
-Am(Am==3)=-1;
-Mat = sign(carrier).*Am;
+if strcmp(Bascule,'on')
+    
+        Am = mod(ceil(2*fz*(T-alpha*X)),4);
+        Am(Am==2)=0;
+        Am(Am==3)=-1;
+        Mat = sign(carrier).*Am;
+        
+else
+    
+        if nbZ==0
+           Mat = sign(carrier) ;
+        else
+           Mat = sign(carrier).*( sin( 2*pi*fz*(T-alpha*X) )> 0 );   
+        end    
+        
+end
 
 % if nbZ==0
 %    Mat = sign(carrier) ;

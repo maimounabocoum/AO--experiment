@@ -28,6 +28,7 @@
  % 'OC' : Ondes Chirpées
  
         TypeOfSequence  = 'JM'; % 'OP','OS','JM','OC','OFJM'
+        Bacules         = 'off';
         Master          = 'on';
         GageActive      = 'on' ; 
         Volt            = 15; %Volt
@@ -38,13 +39,13 @@
         NbHemicycle     = 50 ;
         
         AlphaM          = 0; %(-20:20)*pi/180; specific OP
-
+        
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbZ         = 9;%[6,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 0;%[-10:10];        % 20 Nb de composantes de Fourier en X, 'JM'
-        Phase       = [0,0];%[0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
+        NbZ         = 10;    % [6,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = 0 ;    % [-10:10];        % 20    Nb de composantes de Fourier en X, 'JM'
+        Phase       = 0; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
         %        NUrep =   Nbz*(50kHz)         
@@ -66,8 +67,9 @@
         step            = 1;     % in mm
         TxWidth         = 40;
         
-        NTrig           = 100;   % repeat 2 time not allowed
-        Prof            = (1e-3*1540)*800; % last digits in us 
+        Frep            =  max(2,100) ; % in Hz
+        NTrig           = 1000;             % repeat 2 time not allowed
+        Prof            = (1e-3*1540)*1000; % last digits in us 
         SaveData        = 0 ; % set to 1 to save
 
 %% default parameters for user input (used for saving)
@@ -88,19 +90,19 @@ Volt = min(50,Volt); % security for OP routine
 %[SEQ,Delay,ScanParam,Alphas] = AOSeqInit_OP_arbitrary(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'OS'
 Volt = min(50,Volt); % security for OP routine     
-[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , NbX , X0 , X1 ,Prof, NTrig);
+[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , NbX , X0 , X1 ,Prof, NTrig );
     case 'JM'
 Volt = min(Volt,20) ; 
- [SEQ,ActiveLIST,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OJMLusmeasure(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig ,NU_low,Tau_cam , Phase ,Master);
+ [SEQ,ActiveLIST,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OJMLusmeasure(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig ,NU_low,Tau_cam , Phase , Frep , Bacules , Master );
 %[SEQ,MedElmtList,NUX,NUZ,nuX0,nuZ0] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
     case 'OFJM'
 Volt = min(Volt,20) ; 
- [SEQ,ActiveLIST,dX0,nuZ0,NUZ,ParamList] = AOSeqInit_OFJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc , NbZ , X0 , X1 , TxWidth ,step , NTrig ,NU_low,Tau_cam , Phase ,Master);
+ [SEQ,ActiveLIST,dX0,nuZ0,NUZ,ParamList] = AOSeqInit_OFJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc , NbZ , X0 , X1 , TxWidth ,step , NTrig ,NU_low,Tau_cam , Phase , Frep , Master );
 %[SEQ,MedElmtList,NUX,NUZ,nuX0,nuZ0] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
   
     case 'OC'
 Volt = min(Volt,15) ; 
-[SEQ,MedElmtList,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OC(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 , NTrig ,DurationWaveform,Tau_cam);
+[SEQ,MedElmtList,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OC(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 , NTrig , DurationWaveform , Tau_cam );
 
 end
 
@@ -118,7 +120,12 @@ Nevent = length(SEQ.InfoStruct.event);
 fprintf('Total number of event is %d\n',Nevent);
 
 NbElemts    = system.probe.NbElemts ; 
-SampFreq    = system.hardware.ClockFreq ;
+if strcmp(Bacules,'on')
+SampFreq    = (system.hardware.ClockFreq)/2 ;
+else
+SampFreq    = system.hardware.ClockFreq ;    
+end
+    
 
 % emission block event evaluated on Nactive over NbElemts transducers
 WaveF = SEQ.InfoStruct.tx(Nactive).waveform(:,1:NbElemts) ;
@@ -193,7 +200,7 @@ FileNameHollande_csv       = [SubFolderNameHollande,'\LogFile.csv'];
 pause(1);
 
 if strcmp(GageActive,'on')
-     SampleRate    =   10;
+     SampleRate    =   50;
      Range         =   2; %Volt
 Nlines = length(SEQ.InfoStruct.event);    
 [ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig*Nlines,Prof,SampleRate,Range,'on');
@@ -236,13 +243,13 @@ colormap(parula)
 %  SEQ = SEQ.startSequence();
 %  SEQ = SEQ.stopSequence('Wait',0);
 
-%% ======================== data post processing =============================
+% ======================== data post processing =============================
 % SaveData        = 1; % set to 1 to save
 % 
 % h       = 6.6e-34;
 % lambda  = 780e-9;
 % Ephoton = h*(3e8/lambda);
- F_aq    = 100; %Hz
+ Frep    = 100; %Hz
  Pmain = 9;
  Pref = 2;
  AcoustoOptiqueDATA_ANALYSES;
@@ -253,13 +260,13 @@ if SaveData == 1
     
 MainFolderName = 'D:\Data\Mai';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'NbXnBzAvecSautPhase';%RefOnly_100Hz_noFilter
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence);
+CommentName    = 'PJ';%RefOnly_100Hz_noFilter
+FileName       = generateSaveName(SubFolderName ,'name',CommentName);
 % savefig(Hmu,FileName);
 % saveas(Hmu,FileName,'png');
 
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
-              ,'X0','X1','NTrig','Nlines','Prof','F_aq','ActiveLIST','Pref','NbElemts','t1','t2','raw','Pmain','SampleRate','c','Range','TypeOfSequence');
+              ,'X0','X1','NTrig','Nlines','Prof','Frep','ActiveLIST','Pref','NbElemts','t1','t2','raw','Pmain','SampleRate','c','Range','TypeOfSequence','Bacules');
 
 fprintf('Data has been saved under : \r %s \r\n',FileName);
 

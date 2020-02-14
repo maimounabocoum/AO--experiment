@@ -4,19 +4,25 @@
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
 
-function [SEQ,MedElmtList,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OJMLusmeasure(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig, NU_low , Tau_cam , Phase , Master)
+function [SEQ,MedElmtList,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OJMLusmeasure(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig, NU_low , Tau_cam , Phase , frep, Bascule ,Master)
 
 
 %% System parameters import :
 % ======================================================================= %
 c           = common.constants.SoundSpeed ; %[m/s]
-SampFreq    = system.hardware.ClockFreq; %NE PAS MODIFIER % emitted signal sampling = 180 in [MHz]
+
+if strcmp(Bascule,'on')
+SampFreq    = system.hardware.ClockFreq/2;  % NE PAS MODIFIER % emitted signal sampling = 90 in [MHz]    
+else
+SampFreq    = system.hardware.ClockFreq;    % NE PAS MODIFIER % emitted signal sampling = 180 in [MHz]
+end 
 SampFreq    = double(SampFreq);
+
 NbElemts    = system.probe.NbElemts ; 
-pitch       = system.probe.Pitch ; % in mm
+pitch       = system.probe.Pitch ;          % in mm
 MinNoop     = system.hardware.MinNoop;
 
-NoOp       = 10000;             % µs minimum time between two US pulses
+NoOp       = 1e6/frep;                      % µs minimum time between two US pulses
 
 
 %% ======================================================================= %
@@ -86,7 +92,7 @@ for nbs = 1:Nfrequencymodes
         % f0 : MHz
         % nuZ : en mm-1
         % nuX : en mm-1
-        [nuX,nuZ,~,Waveform] = CalcMatHole(f0, NBX(nbs),NBZ(nbs),nuX0,nuZ0,Xs,SampFreq,c); % Calculer la matrice
+        [nuX,nuZ,~,Waveform] = CalcMatHole(f0, NBX(nbs),NBZ(nbs),nuX0,nuZ0,Xs,SampFreq,c,Bascule); % Calculer la matrice
         % upgrade frequency map : 
         NUX(nbs) = nuX ;
         NUZ(nbs) = nuZ ;
@@ -108,10 +114,17 @@ for nbs = 1:Nfrequencymodes
     EvtDur   = ceil(pulseDuration + PropagationTime);   
     
     % Flat TX{nbs}
+    if strcmp(Bascule,'on')
+    TXList{nbs} = remote.tx_arbitrary(...
+                    'txClock180MHz', 0,...
+                    'twId',1,...
+                    'Delays',0);
+    else
     TXList{nbs} = remote.tx_arbitrary(...
                     'txClock180MHz', 1,...
                     'twId',1,...
-                    'Delays',0);
+                    'Delays',0);    
+    end
     
     % Arbitrary TW
     % RepeatCH = 1 : repeat singe waveform on all channels{nbs} 

@@ -15,6 +15,8 @@
         f0        = 6; % MHz
         c = 1540;
         Xs        = (0:Nbtot-1)*pitch;             % Echelle de graduation en mm
+        
+        seq_time = 200e-6;                        % Sequence time
 
  nuZ0 = (NU_low*1e6)/(c*1e3);                 % Pas fréquence spatiale en Z (en mm-1)
  nuX0 = 1/(Nbtot*pitch);                      % Pas fréquence spatiale en X (en mm-1)
@@ -25,15 +27,7 @@
         NUZ = zeros('like',NBZ); 
         Nfrequencymodes = length(NBX(:));
         
-        for nbs = 1:Nfrequencymodes
-    
-        nuZ  = NBZ(nbs)*nuZ0; % fréquence de modulation de phase (en Hz) 
-        nuX  = NBX(nbs)*nuX0;  % fréquence spatiale (en mm-1)
-        
-        % f0 : MHz
-        % nuZ : en mm-1
-        % nuX : en mm-1
-        [nuX,nuZ,~,Waveform] = CalcMatHole(f0, NBX(nbs),NBZ(nbs),nuX0,nuZ0,Xs,SampFreq,c,Bascule); % Calculer la matrice
+
+        [~,Waveform] = CalcMatBas(f0, SampFreq, seq_time); % Calculer la matrice
                 
         figure;imagesc(Waveform); colormap(parula)
-        end

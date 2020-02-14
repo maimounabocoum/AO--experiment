@@ -17,7 +17,7 @@
      lambda = 780e-9;
      Ephoton = h*(3e8/lambda);
      Fs1 = SampleRate*1e6 ; % gage sampling frequncy
-     Fs2 = F_aq ;            % triggerbox sampling frequency
+     Fs2 = Frep ;            % triggerbox sampling frequency
      % definition of 2 structure for data analyses:
      MyStat1 = stats_t( Fs1 );
      MyStat2 = stats_t( Fs2 );
