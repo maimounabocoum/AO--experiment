@@ -9,7 +9,6 @@
 
 % adresse Bastille : '192.168.0.20'
 % adresse Jussieu :  '192.168.1.16'
-
  AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
  % path at Jussieu :
  if strcmp(AixplorerIP,'192.168.1.16')
@@ -26,49 +25,51 @@
  % 'OS' : Ondes Structurées
  % 'JM' : Ondes Jean-Michel
  % 'OC' : Ondes Chirpées
- 
-        TypeOfSequence  = 'JM'; % 'OP','OS','JM','OC','OFJM'
-        Bacules         = 'off';
+
+        TypeOfSequence  = 'BAS'; % 'OP','OS','JM','OC','OFJM', 'BAS', 'BAS_SYNC'
+        Bacules         = 'on';
         Master          = 'on';
         GageActive      = 'on' ; 
         Volt            = 15; %Volt
+        seq_time        = 20e-6; % Sequence duration in s
+
         % 2eme contrainte : 
         % soit FreqSonde congrue à NUZ0 , soit entier*FreqSonde = NUech(=180e6)
         FreqSonde       = 6; % MHz AO : 78 et 84 MHz to be multiple of 6
         FreqSonde       = 180/round(180/FreqSonde); %MHz
-        NbHemicycle     = 50 ;
-        
+        NbHemicycle     = 100 ;
+
         AlphaM          = 0; %(-20:20)*pi/180; specific OP
-        
-        
+
+
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbZ         = 1;    % [6,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbZ         = 2;    % [6,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
         NbX         = 0 ;    % [-10:10];        % 20    Nb de composantes de Fourier en X, 'JM'
         Phase       = 0; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
         %        NUrep =   Nbz*(50kHz)         
-        
+
         % on choisira DurationWaveform telle que DurationWaveform*(180MHz)
-        
+
         DurationWaveform = 20; % fundamental temporal duration
-        
+
         % contrainte : 
         % soit un multiple de 180 MHz
         n_low = round( 180*DurationWaveform );
         NU_low = (180)/n_low;    % fundamental temporal frequency
-        
+
         Tau_cam          = 200 ; % camera integration time (us)
-        
+
         Foc             = 99; % mm
         X0              = 0;  % 19.2
         X1              = 40;
         step            = 1;     % in mm
         TxWidth         = 40;
-        
-        Frep            =  max(2,30) ; % in Hz
-        NTrig           = 1000;             % repeat 2 time not allowed
+
+        Frep            =  max(2,100) ; % in Hz
+        NTrig           = 2000;             % repeat 2 time not allowed
         Prof            = (1e-3*1540)*1000; % last digits in us 
         SaveData        = 0 ; % set to 1 to save
 
@@ -86,7 +87,7 @@ Volt = min(50,Volt); % security for OP routine
 [SEQ,ScanParam] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
     case 'OP'
 Volt = min(50,Volt); % security for OP routine       
-[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof, NTrig,'on');
+[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof, NTrig,Frep,'on');
 %[SEQ,Delay,ScanParam,Alphas] = AOSeqInit_OP_arbitrary(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'OS'
 Volt = min(50,Volt); % security for OP routine     
@@ -99,11 +100,14 @@ Volt = min(Volt,20) ;
 Volt = min(Volt,20) ; 
  [SEQ,ActiveLIST,dX0,nuZ0,NUZ,ParamList] = AOSeqInit_OFJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc , NbZ , X0 , X1 , TxWidth ,step , NTrig ,NU_low,Tau_cam , Phase , Frep , Master );
 %[SEQ,MedElmtList,NUX,NUZ,nuX0,nuZ0] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
-  
+
     case 'OC'
 Volt = min(Volt,15) ; 
 [SEQ,MedElmtList,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OC(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 , NTrig , DurationWaveform , Tau_cam );
 
+    case 'BAS'
+        Volt = min(Volt, 15);
+        [SEQ,ActiveLIST,nuX0,nuZ0,NUX,NUZ] = AOSeqInit_Bas(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig ,NU_low,Tau_cam , Phase , Frep , Bacules , Master, seq_time);
 end
 
 
@@ -125,7 +129,7 @@ SampFreq    = (system.hardware.ClockFreq)/2 ;
 else
 SampFreq    = system.hardware.ClockFreq ;    
 end
-    
+
 
 % emission block event evaluated on Nactive over NbElemts transducers
 WaveF = SEQ.InfoStruct.tx(Nactive).waveform(:,1:NbElemts) ;
@@ -140,52 +144,6 @@ title(['shot Number = ',num2str(Nactive)])
 
 SEQ.InfoStruct.event(Nactive).duration
 
-%% write log file to share between applications (Labview) as csv format
-
-% list of data type : isDataType
-% isfloat H:\
-% islogical
-% isstring
-SubFolderNameLocal         = generateSubFolderName('D:\Data\Mai');  % localhost save
-SubFolderNameHollande      = generateSubFolderName('Z:\Mai');       % 10.10.10.36 - holland save
-FileNameLocal_csv          = [SubFolderNameLocal,'\LogFile.csv'];
-FileNameHollande_csv       = [SubFolderNameHollande,'\LogFile.csv'];
-
-%  fid = fopen(FileName_txt,'w');
-%  [rows,cols]=size(ParamList);
- 
-%  fprintf(fid,'%s\n','=========== begin header in SI units ========');
-%  fprintf(fid,'TypeOfSequence : %s \n',TypeOfSequence);
-%  fprintf(fid,'Volt           : %f \n',Volt);
-%  fprintf(fid,'FreqSonde      : %E \n',FreqSonde*1e6);
-%  fprintf(fid,'NbHemicycle    : %f \n',NbHemicycle);
-%  fprintf(fid,'Tau_cam        : %E \n',Tau_cam*1e-6);
-%  fprintf(fid,'DurWaveform    : %E \n',DurationWaveform*1e-6);
-%  fprintf(fid,'Prof           : %E \n',Prof*1e-3);
-%  fprintf(fid,'Nevent         : %i \n',Nevent);
-%  fprintf(fid,'NTrig          : %i \n',NTrig);
-%  fprintf(fid,'X0             : %E \n',X0*1e-3);
-%  fprintf(fid,'X1             : %E \n',X1*1e-3);
-%  fprintf(fid,'Foc            : %E \n',Foc*1e-3); %nuX0,nuZ0
- 
- HearderCell(:,1) = {'TypeOfSequence';TypeOfSequence};
- HearderCell(:,2) = {'Volt';Volt};
- HearderCell(:,3) = {'FreqSonde';FreqSonde*1e6};
- HearderCell(:,4) = {'NbHemicycle';NbHemicycle};
- HearderCell(:,5) = {'Tau_cam';Tau_cam};
- HearderCell(:,6) = {'DurWaveform';DurationWaveform*1e-6};
- HearderCell(:,7) = {'Prof';Prof*1e-3};
- HearderCell(:,8) = {'Nevent';Nevent};
- HearderCell(:,9) = {'NTrig';NTrig};
- HearderCell(:,10) = {'X0'; X0};
- HearderCell(:,11) = {'nuX0'; nuX0};
- HearderCell(:,12) = {'nuZ0'; nuZ0};
- 
- FinalCell = joincell( HearderCell , ParamList ) ;
-
- cell2csv(FileNameLocal_csv,  FinalCell , ';' ,'2015' ,'.' ) ;
- cell2csv(FileNameHollande_csv,  FinalCell , ';' ,'2015' ,'.' ) ;
-%fwritecell('exptable.txt',ParamList);
 
 %%  ========================================== Init Gage ==================
 % Possible return values for status are:
@@ -210,16 +168,16 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
 %%%%%%%%%%%%%%%%%%%  lauch gage acquisition %%%%%%%%%%%%%%%%%%%
 
  ret = CsMl_Capture(Hgage);
- 
+
  CsMl_ErrorHandler(ret, 1, Hgage);
  status = CsMl_QueryStatus(Hgage);
-  SEQ = SEQ.startSequence();
+ %SEQ = SEQ.startSequence();
 
 
  while status ~= 0
   status = CsMl_QueryStatus(Hgage);
  end
-    
+
     for SegmentNumber = 1:acqInfo.SegmentCount        
         transfer.Segment       = SegmentNumber;                     % number of the memory segment to be read
         [ret, datatmp, actual] = CsMl_Transfer(Hgage, transfer);    % transfer
@@ -227,7 +185,7 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
                                                                     % different from the requested one.
        raw((1+actual.ActualStart):actual.ActualLength,SegmentNumber) = datatmp' ;       
     end
-    
+
 end
 figure;imagesc(raw)
 colormap(parula)
@@ -255,12 +213,12 @@ colormap(parula)
  AcoustoOptiqueDATA_ANALYSES;
 
 % save datas :
-
+SaveData = 1;
 if SaveData == 1
-    
-MainFolderName = 'D:\Data\Mai';
+
+MainFolderName = 'D:\Data\Fevrier_Thomas';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'PJ';%RefOnly_100Hz_noFilter
+CommentName    = 'Interf';%RefOnly_100Hz_noFilter
 FileName       = generateSaveName(SubFolderName ,'name',CommentName);
 % savefig(Hmu,FileName);
 % saveas(Hmu,FileName,'png');

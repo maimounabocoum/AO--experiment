@@ -16,7 +16,7 @@
         c = 1540;
         Xs        = (0:Nbtot-1)*pitch;             % Echelle de graduation en mm
         
-        seq_time = 20e-6;                        % Sequence time
+        seq_time = 40e-6;                        % Sequence time
 
  nuZ0 = (NU_low*1e6)/(c*1e3);                 % Pas fréquence spatiale en Z (en mm-1)
  nuX0 = 1/(Nbtot*pitch);                      % Pas fréquence spatiale en X (en mm-1)
@@ -28,6 +28,6 @@
         Nfrequencymodes = length(NBX(:));
         
 
-        [~,Waveform] = CalcMatBas(f0, SampFreq, seq_time); % Calculer la matrice
+        [~,Waveform] = CalcMatSharp(f0, SampFreq, seq_time); % Calculer la matrice
                 
         figure;imagesc(Waveform); colormap(parula)
