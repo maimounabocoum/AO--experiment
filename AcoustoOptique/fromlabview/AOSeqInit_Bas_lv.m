@@ -5,7 +5,8 @@
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
 
 function [SEQ,MedElmtList,nuX0,nuZ0,NUX,NUZ] = AOSeqInit_Bas(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig, NU_low , Tau_cam , Phase , frep, Bascule ,Master, seq_time, sequence)
-
+disp('Called');
+return;
 
 %% System parameters import :
 % ======================================================================= %
@@ -87,7 +88,7 @@ for nbs = 1:Nfrequencymodes
         % f0 : MHz
         % nuZ : en mm-1
         % nuX : en mm-1
-        [~,Waveform] = CalcMatBas(f0, SampFreq, seq_time); % Calculer la matrice
+        [~,Waveform] = CalcMatBas(f0, SampFreq, seq_time, sequence); % Calculer la matrice
         % upgrade frequency map : 
         NUX(nbs) = nuX ;
         NUZ(nbs) = nuZ ;
@@ -117,7 +118,7 @@ for nbs = 1:Nfrequencymodes
     TWList{nbs}= remote.tw_arbitrary( ...
                     'Waveform',Waveform', ...
                     'RepeatCH', 0, ...
-                    'repeat',10, ... %nrep
+                    'repeat',3, ... %nrep
                     'repeat256', 0, ...
                     'ApodFct', 'none', ...
                     'TxElemts',ElmtBorns(1):ElmtBorns(2), ...

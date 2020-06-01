@@ -17,19 +17,15 @@ f0 = f0*1e6;
 N = floor(seq_time/dt);
 NP = floor(seq_time * f0); % Number of signal periods
 N_period = floor(Fe/f0); % Number of points in a period of signal
-
-% Sequence loading
-ENABLE_SEQ_LOADING_FROM_FILE = true;
 sequenceFile = 'sequence.txt';
 
-% Phase jumps
-GENERATE_PHASE_JUMPS = true;
+
 
 tau_carac = 2e-6;
 NP_carac = tau_carac * f0; % Number of carac periods for the phase jumps
 
 z_time = 5e-6;
-padding_starts = [floor(NP/6) floor(2*NP/3)];
+padding_starts = [floor(NP/3) floor(2*NP/3)];
 
 % 2 constraints are imposed on the repeating patter:
 % fz*Tot should be integer
@@ -43,60 +39,39 @@ padding_starts = [floor(NP/6) floor(2*NP/3)];
 % consequently, if fz0/Fe and f0/Fe are integers, than:
 
 t = (0:N-1)*dt;  % time in us
+Nduree = 50;
+
+
+phi = zeros(1,N);
+
+
+
+y = sin(2*pi*f0*t + phi);
+
 
 Jumps = [];
-if(exist(sequenceFile, 'file') == 2 && ENABLE_SEQ_LOADING_FROM_FILE) % Using saved sequence
+if(exist(sequenceFile, 'file') == 2) % Using saved sequence
     disp('Found sequence file, loading from it.');
     fileId = fopen(sequenceFile);
-    % Header
-    
-    seq_time_file = str2double(fgetl(fileId));
-    if(seq_time_file ~= seq_time)
-        disp('Sequence times do not match: using loaded sequence time.');
-        seq_time = seq_time_file;
-    end
-    paddings_length = floor(str2double(fgetl(fileId)));
-    fprintf('seq_time = %f, length = %i\n', seq_time, paddings_length);
-    padding_starts = [];
-    for i = 1:paddings_length
-       padding_starts = [padding_starts floor(str2double(fgetl(fileId)))];
-    end
-
-    disp(padding_starts);
-    
     line = fgetl(fileId);
     while ischar(line)
         Jumps = [Jumps str2double(line)];
         line = fgetl(fileId);
     end
     fclose(fileId);
-    
-    N = floor(seq_time/dt);
-    NP = floor(seq_time * f0); % Number of signal periods
 
 else % Generating sequence instead
     disp('No sequence file detected, generating sequence...');
-    
-    if(GENERATE_PHASE_JUMPS)
-        % Generating jumps
-        rng(0, 'twister');
-        total_periods = 0;
-        Jumps = [];
-        while total_periods + NP_carac + 1 < NP
-            r = floor(rand() * NP_carac) + 1; %+1 period if rand is 0 : we want at least one period of signal
-            Jumps = [Jumps r];
-            total_periods = total_periods + r;
-        end
-        Jumps = [Jumps NP - total_periods]; % Finish the jump sequence with the only what's left (overflow security)
-    else
-        Jumps = NP
+    % Generating jumps
+    rng(0, 'twister');
+    total_periods = 0;
+    Jumps = 1;
+    while total_periods + NP_carac + 1 < NP
+        r = floor(rand() * NP_carac) + 1; %+1 period if rand is 0 : we want at least one period of signal
+        Jumps = [Jumps r];
+        total_periods = total_periods + r;
     end
-    
-% check if size jump is ok
-if sum(Jumps) ~= NP
-    error('problem is total jump size');
-end
-
+    Jumps = [Jumps NP - total_periods]; % Finish the jump sequence with the only what's left (overflow security)
 end
     %% Padding zeroes for reset
     z_steps = floor(z_time/dt);
@@ -115,6 +90,7 @@ end
     Mat = zeros(length(t), 192);
     t_base = (0:N_period - 1);  % Points for one period of signals
     signal = [];
+    phi = [];
     
     state = false; % false is base, true is oppos
     for i = 1:length(Jumps)
@@ -124,10 +100,8 @@ end
         end
         state = not(state);
     end
-    
-
-    %%
     disp(size(signal));
+    figure(1);
     %plot(t, signal, 'color', [1, 0, 0]);
     
     for y = 1:192
@@ -142,9 +116,8 @@ end
 
     %% save into file
     fileId = fopen(sequenceFile, 'w');
-    fprintf(fileId, '%f\n', seq_time);
-    fprintf(fileId, '%i\n', length(padding_starts) - 1);
-    fprintf(fileId, '%i\n', padding_starts(1:length(padding_starts) - 1));
+    fprintf(fileId, '%i\n', length(padding_starts));
+    fprintf(fileId, '%i\n', padding_starts);
     fprintf(fileId, '%i\n', Jumps);
     fclose(fileId);
 
