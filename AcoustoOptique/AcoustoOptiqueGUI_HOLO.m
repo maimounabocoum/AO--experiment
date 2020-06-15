@@ -49,6 +49,7 @@
 if strcmp(AIXPLORER_Active,'on')
     
 switch TypeOfSequence
+    
     case 'OF'
 NbHemicycle = min(NbHemicycle,15);
 [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);

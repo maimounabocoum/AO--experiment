@@ -4,29 +4,35 @@
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
 
-function [SEQ,MedElmtList,NUX,NUZ,nuX0,nuZ0] = AOSeqInit_OJM(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
+function [SEQ,MedElmtList,NUX,NUZ,nuX0,nuZ0] = AOSeqInit_OJM(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig, NU_low , Tau_cam , frep, Bascule ,Master)
+%(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,frep,Bacules ,Master)
 
 Phase       = 0;
 %% System parameters import :
 % ======================================================================= %
 c           = common.constants.SoundSpeed ; %[m/s]
-SampFreq    = system.hardware.ClockFreq; %NE PAS MODIFIER % emitted signal sampling = 180 in [MHz]
-SampFreq    = double(SampFreq); % convert to double precision
+if strcmp(Bascule,'on')
+SampFreq    = system.hardware.ClockFreq/2;  % NE PAS MODIFIER % emitted signal sampling = 90 in [MHz]    
+else
+SampFreq    = system.hardware.ClockFreq;    % NE PAS MODIFIER % emitted signal sampling = 180 in [MHz]
+end 
+SampFreq    = double(SampFreq);
+
 NbElemts    = system.probe.NbElemts ; 
 pitch       = system.probe.Pitch ; % in mm
 MinNoop     = system.hardware.MinNoop;
 
-NoOp       = 80000;             % µs minimum time between two US pulses
+NoOp       = 1e6/frep;                      % µs minimum time between two US pulses
 
 % ======================================================================= %
 
-PropagationTime        = Prof/c*1e3 ;  % 1 / pulse frequency repetition [us]
+n_rep = floor(Tau_cam*NU_low) ; % number of repetition of fondamental unit sequence to last during camera integration time
+PropagationTime        = ( n_rep + 2 )/NU_low  ;  % 1 / pulse frequency repetition [us]38.96;%
 Pause                  = max( NoOp-ceil(PropagationTime) , MinNoop ); % pause duration in µs
-
 % ======================================================================= %
 %% Codage en arbitrary : delay matrix and waveform
 pulseDuration = NbHemicycle*(0.5/f0) ; % US inital pulse duration in us
-Nphase        = max(1,length(Phase))
+Nphase        = max(1,length(Phase)) ;
 
 % DurationWaveform = 1/NU_low ;
 % n_rep = floor(Tau_cam*NU_low) ;
@@ -41,8 +47,8 @@ ElmtBorns   = sort(ElmtBorns) ; % in case X0 and X1 are mixed up
 Nbtot    = ElmtBorns(2) - ElmtBorns(1) + 1 ;
 Xs        = (0:Nbtot-1)*pitch;             % Echelle de graduation en X
 
-nuZ0 = 1/((c*1e3)*DurationWaveform*1e-6);  % Pas fréquence spatiale en Z (en mm-1)
-nuX0 = 1/(Nbtot*pitch);                    % Pas fréquence spatiale en X (en mm-1)
+nuZ0 = (NU_low*1e6)/(c*1e3);               % Fondamental spatial frequency  in Z (en mm-1)
+nuX0 = 1/(Nbtot*pitch);                    % Fondamental spatial frequency  in X (en mm-1)
 
 [NBX,NBZ] = meshgrid(NbX,NbZ);
 % initialization of empty frequency matrix
@@ -56,7 +62,7 @@ FC = remote.fc('Bandwidth', 90 , 0); %FIR receiving bandwidth [%] - center frequ
 RX = remote.rx('fcId', 1, 'RxFreq', 60 , 'QFilter', 2, 'RxElemts', 1:128, 0);
 
 
-%% updata log param struct
+%% update logfile param struct
 %% add phase variable
 PHASE = repmat(Phase(:),Nfrequencymodes,1);
 % data types : int,str,double,bool
@@ -74,7 +80,7 @@ for nbs = 1:Nfrequencymodes
         % f0 : MHz
         % nuZ : en mm-1
         % nuX : en mm-1
-        [nuX,nuZ,~,Waveform] = CalcMatHole(f0,NBX(nbs),NBZ(nbs),nuX0,nuZ0,Xs,SampFreq,c); % Calculer la matrice
+        [nuX,nuZ,~,Waveform] = CalcMatHole(f0, NBX(nbs),NBZ(nbs),nuX0,nuZ0,Xs,SampFreq,c,Bascule); % Calculer la matrice
         % upgrade frequency map : 
         NUX(nbs) = nuX ;
         NUZ(nbs) = nuZ ;
@@ -93,17 +99,25 @@ for nbs = 1:Nfrequencymodes
         
     EvtDur   = ceil(pulseDuration + PropagationTime);   
     
-    % Flat TX
+    % update of the probe emission sampling frequency
+    if strcmp(Bascule,'on')
+    TXList{nbs} = remote.tx_arbitrary(...
+                    'txClock180MHz', 0,...
+                    'twId',1,...
+                    'Delays',0);
+    else
     TXList{nbs} = remote.tx_arbitrary(...
                     'txClock180MHz', 1,...
                     'twId',1,...
-                    'Delays',0);
+                    'Delays',0);    
+    end
+    
     
     % Arbitrary TW
     TWList{nbs} = remote.tw_arbitrary( ...
                     'Waveform',Waveform', ...
                     'RepeatCH', 0, ...
-                    'repeat',4 , ...
+                    'repeat',n_rep  , ...
                     'repeat256', 0, ...
                     'ApodFct', 'none', ...
                     'TxElemts',ElmtBorns(1):ElmtBorns(2), ...
@@ -151,7 +165,7 @@ ELUSEV{nbs} = elusev.elusev( ...
                     0);            
     end
 
-    %
+
 end
 
 % ======================================================================= %

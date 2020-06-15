@@ -3,7 +3,7 @@
 % ATTENTION !! Même si la séquence US n'écoute pas, il faut quand même
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
-function [SEQ,Delay,MedElmtList,ActiveLIST,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , X0 , X1 ,Prof, frep, NTrig,Master)
+function [SEQ,Delay,MedElmtList,ActiveLIST,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , X0 , X1 ,Prof, NTrig, frep, Master)
  clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
 
@@ -153,6 +153,7 @@ ELUSEV{nbs} = elusev.elusev( ...
     'TrigOutDelay', 0, ...
     0);
         end
+        
 end
 
 % ======================================================================= %
