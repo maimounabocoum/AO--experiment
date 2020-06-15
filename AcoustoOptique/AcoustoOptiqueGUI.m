@@ -1,7 +1,7 @@
 % clear all; close all; clc
 % w = instrfind; if ~isempty(w) fclose(w); delete(w); end
 
-%% parameter for plane wave sequence :
+%% parameter for sequence :
 % ======================================================================= %
 % adresse Jussieu  : '192.168.1.16'
 % adresse Bastille : '192.168.0.20'
