@@ -143,6 +143,8 @@ raw   = zeros(N,Naverage);
 
 MyScan = USscan(x,y,z,Naverage,N);   
 
+
+
       for n_scan = 1:MyScan.Nscans
           
         % clear buffer and look for errors
