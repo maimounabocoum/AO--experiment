@@ -9,22 +9,16 @@
 % adresse Jussieu :  '192.168.1.16'
 
  AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
- % path at Jussieu :
- if strcmp(AixplorerIP,'192.168.1.16')
- addpath('D:\AO---softwares-and-developpement\radon inversion\shared functions folder')
- end
- % path at Bastille :
- if strcmp(AixplorerIP,'192.168.0.20')
- addpath('D:\GIT\AO---softwares-and-developpement\radon inversion\shared functions folder');
- end
- 
+ addpath('D:\AO--commons\shared functions folder')
+
  addpath('sequences');
  addpath('subfunctions');
  addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-        TypeOfSequence  = 'OP'; % 'OP','OS'
+        TypeOfSequence  = 'OS'; % 'OP','OS'
+        Master          = 'on';
         Volt            = 15; %Volt
         FreqSonde       = 8; %MHz
         NbHemicycle     = 10;
@@ -34,14 +28,15 @@
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        decimation             = [8] ;     % 20 Nb de composantes de Fourier en X, 'OS'
+        decimation      = [8] ;     % 20 Nb de composantes de Fourier en X, 'OS'
         
         Foc             = 35; % mm
         X0              = 20; %13-27
         X1              = 40;
         
-        NTrig           = 3000;
+        NTrig           = 30;
         Prof            = 60;
+        Frep            =  max(2,50) ; % in Hz
         SaveData        = 0; % set to 1 to save
         SaveRaw         = 0 ;
 
@@ -57,11 +52,11 @@ Volt = min(60,Volt); % security for OP routine
 [SEQ,ScanParam] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
     case 'OP'
 Volt = min(60,Volt); % security for OP routine       
-[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof, NTrig,'on');
+[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof, NTrig, Frep , Master);
 %[SEQ,Delay,ScanParam,Alphas] = AOSeqInit_OP_arbitrary(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig);
     case 'OS'
 Volt = min(50,Volt); % security for OP routine     
-[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , decimation , X0 , X1 ,Prof, NTrig);
+[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , decimation , X0 , X1 ,Prof, NTrig,Frep,Master);   
 
 end
 
@@ -80,7 +75,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
      GageActive = 'on' ; % 'on' to activate external trig, 'off' : will trig on timout value
      
  Nlines = length(SEQ.InfoStruct.event);    
-[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig*Nlines,Prof,SampleRate,Range,GageActive);
+[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig*Nlines,Prof,c,SampleRate,Range,GageActive);
 raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     
    
@@ -128,17 +123,18 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     SEQ = SEQ.stopSequence('Wait', 0);  
     
     %% ======================== data post processing =============================
-    Hmu = figure;
-    set(Hmu,'WindowStyle','docked');
 
-    
     switch TypeOfSequence
+        
         case 'OF'
     [Datas_mu,Datas_std, Datas_var] = RetreiveDatas(raw,NTrig,Nlines,ScanParam);
     z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
     NbElemts = system.probe.NbElemts ;
     pitch = system.probe.Pitch ; 
     x = ScanParam*pitch;
+    
+    Hmu = figure;
+    set(Hmu,'WindowStyle','docked');
     imagesc(x,z,1e3*Datas_mu)
     ylim([0 Prof])
     xlabel('x (mm)')
@@ -161,33 +157,30 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     colormap(parula)
     set(findall(Hstd,'-property','FontSize'),'FontSize',15) 
     
-    Hsnr = figure;
-    set(Hsnr,'WindowStyle','docked');
-    imagesc(x,z,abs(Datas_mu./Datas_std))
-    ylim([0 Prof])
-    xlabel('x (mm)')
-    ylabel('z (mm)')
-    title('SNR raw datas')
-    cb = colorbar;
-    ylabel(cb,'AC tension (mV)')
-    colormap(parula)
-    set(findall(Hsnr,'-property','FontSize'),'FontSize',15)    
-    
+
         case 'OP'
-    Datas = RetreiveDatas(raw,NTrig,Nlines,ScanParam);
+    
+    [Datas_mu,Datas_std, Datas_var] = RetreiveDatas(raw,NTrig,Nlines,ScanParam);
+    % Datas_mu: average data
+    % Datas_std: = data standard deviation
+    % Datas_var: data variance
+    
     z = (1:actual.ActualLength)*(c/(1e6*SampleRate));
-    imagesc(Alphas*180/pi,z*1e3,1e3*Datas)
+    
+    
+    % plot raw datas
+    Hmu = figure;
+    set(Hmu,'WindowStyle','docked');
+    imagesc(Alphas*180/pi,z*1e3,1e3*Datas_mu)
     xlabel('angle (°)')
     ylabel('z (mm)')
     title('Averaged raw datas')
     cb = colorbar;
     ylabel(cb,'AC tension (mV)')
     colormap(parula)
-    set(findall(Hstd,'-property','FontSize'),'FontSize',15) 
-    %  Radon inversion :
-% 
-% 
-%     %conv2(Datas,Mconv,'same')
+    set(findall(Hmu,'-property','FontSize'),'FontSize',15) 
+    
+    %  Load data to OP structure file :
     MyImage = OP(Datas,Alphas,z,SampleRate*1e6,c) ;
     [I,z_out] = DataFiltering(MyImage,10) ;
     NbElemts = system.probe.NbElemts ;
@@ -195,9 +188,11 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     X_m = (1:NbElemts)*(pitch*1e-3) ;
     [theta,M0,X0,Z0] = EvalDelayLaw_shared(X_m,DelayLAWS,ActiveLIST,c); 
 
+    %  iRadon inversion :
+    Ireconstruct = Retroprojection_shared(I , X_m , z_out ,theta,M0,Hresconstruct);
+    
     Hresconstruct = figure;
     set(Hresconstruct,'WindowStyle','docked');
-    Ireconstruct = Retroprojection_shared(I , X_m , z_out ,theta,M0,Hresconstruct);
     ylim([0 Prof])
     cb = colorbar;
     ylabel(cb,'a.u')
@@ -208,23 +203,25 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     % back to original folder 
     
         case 'OS'
-     Datas = RetreiveDatas(raw,NTrig,Nlines,1:size(ScanParam,1));
+            
+     [Datas_mu,Datas_std, Datas_var] =  RetreiveDatas(raw,NTrig,Nlines,1:size(ScanParam,1));
      NbElemts = system.probe.NbElemts ;
      pitch = system.probe.Pitch ; 
      X_m = (1:NbElemts)*(pitch*1e-3) ;
      z = (1:actual.ActualLength)*(c/(1e6*SampleRate));
      x = ScanParam(:,2);
-     
-    imagesc(x,z*1e3,1e3*Datas)   
+    
+    Hmu = figure;
+    set(Hmu,'WindowStyle','docked');
+    imagesc(x,z*1e3,1e3*Datas_mu)   
     xlabel('order N_x')
     zlabel('z(mm)')
     cb = colorbar;
     ylabel(cb,'AC tension (mV)')
     colormap(parula)
-    set(findall(Hf,'-property','FontSize'),'FontSize',15) 
+    set(findall(Hmu,'-property','FontSize'),'FontSize',15) 
    
-    MyImage = OS(Datas,ScanParam(:,1),ScanParam(:,2),...
-                 dFx,z,SampleRate*1e6,c,[X0 X1]*1e-2) ; 
+    MyImage = OS(Datas,ScanParam(:,1),ScanParam(:,2),dFx,z,SampleRate*1e6,c,[X0 X1]*1e-2) ; 
    
              
              %% resolution par ifourier

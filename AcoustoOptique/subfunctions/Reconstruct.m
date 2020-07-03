@@ -21,17 +21,12 @@ function [I,X,Z] = Reconstruct(NbX,NbZ,NUX,NUZ,x,z,Datas,SampleRate,durationWave
             % projection of fourrier composants:
             Cnm = conj(diag(ExpFunc*Datas))' ;
                
-        DecalZ  =   0.3; % ??
+        DecalZ  =   0.3; % phase arbitrary offset along z
         NtF     =   2^10;
 %         
 %         F = TF2D(NtF,(NtF-1)*nuX0,(NtF-1)*nuZ0);
-%         dF = nuX0 ;
-        
-        dF = diff(NUX(:)) ;
-        dF = min(dF(dF>0));
-        
-        
-        Fmax = (NtF/2)*dF;
+            
+        Fmax = (NtF/2)*nuX0;
         dx = 1e-3/abs(2*Fmax) ;
         
 % Variables

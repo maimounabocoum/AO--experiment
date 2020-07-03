@@ -29,7 +29,7 @@ for nbs = 1:Nfrequencymodes
         % fz : 
         % nuX : en mm-1
 
-[nuX,nuZ,t,Mat] = CalcMatHole_OC(f0,nuX,nuZ,Xs,Fe,c);
+[nuX,nuZ,t,Mat] = CalcMatHole(f0,nuX,nuZ,Xs,Fe,c);
         imagesc(Xs,c*t*1e3,Mat)
         xlabel('x (mm)')
         ylabel('z(mm)')

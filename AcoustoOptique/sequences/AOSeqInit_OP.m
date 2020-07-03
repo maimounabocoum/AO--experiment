@@ -3,7 +3,7 @@
 % ATTENTION !! Même si la séquence US n'écoute pas, il faut quand même
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
-function [SEQ,Delay,MedElmtList,ActiveLIST,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , X0 , X1 ,Prof, NTrig,frep,Master)
+function [SEQ,Delay,MedElmtList,ActiveLIST,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , f0 , NbHemicycle , AlphaM , X0 , X1 ,Prof, NTrig, frep, Master)
  clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
 
@@ -153,6 +153,7 @@ ELUSEV{nbs} = elusev.elusev( ...
     'TrigOutDelay', 0, ...
     0);
         end
+        
 end
 
 % ======================================================================= %
@@ -199,30 +200,25 @@ SEQ = usse.usse( ...
     'Popup', 0, ...         % enables the popups to control the sequence execution : {0,1}
     0);                     % debugg parameter
 
-[SEQ NbAcq] = SEQ.buildRemote();
+[SEQ ,~] = SEQ.buildRemote();
  display('Build OK')
- 
-%%%    Do NOT CHANGE - Sequence execution 
-%%%    Initialize remote on systems
- SEQ = SEQ.initializeRemote('IPaddress',AixplorerIP);
- %SEQ.Server
- %SEQ.InfoStruct.event
- 
-% remoteGetUserSequence(SEQ.Server)
-% remoteGetStatus(SEQ.Server)
 
 % convert Delay matrix to us -> s
 Delay = Delay*1e-6;
 
  
- display('Remote OK');
-
- % status :
- display('Loading sequence to Hardware');
+ %% initialize communation with remote aixplorer and load sequence
+try
+ SEQ = SEQ.initializeRemote('IPaddress',AixplorerIP);
+ display('============== Remote OK =============');
+ display('Loading sequence to Hardware'); tic ;
  SEQ = SEQ.loadSequence();
- disp('-------------Ready to use-------------------- ')
+ fprintf('Sequence has loaded in %f s \n\r',toc)
+ display('--------ready to use -------------');
  
-
+catch e
+  fprintf(e.message);  
+end
 end
 
 

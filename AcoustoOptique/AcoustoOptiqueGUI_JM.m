@@ -3,46 +3,49 @@
 
 %% parameter for plane wave sequence :
 % ======================================================================= %
-% adresse Jussieu : '192.168.1.16'
+% adresse Jussieu  : '192.168.1.16'
 % adresse Bastille : '192.168.0.20'
 
  AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
- % path at Jussieu :
- if strcmp(AixplorerIP,'192.168.1.16')
- addpath('D:\AO---softwares-and-developpement\radon inversion\shared functions folder')
- end
- % path at Bastille :
- if strcmp(AixplorerIP,'192.168.0.20')
- addpath('D:\GIT\AO---softwares-and-developpement\radon inversion\shared functions folder');
- end
- 
- addpath('sequences');
+
+ addpath('D:\AO--commons\shared functions folder')
+ addpath('sequences');    
  addpath('subfunctions');
  addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-       TypeOfSequence = 'JM';   % 'OF' , 'JM'
+       TypeOfSequence = 'JM';   %'OF'(focused waves) , 'OS' (plane structures waves), 
+                                %'OP' (plane waves) , 'JM' (Jean-Michel waves)
         
-        Master      = 'on';
-        Volt        = 15;       % 'OF' , 'OP' , 'JM'
-        FreqSonde   = 6;        % 'OF' , 'OP' , 'JM'
-        NbHemicycle = 250;      % 'OF' , 'OP' , 'JM'
-        Foc         = 5;       % 'OF' 
-        AlphaM      = 0;       % 'OP' 
-        dA          = 1;        % 'OP' 
-        X0          = 0;        % 'OF' , 'OP' 
-        X1          = 50 ;      % 'OF' , 'OP' 
-        NTrig       = 500;      % 'OF' , 'OP' , 'JM'
-        Prof        = 300;      % 'OF' , 'OP' , 'JM'
-        NbZ         = 8;    % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 0;     % 20 Nb de composantes de Fourier en X, 'JM'
-        DurationWaveform = 20;  % length in dimension x (us)
-        n_low = round( 180*DurationWaveform );
-        NU_low = (180)/n_low;   % fundamental temporal frequency
+        Master      = 'on';     % Aixplorer as Master ('on') of Slave ('off') with respect to trigger
+        Volt        = 15;       % 'OF' , 'OS', 'OP' , 'JM'
+        FreqSonde   = 6;        % 'OF' , 'OS', 'OP' , 'JM'
+        NbHemicycle = 250;      % 'OF' , 'OS', 'OP' , 'JM'
+        Foc         = 5;        % 'OF'
+        AlphaM      = [-10,0,10]*pi/180;        % 'OP' list of angles in scan in Rad
+        X0          = 0;        % 'OF' , 'OS', 'OP' , 'JM'
+        X1          = 50 ;      % 'OF' , 'OS', 'OP' , 'JM'
+        NTrig       = 50;       % 'OF' , 'OS', 'OP' , 'JM'
+        Prof        = 300;      % 'OF' , 'OS', 'OP' , 'JM'
+        decimation  = [8] ;     % 'OS'
+        NbZ         = 8;        % 'JM' harmonic along z 
+        NbX         = 0;        % 'JM' harmonic along x 
+        Phase       = [0];        % 'JM' phases per frequency in 2pi unit
+        Tau_cam          = 100 ;  % 'JM' camera integration time (us) : sets the number of repetition patterns
+        Bacules         = 'off';  % 'JM' alternates phase to provent Talbot effect
+        Frep            =  max(2,50) ;   % 'OF' , 'OS', 'OP' , 'JM'in Hz
         
         
-        SaveData = 0;          % set to 1 to save data
+        % 'JM' 
+        DurationWaveform = 20;  % 'JM' fondamental time along t -- do not edit --
+        % imposing that be a multiple of sampling period
+        n_low = round( 180*DurationWaveform ); % -- do not edit --
+        NU_low = (180)/n_low;                  % 'JM' fundamental temporal frequency in MHz -- do not edit --
+        
+        
+        
+        SaveData = 0;           % set to 1 to save data
         AIXPLORER_Active = 'on';% 'on' or 'off' 
 
  % estimation of loading time 
@@ -55,45 +58,52 @@ if strcmp(AIXPLORER_Active,'on')
     
 switch TypeOfSequence
     case 'OF'
-NbHemicycle = min(NbHemicycle,15);
-[SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig,Master);
+NbHemicycle = min(NbHemicycle,100);
+[SEQ,ScanParam] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
     case 'OP'
-NbHemicycle = min(NbHemicycle,15);
-[SEQ,MedElmtList,AlphaM] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , dA , X0 , X1 ,Prof, NTrig,Master);
+NbHemicycle = min(NbHemicycle,100);
+[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof,NTrig ,Frep ,Master);
+    case 'OS'
+Volt = min(50,Volt); % security for OP routine     
+[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , decimation , X0 , X1 ,Prof, NTrig,Frep,Master);   
     case 'JM'
 Volt = min(Volt,20) ; 
 % check the coordinate of this function
-[SEQ,MedElmtList,NUX,NUZ,nuX0,nuZ0] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
-    case 'JMpulse'
-[SEQ,MedElmtList,NUX,NUZ,nuX0,nuZ0] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
+
+% sequence for Digital Holography
+%[SEQ,ActiveLIST,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OJMLusmeasure(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig ,NU_low,Tau_cam , Phase , Frep , Bacules , Master );
+
+% sequence for Photorefractive Crystal
+[SEQ,MedElmtList,NUX,NUZ,nuX0,nuZ0]          = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig ,NU_low,Tau_cam ,  Frep , Bacules , Master );
 
 end
 
 end
 
 c = common.constants.SoundSpeed ; % sound velocity in m/s
+
+%% === run following script to view sequences loaded into Aixplorer ======
+
                     
-%%  ========================================== Init Gage ==================
-% Possible return values for status are:
+%%  ========================================== Init Gage acquisition Card ==================
+%   Possible return values for status are:
 %   0 = Ready for acquisition or data transfer
 %   1 = Waiting for trigger event
 %   2 = Triggered but still busy acquiring
 %   3 = Data transfer is in progress
-
      
      SampleRate    =   10;
      Range         =   1;
-     GageActive = 'off' ; % on to activate external trig, off : will trig on timout value
+     GageActive = 'on' ; % on to activate external trig, off : will trig on timout value
      
     if strcmp(AIXPLORER_Active,'on') 
- Nlines = length(SEQ.InfoStruct.event);  
+    Nlines = length(SEQ.InfoStruct.event);  
     else
-        Nlines = (2*length(NbX)+1)*length(NbZ) ;
+    Nlines = (2*length(NbX)+1)*length(NbZ) ;
     end
  
-[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig*Nlines,Prof,SampleRate,Range,GageActive);
-
-    raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
+[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig*Nlines,Prof,c,SampleRate,Range,GageActive);
+raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     
 
     %% ======================== start acquisitionMaster =============================
@@ -156,21 +166,85 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
     
     
 %% ======================== data post processing =============================
-    Hf = figure;
-    set(Hf,'WindowStyle','docked');
-    
+ 
     switch TypeOfSequence
         
         case 'OF'
             
-    Datas = RetreiveDatas(raw,NTrig,Nlines,MedElmtList);
+    [Datas_mu,Datas_std, Datas_var] = RetreiveDatas(raw,NTrig,Nlines,ScanParam);
     z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
-    x = (1:Nlines)*system.probe.Pitch;
-    imagesc(x,z,1e3*Datas)
+    NbElemts = system.probe.NbElemts ;
+    pitch = system.probe.Pitch ; 
+    x = ScanParam*pitch;
+
+        Hmu = figure;
+    set(Hmu,'WindowStyle','docked');
+    imagesc(x,z,1e3*Datas_mu)
+    ylim([0 Prof])
     xlabel('x (mm)')
     ylabel('z (mm)')
+    title('Averaged raw datas')
+    cb = colorbar;
+    ylabel(cb,'AC tension (mV)')
+    colormap(parula)
+    set(findall(Hmu,'-property','FontSize'),'FontSize',15) 
+    
+    Hstd = figure;
+    set(Hstd,'WindowStyle','docked');
+    imagesc(x,z,1e3*Datas_std)
+    ylim([0 Prof])
+    xlabel('x (mm)')
+    ylabel('z (mm)')
+    title('STD raw datas')
+    cb = colorbar;
+    ylabel(cb,'AC tension (mV)')
+    colormap(parula)
+    set(findall(Hstd,'-property','FontSize'),'FontSize',15) 
+    
+        case 'OP'
+    
+    [Datas_mu,Datas_std, Datas_var] = RetreiveDatas(raw,NTrig,Nlines,ScanParam);
+    % Datas_mu: average data
+    % Datas_std: = data standard deviation
+    % Datas_var: data variance
+    
+    z = (1:actual.ActualLength)*(c/(1e6*SampleRate));
+    
+    
+    % plot raw datas
+    Hmu = figure;
+    set(Hmu,'WindowStyle','docked');
+    imagesc(Alphas*180/pi,z*1e3,1e3*Datas_mu)
+    xlabel('angle (°)')
+    ylabel('z (mm)')
+    title('Averaged raw datas')
+    cb = colorbar;
+    ylabel(cb,'AC tension (mV)')
+    colormap(parula)
+    set(findall(Hmu,'-property','FontSize'),'FontSize',15) 
+    
+    %  Load data to OP structure file :
+    MyImage = OP(Datas_mu,Alphas,z,SampleRate*1e6,c) ;
+    [I,z_out] = DataFiltering(MyImage) ;
+    NbElemts = system.probe.NbElemts ;
+    pitch = system.probe.Pitch ; 
+    X_m = (1:NbElemts)*(pitch*1e-3) ;
+    [theta,M0,X0,Z0] = EvalDelayLaw_shared(X_m,DelayLAWS,ActiveLIST,c); 
 
-
+    %  iRadon inversion :
+    Ireconstruct = Retroprojection_shared(I , X_m , z_out ,theta,M0,Hresconstruct);
+    
+    Hresconstruct = figure;
+    set(Hresconstruct,'WindowStyle','docked');
+    ylim([0 Prof])
+    cb = colorbar;
+    ylabel(cb,'a.u')
+    colormap(parula)
+    set(findall(Hresconstruct,'-property','FontSize'),'FontSize',15) 
+    
+    % RetroProj_cleaned(Alphas,Datas,SampleRate*1e6);
+    % back to original folder 
+    
 
    case 'JM'
         MedElmtList = 1:Nlines ;
@@ -179,6 +253,9 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
         z = (1:actual.ActualLength)*(c/(1e6*SampleRate));
         x = (1:Nlines);
         
+        % plot raw datas
+            Hmu = figure;
+            set(Hmu,'WindowStyle','docked');
             imagesc(x,z*1e3,1e3*Datas_mu)
             xlabel('lines Nbx, Nbz')
             ylabel('z (mm)')    
@@ -186,7 +263,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
             cb = colorbar;
             ylabel(cb,'AC tension (mV)')
             colormap(parula)
-            set(findall(Hf,'-property','FontSize'),'FontSize',15)
+            set(findall(Hmu,'-property','FontSize'),'FontSize',15)
 
        [I,X,Z] = Reconstruct(NbX , NbZ, ...
                              NUX , NUZ ,...

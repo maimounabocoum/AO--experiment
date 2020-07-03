@@ -26,16 +26,16 @@ NoOp       = 1e6/frep;                      % µs minimum time between two US pul
 
 
 %% ======================================================================= %
-n_rep = floor(Tau_cam*NU_low) ;
+n_rep = floor(Tau_cam*NU_low) ; % number of repetition of fondamental unit sequence to last during camera integration time
 PropagationTime        = ( n_rep + 2 )/NU_low  ;  % 1 / pulse frequency repetition [us]38.96;%
 Pause                  = max( NoOp-ceil(PropagationTime) , MinNoop ); % pause duration in µs
 
 
-%% ===== Codage en arbitrary : delay matrix and waveform ===========
+%% =========================================================================
 pulseDuration = NbHemicycle*(0.5/f0) ; % US inital pulse duration in us
-Nphase        = max(1,length(Phase));
+Nphase        = max(1,length(Phase)); % number of different phase values per structuration
 
-%DurationWaveform = 1/NU_low ;
+% DurationWaveform = 1/NU_low ;
 %( n_rep + 2 ) : we chose 2 to make shure the full emission sequence will
 % be issued (long overshoot in the beginning)
 
@@ -43,15 +43,15 @@ Nphase        = max(1,length(Phase));
 %% ==================== Codage en arbitrary : preparation des acmos ==============
 % shooting elements 
 ElmtBorns   = [min(NbElemts,max(1,round(X0/pitch))),max(1,min(NbElemts,round(X1/pitch)))];
-ElmtBorns   = sort(ElmtBorns) ; % in case X0 and X1 are mixed up
+ElmtBorns   = sort(ElmtBorns) ; % sorting in case X0 and X1 are mixed up
 
 
-Nbtot    = ElmtBorns(2) - ElmtBorns(1) + 1 ;
-Xs        = (0:Nbtot-1)*pitch;             % Echelle de graduation en mm
+Nbtot    = ElmtBorns(2) - ElmtBorns(1) + 1 ; % Total number of active element
+Xs        = (0:Nbtot-1)*pitch;               % Active probe coordinates in mm
 
 
-nuZ0 = (NU_low*1e6)/(c*1e3);                 % Pas fréquence spatiale en Z (en mm-1)
-nuX0 = 1/(Nbtot*pitch);                      % Pas fréquence spatiale en X (en mm-1)
+nuZ0 = (NU_low*1e6)/(c*1e3);                 % Fondamental spatial frequency  in Z (en mm-1)
+nuX0 = 1/(Nbtot*pitch);                      % Fondamental spatial frequency  in X (en mm-1)
 
 [NBX,NBZ] = meshgrid(NbX,NbZ);
 % initialization of empty frequency matrix
@@ -104,16 +104,14 @@ for nbs = 1:Nfrequencymodes
  
                         
        ParamList((3 + (nbs-1)*Nphase): (2 + nbs*Nphase) ,1:3) = ParamBLOCK ;
-                                                
-                          
-                          
+                                                                       
 %       fprintf('waveform is lasting %4.2f us \n\r',size(Waveform,1)/SampFreq)
 %       imagesc(Waveform);
 %       pause(0.1);
         
     EvtDur   = ceil(pulseDuration + PropagationTime);   
     
-    % Flat TX{nbs}
+    % update of the probe emission sampling frequency
     if strcmp(Bascule,'on')
     TXList{nbs} = remote.tx_arbitrary(...
                     'txClock180MHz', 0,...
