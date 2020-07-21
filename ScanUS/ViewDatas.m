@@ -1,3 +1,22 @@
+%% using imported data scans
+
+[x,y] = MyScan.GetXYcoordinate(0);
+
+[Pmax , Tmax] = MyScan.GetPressureField('hilbert'); % method 'hilbert'
+
+%Pmax = 0*Pmax(:)+1:length(Pmax(:));
+ch = [x(:),y(:),Pmax(:)] ;
+
+Pm = MyScan.GetPressureMap(x,y,Pmax);
+
+figure(1)
+imagesc(x,y,Pm)
+xlabel('x(mm)')
+ylabel('y(mm)')
+cb = colorbar ;
+ylabel(cb,'Pressure a.u.')
+
+
 
 %% read saved datas
 Hf = figure;
@@ -7,11 +26,9 @@ F=[0 0.25 0.5 0.75 1];
 G=linspace(0,1,256);
 cmap=interp1(F,D,G);
 colormap(hot)
-
-
 t = (1:MyScan.Npoints)*(1/(1e6*SampleRate));
-
 cc = jet(2);
+
 % view data with common z value
 for i = 1:length(MyScan.z)
 zin = MyScan.z(i) ;

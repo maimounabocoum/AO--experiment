@@ -27,20 +27,25 @@ classdef USscan
             
         %figure;
         scatter3(obj.Positions(:,1),...
-                 obj.Positions(:,2),...
-                 obj.Positions(:,3),'filled')
+                 obj.Positions(:,3),...
+                 obj.Positions(:,2),'filled')
         
         hold on
              
         scatter3(Positions(:,1),...
-                 Positions(:,2),...
-                 Positions(:,3),'filled')
+                 Positions(:,3),...
+                 Positions(:,2),'filled')
         xlabel(' x (mm)')
-        ylabel(' y (mm)')
+        ylabel(' z (mm)')
+        
+        
         set (gca,'Ydir','reverse')
-        zlabel(' z (mm)')
+        set (gca,'Xdir','reverse')
+        zlabel(' y (mm)')
         axis equal
-        view([-10,5,3])    
+        view([65.6624    8.1364])   
+        
+        zlim([-max(abs(Positions(:,2))) , max(abs(Positions(:,2)))])
         hold off
         end
         
@@ -97,8 +102,7 @@ classdef USscan
             
             
         end
-        
-        
+             
         function Plane = DefineRotationPlane(obj,Points,FixedPoint)
             
             if sum(size(Points)==[3,3])~= 2 
@@ -125,15 +129,15 @@ classdef USscan
             P = [X,Y,Z];
             pretty(dot(normal, P-P1));
             
-            a = dot(normal, [1,0,0]-P1)
-            b = dot(normal, [0,1,0]-P1)
-            c = dot(normal, [0,0,1]-P1)
+            a = dot(normal, [1,0,0]-P1);
+            b = dot(normal, [0,1,0]-P1);
+            c = dot(normal, [0,0,1]-P1);
 
             
             
         end
         
-        function obj =  USscan(x,y,z,Naverage,Npoints,Nevents)
+        function obj =  USscan(x,y,z,Naverage,Npoints)
             
             
             
@@ -188,6 +192,59 @@ classdef USscan
             
 
             obj.Datas = zeros(obj.Npoints,obj.Nscans) ;
+        end
+        
+        function [x,y] = GetXYcoordinate(obj,zin)
+            
+        % extract all coordinate matching input z value.
+        I_zin = find( abs(obj.Positions(:,3) - zin ) < 1e-6 );
+        %I_zin = find( obj.Positions(:,3) == zin );
+        
+        % extract corresponding X values
+        x = obj.Positions(I_zin,1);
+        %[x,Isortx] = sort(X_zin);
+        
+        % extract corresponding X values
+        y = obj.Positions(I_zin,2);
+        %[y,Isorty] = sort(X_zin);
+            
+        end
+        
+        function Pgrid = GetPressureMap(obj,x_in,y_in,Pin)
+      
+            [xx,~,icx] = unique(x_in);
+            [yy,~,icy] = unique(y_in);
+            
+             Nx = length(xx) ;
+             Ny = length(yy) ;
+            
+            I = sub2ind( [Ny,Nx] , icy , icx );
+            
+            
+            Pgrid = zeros( Ny , Nx ) ;
+            
+            Pgrid(I) = Pin ;
+            
+            
+            
+            
+            
+            
+        end
+        
+        function [Pmax,Tmax] = GetPressureField(obj,method)
+            
+            switch method
+                case 'hilbert'
+            % perform hilbert trasform and get maxium
+            H = hilbert(obj.Datas);
+%             figure; 
+%             imagesc(abs(H))
+            [Pmax,Tmax] = max(abs(H));
+            
+            end
+            
+            
         end
 
     end

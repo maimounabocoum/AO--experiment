@@ -183,7 +183,7 @@ MyScan = USscan(x,y,z,Naverage,N);
         end
         
         % print current position
-        disp(sprintf('Scan position X:%f,Y:%f,Z:%f',posX,posY,posZ));
+        fprintf('Scan position X:%f,Y:%f,Z:%f\n',posX,posY,posZ);
         
         % update position inside scan sctucture
         MyScan.Positions(n_scan,1) = posX ;
