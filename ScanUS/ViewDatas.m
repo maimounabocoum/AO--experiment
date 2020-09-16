@@ -1,3 +1,17 @@
+%% plot all acquired trace in MyScan Structure
+n_event = 1;
+t = (1:MyScan.Npoints)*(1/(1e6*SampleRate)); % time vector
+
+Datas = MyScan.Datas(:,:,n_event) - repmat(mean(MyScan.Datas((length(t)-50):length(t),:,n_event)),length(t),1) ;
+
+figure(1)
+plot( 1e6*t , abs( hilbert(Datas) ) )
+xlabel('times (\mu s)')
+ylabel('Volt')
+
+Data_MaxPressure = max( abs( hilbert(Datas) ) ) ;
+
+
 %% using imported data scans
 
 [x,y] = MyScan.GetXYcoordinate(0);
