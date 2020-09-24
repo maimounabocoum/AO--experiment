@@ -22,66 +22,74 @@ fprintf(Controller,['1' 'gnv']);
 %% ===============   calibration des rails
 
 % command redefinit le zero
-fprintf(Controller,['1','ncal'])
-fprintf(Controller,['2','ncal'])
-fprintf(Controller,['1','nrm'])
-fprintf(Controller,['2','nrm'])
-
-
-GetPosition(Controller,'1')
-GetPosition(Controller,'2')
+fprintf(Controller,['1','ncal']);
+fprintf(Controller,['2','ncal']);
+fprintf(Controller,['1','nrm']);
+fprintf(Controller,['2','nrm']);
 
 %% set current position as 0
 
+GetPitch(Controller,'1');
 GetPitch(Controller,'2');
-GetMotionDirection(Controller,'1');
 
+%% get position
 GetPosition(Controller,'1')
 GetPosition(Controller,'2')
 
+%% get velociy
 GetVelocity(Controller,'1');
+GetVelocity(Controller,'2');
+
+%% set velocity
+SetVelocity(Controller,50,'1'); % not working ??
+SetVelocity(Controller,50,'1'); % not working ??
+
+
+%% get accelaration
 GetAccelerationRamp(Controller,'1');
-SetVelocity(Controller,4,'1'); % not working ??
+GetAccelerationRamp(Controller,'2');
 
-% redefine zero position at current position :
+%% redefine zero position at current position :
 SetZeroHere(Controller,'1')
+SetZeroHere(Controller,'2')
 
-% absolute move
+%% absolute move
 PolluxDepAbs(Controller,-30,'2')
 PolluxDepAbs(Controller,0,'1')
 
-
-% relative move
+%% relative move
 PolluxDepRel(Controller,10,'2')
 PolluxDepRel(Controller,-5,'1')
 
-
-% move to calibrated limit switch (position 0 and redefines 0 as absolute reference)
-% note : this motion does not account for software limit switches
-PolluxMoveCal(Controller,'2')
-
-% move to Range measurement (position 151mm )
-% note : this motion does not account for software limit switches
-PolluxRangeCal(Controller,'2')
-
-GetSwitchStatus(Controller,'1')% not working, suppose to return  [0 , 0] format
-
-% software limit switches 
-% this function is overwritten after running PolluxMoveCal
-% this function is not updated if one is outside of the limit range
-Limits = GetSoftwareLim(Controller,'2')
-SetLimitRange(Controller,-35,50,'2')
-
-% emmergency stop motion
+%% emmergency stop motion
 StopMotion(Controller,'1')
 StopMotion(Controller,'2')
 
+%% move to calibrated limit switch (position 0 and redefines 0 as absolute reference)
+% note : this motion does not account for software limit switches
+PolluxMoveCal(Controller,'1')
+PolluxMoveCal(Controller,'2')
+
+%% move to Range measurement (position 151mm )
+% note : this motion does not account for software limit switches
+PolluxRangeCal(Controller,'1')
+PolluxRangeCal(Controller,'2')
 
 
+GetSwitchStatus(Controller,'1')% not working, suppose to return  [0 , 0] format
+
+%% software limit switches 
+% this function is overwritten after running PolluxMoveCal
+% this function is not updated if one is outside of the limit range
+Limits = GetSoftwareLim(Controller,'2');
+SetLimitRange(Controller,-35,50,'2');
+Limits = GetSoftwareLim(Controller,'1');
+SetLimitRange(Controller,-35,50,'1');
 
 
-% get last error
-code = GetLastError(Controller,'2')
+%% get last error
+code = GetLastError(Controller,'1');
+code = GetLastError(Controller,'2');
 
 %% Fermeture et nettoyage de la memoire
 PolluxClose(Controller,COM_Port);

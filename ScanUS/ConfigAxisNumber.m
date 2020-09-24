@@ -14,8 +14,7 @@ Controller = PolluxOpenAndInitialize(COM_Port) ;
 
 %% get axis number 
 fprintf(Controller,['getaxisno']);
-y = str2double(fscanf(Controller,'%s'))
-
+y = str2double(fscanf(Controller,'%s'));
 
 %% set axis number 
 fprintf(Controller,['2' 'setaxisno']);
