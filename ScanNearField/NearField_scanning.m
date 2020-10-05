@@ -1,13 +1,13 @@
 %% include folders
-addpath('Q:\AO--commons\shared functions folder');
-addpath('Q:\AO--experiment\ScanUS\commands')
+addpath('D:\AO--commons\shared functions folder');
+addpath('D:\AO--experiment\ScanUS\commands');
 
 %% Fermeture et nettoyage de la memoire
 PolluxClose(Controller,COM_Port);
 
 %% connection to COM Port
-close all
-clear all
+% close all
+% clear all
 
 COM_Port   = 4 ;
 Controller = PolluxOpenAndInitialize(COM_Port) ;
@@ -36,15 +36,34 @@ GetPosition(Controller,'2');
 
 %% Go to position zero : center of laser beam
 
+%% load camera
+vid = videoinput('gige', 1, 'Mono8');
+src = getselectedsource(vid);
+
+vid.FramesPerTrigger = 1;
+
+%%
+start(vid);
+
+dd = getdata(vid);
+
+stop(vid);
+
+figure(1)
+imagesc(dd)
+
+
+
+
     %% ======================== start acquisition =============================
 % GetPosition(Controller,'1')
 % GetPosition(Controller,'2')
-MotorControl = 'off';    
-x = [0:100] ;% + (-15:1:15) ; % horizontal axis (1) in mm
-y = 0 ;
+MotorControl = 'on';    
+x = (-15:1:15) ; % horizontal axis (1) in mm
+y = 0;
 z = 0 ;% + (0:1:50);    % -30 vertical axis   (2) in mm , GetPosition(Controller,'2')
 Naverage = 2;
-MyCamera = camera('PCO.edge');
+MyCamera = camera('DMK33GR0134');
 MyScan = CAMscan(x,y,z,Naverage,MyCamera);   
 
 
@@ -91,8 +110,17 @@ MyScan = CAMscan(x,y,z,Naverage,MyCamera);
         MyScan.Positions(n_scan,2) = posY ;
         
         % acquire data
+        start(vid);
+        pause(1)
+        CurrentFrame = getdata(vid);
+        stop(vid);
         
-        MyScan = MyScan.FillData( n_scan , rand( MyCamera.Ny_cam, MyCamera.Ny_cam ) ) ;
+        
+        MyScan = MyScan.FillData( n_scan , CurrentFrame ) ;
+        
+        
+        
+        
         
       figure(1) 
       imagesc(MyScan.Datas);

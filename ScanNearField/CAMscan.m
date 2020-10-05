@@ -182,8 +182,8 @@ classdef CAMscan
             
          % Datas contains only results for memory space constraint
          
-         SizeScan_X = (1e-3)*( max(x(:)) - min(x(:)) )/camera.dpixel + camera.Nx_cam ;
-         SizeScan_Y = (1e-3)*( max(y(:)) - min(y(:)) )/camera.dpixel  + camera.Ny_cam ;
+         SizeScan_X = round((1e-3)*( max(x(:)) - min(x(:)) )/camera.dpixel) + camera.Nx_cam ;
+         SizeScan_Y = round((1e-3)*( max(y(:)) - min(y(:)) )/camera.dpixel)  + camera.Ny_cam ;
          
             obj.Datas = zeros(SizeScan_Y,SizeScan_X) ;
         end
