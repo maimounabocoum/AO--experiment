@@ -15,7 +15,7 @@
 
 %%  ========================= initialization of Pollux  ==
 
-COM_Port   = 3 ;
+COM_Port   = 1 ;
 Controller = PolluxOpenAndInitialize(COM_Port);
 fprintf(Controller,['1' 'gnv']); 
 
