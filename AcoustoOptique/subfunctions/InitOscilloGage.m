@@ -1,4 +1,4 @@
-function [ret,handle,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Prof,c,SamplingRate,Range,TriggerSatus)
+function [ret,handle,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Npoints,SamplingRate,Range,TriggerSatus)
 % Set the acquisition, channel and trigger parameters for the system and
 % commit the parameters to the driver.
 % AO     = structure with the different parameters
@@ -64,8 +64,7 @@ disp(s);
 
 acqInfo.SampleRate      = SamplingRate*1e6;%Max = 50 MHz, must be divider of 50;
 acqInfo.SegmentCount    = NTrig; % Number of memory segments 
-
-acqInfo.Depth           = ceil(( acqInfo.SampleRate*1e-6*ceil(Prof/(c*1e-3)))/32)*32; % Must be a multiple of 32
+acqInfo.Depth           = Npoints; % Must be a multiple of 32
 
 
 %====================== The acqInfo fields can include:

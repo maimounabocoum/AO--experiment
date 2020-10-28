@@ -14,11 +14,11 @@
 
 
         WriteLogFile    = 'off';
-        Volt            = 10; %Volt
-        SaveData        = 0 ; % set to 1 to save
-        Frep            =  max(2,100) ; % in Hz
-        NTrig           = 2;             % repeat 2 time not allowed
-        Prof            = (1e-3*1540)*150; % last digits in us 
+        Volt            = 0;                % Volt AO modulator 
+        SaveData        = 0 ;               % set to 1 to save
+        Frep            =  max(2,100) ;     % Reptition frequency from DG645 Master ( Hz )
+        NTrig           = 2;                % repeat 2 time not allowed
+        Prof            = (1e-3*1540)*150;  % last digits in us 
         
 
 
@@ -29,10 +29,13 @@
 %   2 = Triggered but still busy acquiring
 %   3 = Data transfer is in progress
 
+% 4 Channels @ 50 MS/s, 14-bits,
+% 1 GS Memory, 65 MHz Bandwidth
+% AC/DC Coupling, 50Ω or 1MΩ Inputs
 
-
-     SampleRate    =   50;
-     Range         =   2; %Volt
+     SampleRate    =   50; % Gage sampling frequency in MHz (option: [10,50])
+     Range         =   2;  % Gage dynamic range Volt (option: [2])
+     Npoint          = ceil(( acqInfo.SampleRate*1e-6*ceil(Prof/(c*1e-3)))/32)*32 ;
      c = 1540;
 
 [ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Prof,c,SampleRate,Range,'on');

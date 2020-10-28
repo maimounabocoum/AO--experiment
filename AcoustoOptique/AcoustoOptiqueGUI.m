@@ -94,6 +94,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
      
      SampleRate    =   10;
      Range         =   1;
+     Npoint          = ceil(( SampleRate*ceil(Prof/(c*1e-3)))/32)*32 ;
      GageActive = 'on' ; % on to activate external trig, off : will trig on timout value
      
     if strcmp(AIXPLORER_Active,'on') 
@@ -102,7 +103,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
     Nlines = (2*length(NbX)+1)*length(NbZ) ;
     end
  
-[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig*Nlines,Prof,c,SampleRate,Range,GageActive);
+[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig*Nlines,Npoint,SampleRate,Range,GageActive);
 raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     
 
