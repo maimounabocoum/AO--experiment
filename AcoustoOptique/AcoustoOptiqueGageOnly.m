@@ -6,15 +6,13 @@
 
 %% addpath and parameter for wave sequences :
 % ======================================================================= %
-
+ addpath('D:\AO--commons\shared functions folder')
  addpath('sequences');
  addpath('subfunctions');
  addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
  addpath('D:\AO--commons\read and write files')
 
 
-
-        Master          = 'on';
         WriteLogFile    = 'off';
         Volt            = 10; %Volt
         SaveData        = 0 ; % set to 1 to save
