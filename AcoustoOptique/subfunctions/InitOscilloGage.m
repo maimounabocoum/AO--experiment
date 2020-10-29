@@ -62,7 +62,7 @@ disp(s);
  
 %Customed Parameters
 
-acqInfo.SampleRate      = SamplingRate*1e6;%Max = 50 MHz, must be divider of 50;
+acqInfo.SampleRate      = SamplingRate;%Max = 50 MHz, must be divider of 50;
 acqInfo.SegmentCount    = NTrig; % Number of memory segments 
 acqInfo.Depth           = Npoints; % Must be a multiple of 32
 

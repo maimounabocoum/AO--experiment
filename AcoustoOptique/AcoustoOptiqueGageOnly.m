@@ -15,9 +15,9 @@
 
         WriteLogFile    = 'off';
         Volt            = 0;                % Volt AO modulator 
-        SaveData        = 0 ;               % set to 1 to save
+        SaveData        = 1 ;               % set to 1 to save
         Frep            =  max(2,100) ;     % Reptition frequency from DG645 Master ( Hz )
-        NTrig           = 2;                % repeat 2 time not allowed
+        NTrig           = 100;                % repeat 2 time not allowed
         Prof            = (1e-3*1540)*150;  % last digits in us 
         
 
@@ -33,15 +33,17 @@
 % 1 GS Memory, 65 MHz Bandwidth
 % AC/DC Coupling, 50Ω or 1MΩ Inputs
 
-     SampleRate    =   50; % Gage sampling frequency in MHz (option: [10,50])
-     Range         =   2;  % Gage dynamic range Volt (option: [2])
-     Npoint          = ceil(( acqInfo.SampleRate*1e-6*ceil(Prof/(c*1e-3)))/32)*32 ;
+     SampleRate    =   50*1e6;  % Gage sampling frequency in Hz (option: [10,50])
+     Range         =   2;       % Gage dynamic range Volt (option: [2])
+     Npoint          = 1000 ;
      c = 1540;
 
-[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Prof,c,SampleRate,Range,'on');
+[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Npoint,SampleRate,Range,'on');
 % input on gageIntit: 'on' to activate external trig, 'off' : will trig on timout value
 raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
 
+Npoint      = acqInfo.Depth;      % SI unit
+SampleRate  = acqInfo.SampleRate; % SI unit
 %%
 %%%%%%%%%%%%%%%%%%%  lauch gage acquisition %%%%%%%%%%%%%%%%%%%
 
@@ -66,32 +68,31 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
 % figure(1); imagesc(raw)
 % colormap(parula)
 
-t = (1e6/acqInfo.SampleRate)*(1:size(raw,1));
-figure(3); plot(t,raw)
-title('PD manip MG - collimated  - AO manip MG not Focused in AO')
-xlabel('time(\mu s)')
-ylabel('Volt')
-set(findall(gcf,'-property','FontSize'),'FontSize',15) 
+% t = (1e6/acqInfo.SampleRate)*(1:size(raw,1));
+% figure(3); plot(t,raw)
+% title('PD manip MG - collimated  - AO manip MG not Focused in AO')
+% xlabel('time(\mu s)')
+% ylabel('Volt')
+% set(findall(gcf,'-property','FontSize'),'FontSize',15) 
+
 % ======================== data post processing =============================
 
- % AcoustoOptiqueDATA_ANALYSES;
+ AcoustoOptiqueDATA_ANALYSES;
 
 % save datas :
 
 if SaveData == 1
     
-MainFolderName = 'D:\Data\Mai';
+%MainFolderName = 'D:\Datas\Mai\';
+MainFolderName = 'Z:\Mai\2020-10-29\IM1'; % Mapped network connection (sharing network needs to be on)
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'ScanJ0_Water';%RefOnly_100Hz_noFilter
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Fus',FreqSonde,'Volt',Volt);
+CommentName    = 'IM1_Ref_filter_100Hz';%RefOnly_100Hz_noFilter_
+FileName       = generateSaveName(SubFolderName ,'name',CommentName);
 % savefig(Hmu,FileName);
 % saveas(Hmu,FileName,'png');
 
-save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
-              ,'X0','X1','NTrig','Nlines','Prof','Frep','ActiveLIST','Pref','NbElemts','t1','t2','raw','Pmain','SampleRate','c','Range','TypeOfSequence','Bacules');
-
+save(FileName,'NTrig','Npoint','Frep','raw','SampleRate','c','Range');
 fprintf('Data has been saved under : \r %s \r\n',FileName);
-
 
 end
 

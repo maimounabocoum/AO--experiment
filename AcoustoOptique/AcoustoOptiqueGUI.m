@@ -92,7 +92,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
 %   2 = Triggered but still busy acquiring
 %   3 = Data transfer is in progress
      
-     SampleRate    =   10;
+     SampleRate    =   10*1e6;
      Range         =   1;
      Npoint          = ceil(( SampleRate*ceil(Prof/(c*1e-3)))/32)*32 ;
      GageActive = 'on' ; % on to activate external trig, off : will trig on timout value
