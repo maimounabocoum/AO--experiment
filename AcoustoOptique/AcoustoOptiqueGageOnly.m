@@ -13,15 +13,7 @@
  addpath('D:\AO--commons\read and write files')
 
 
-        WriteLogFile    = 'off';
-        Volt            = 0;                % Volt AO modulator 
-        SaveData        = 1 ;               % set to 1 to save
-        Frep            =  max(2,100) ;     % Reptition frequency from DG645 Master ( Hz )
-        NTrig           = 100;                % repeat 2 time not allowed
-        Prof            = (1e-3*1540)*150;  % last digits in us 
-        
-
-
+    
 %%  ========================================== Init Gage ==================
 % Possible return values for status are:
 %   0 = Ready for acquisition or data transfer
@@ -33,9 +25,12 @@
 % 1 GS Memory, 65 MHz Bandwidth
 % AC/DC Coupling, 50Ω or 1MΩ Inputs
 
-     SampleRate    =   50*1e6;  % Gage sampling frequency in Hz (option: [10,50])
+     SaveData        = 0 ;               % set to 1 to save
+     Frep            =  max(2,2000) ;     % Reptition frequency from DG645 Master ( Hz )
+     NTrig           = 1000;              % repeat 2 time not allowed 
+     SampleRate    =   20*1e6;  % Gage sampling frequency in Hz (option: [10,50])
      Range         =   2;       % Gage dynamic range Volt (option: [2])
-     Npoint          = 1000 ;
+     Npoint          = 100 ;   % number of point for single segment
      c = 1540;
 
 [ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Npoint,SampleRate,Range,'on');
@@ -84,14 +79,14 @@ SampleRate  = acqInfo.SampleRate; % SI unit
 if SaveData == 1
     
 %MainFolderName = 'D:\Datas\Mai\';
-MainFolderName = 'Z:\Mai\2020-10-29\IM1'; % Mapped network connection (sharing network needs to be on)
+MainFolderName = 'Z:\Mai\'; % Mapped network connection (sharing network needs to be on)
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'IM1_Ref_filter_100Hz';%RefOnly_100Hz_noFilter_
+CommentName    = 'Test_Ref_nofilter_100Hz_Mod_10mHz';%RefOnly_100Hz_noFilter_
 FileName       = generateSaveName(SubFolderName ,'name',CommentName);
 % savefig(Hmu,FileName);
 % saveas(Hmu,FileName,'png');
 
-save(FileName,'NTrig','Npoint','Frep','raw','SampleRate','c','Range');
+save(FileName,'NTrig','Npoint','Frep','raw','SampleRate','c','Range','Fs1','Fs2');
 fprintf('Data has been saved under : \r %s \r\n',FileName);
 
 end
