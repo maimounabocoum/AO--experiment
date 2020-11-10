@@ -63,9 +63,10 @@ disp(s);
 %Customed Parameters
 
 acqInfo.SampleRate      = SamplingRate;%Max = 50 MHz, must be divider of 50;
+%acqInfo.SampleSize      = NTrig; %
 acqInfo.SegmentCount    = NTrig; % Number of memory segments 
 acqInfo.Depth           = Npoints; % Must be a multiple of 32
-
+acqInfo.SegmentSize     = Npoints;
 
 %====================== The acqInfo fields can include:
 %   SampleRate      - the rate at which to digitize the waveform
@@ -82,19 +83,19 @@ acqInfo.Depth           = Npoints; % Must be a multiple of 32
 %   TimeStampConfig - the values for time stamp configuration
 
 acqInfo.ExtClock        = 0;
-acqInfo.Mode            = 1;%CsMl_Translate('Single', 'Mode');% Use only one channel
+acqInfo.Mode            = CsMl_Translate('Single', 'Mode');  % 'Single' , 'Dual' , 'Quad'
 acqInfo.SegmentSize     = acqInfo.Depth; % Must be a multiple of 32
 
 switch TriggerSatus   
     case 'on'
 acqInfo.TriggerTimeout  = 3e12; % in ms
     case 'off'
-acqInfo.TriggerTimeout  = 20;  % in ms : set to natural Rep Rate of 2kHz       
+acqInfo.TriggerTimeout  = 100;  % in ms : set to natural Rep Rate of 10hz       
 end
 
 acqInfo.TriggerHoldoff  = 0; % Number of points during which the card ignores trigs
 acqInfo.TriggerDelay    = 0; % Number of points
-acqInfo.TimeStampConfig = 1; % Get the time at which each waveform was acquired
+acqInfo.TimeStampConfig = 0; % Get the time at which each waveform was acquired
 % if non-zero, restart the time stamp counter at each acq.
 
 [ret] = CsMl_ConfigureAcquisition(handle, acqInfo); % config acq parameters
@@ -142,7 +143,7 @@ switch TriggerSatus
     case 'on'
 trig.Trigger            = 1;
 trig.Slope              = CsMl_Translate('Positive', 'Slope'); % Aixplorer Trig has a 'Negative' slope
-trig.Level              = 30; % in percent of the trig range (-100 to +100)
+trig.Level              = 20; % in percent of the trig range (-100 to +100)
 trig.Source             = CsMl_Translate('External', 'Source');
 trig.ExtCoupling        = CsMl_Translate('DC', 'ExtCoupling');
 trig.ExtRange           = 10000; % Vpp in mV, 10000=+-5V

@@ -24,11 +24,11 @@
 % 4 Channels @ 50 MS/s, 14-bits,
 % 1 GS Memory, 65 MHz Bandwidth
 % AC/DC Coupling, 50Ω or 1MΩ Inputs
-
+clearvars;
      SaveData        = 0 ;               % set to 1 to save
-     Frep            =  max(2,2000) ;     % Reptition frequency from DG645 Master ( Hz )
-     NTrig           = 1000;              % repeat 2 time not allowed 
-     SampleRate    =   20*1e6;  % Gage sampling frequency in Hz (option: [10,50])
+     Frep            =  max(2,100) ;     % Reptition frequency from DG645 Master ( Hz )
+     NTrig           = 100;              % repeat 2 time not allowed 
+     SampleRate    =   25e6;  % Gage sampling frequency in Hz (option: [10,50])
      Range         =   2;       % Gage dynamic range Volt (option: [2])
      Npoint          = 100 ;   % number of point for single segment
      c = 1540;
@@ -51,7 +51,8 @@ SampleRate  = acqInfo.SampleRate; % SI unit
   status = CsMl_QueryStatus(Hgage);
  end
     
-    for SegmentNumber = 1:acqInfo.SegmentCount        
+    
+    for SegmentNumber = 1:acqInfo.SegmentCount     
         transfer.Segment       = SegmentNumber;                     % number of the memory segment to be read
         [ret, datatmp, actual] = CsMl_Transfer(Hgage, transfer);    % transfer
                                                                     % actual contains the actual length of the acquisition that may be
