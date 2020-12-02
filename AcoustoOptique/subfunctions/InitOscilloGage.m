@@ -63,7 +63,7 @@ disp(s);
 %Customed Parameters
 
 acqInfo.SampleRate      = SamplingRate;%Max = 50 MHz, must be divider of 50;
-%acqInfo.SampleSize      = NTrig; %
+acqInfo.SampleSize      = 1; %
 acqInfo.SegmentCount    = NTrig; % Number of memory segments 
 acqInfo.Depth           = Npoints; % Must be a multiple of 32
 acqInfo.SegmentSize     = Npoints;
@@ -117,6 +117,7 @@ end
 % Overwrite setting for channel 1
 chan(1).Coupling        = CsMl_Translate('DC', 'Coupling');
 chan(1).InputRange      = 2*Range*1e3; % Vpp in mV
+chan(1).DcOffset        = 500; % Vpp in mV
 
 [ret] = CsMl_ConfigureChannel(handle, chan); % config chan parameters
 CsMl_ErrorHandler(ret, 1, handle);
@@ -143,7 +144,7 @@ switch TriggerSatus
     case 'on'
 trig.Trigger            = 1;
 trig.Slope              = CsMl_Translate('Positive', 'Slope'); % Aixplorer Trig has a 'Negative' slope
-trig.Level              = 20; % in percent of the trig range (-100 to +100)
+trig.Level              = 50; % in percent of the trig range (-100 to +100)
 trig.Source             = CsMl_Translate('External', 'Source');
 trig.ExtCoupling        = CsMl_Translate('DC', 'ExtCoupling');
 trig.ExtRange           = 10000; % Vpp in mV, 10000=+-5V

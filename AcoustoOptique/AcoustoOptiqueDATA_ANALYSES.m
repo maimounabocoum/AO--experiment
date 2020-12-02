@@ -25,7 +25,7 @@
      MyStat2 = stats_t( Fs2 );
      unit = 'W';
      %alpha = 1/(0.45*1e5) ; % convertion W/Volt - thorlabs
-     alpha = (200e-6)/0.3057 ; % convertion W/Volt - menlo
+     alpha = (200e-6)/0.3057 ; % convertion W/Volt - Menlo
      
     Hmu = figure;
     set(Hmu,'WindowStyle','docked'); 
@@ -57,8 +57,8 @@
     subplot(223)
     s1 = Datas_std1./sqrt(Ephoton*BW*abs(mean(Datas_mu1)));
     s2 = Datas_std2./sqrt(Ephoton*BW*abs(mean(Datas_mu1)));
-    
-    % Mesure2(9,:) = [1e6*mean(Datas_mu1),mean(s1),mean(s2)];
+    [1e6*mean(Datas_mu1),mean(s1),mean(s2)]
+    Mesure(58,:) = [1e6*mean(Datas_mu1),mean(s1),mean(s2)]
 
     %s3 = 1e6*sqrt(Ephoton*BW*abs(mean(Datas_mu1))); % shot noise for detector BW 150
  line( t2*1e3,s1,'Color','k'); 
@@ -83,7 +83,7 @@ line(t1*1e6,s2,'Parent',ax2,'Color','r')
     xlabel('t1 (\mu s)','fontsize',5)
      
     subplot(222)
-line(t2*1e3/(40),1e6*Datas_mu1,'Color','k'); hold on 
+line(t2*1e3,1e6*Datas_mu1,'Color','k'); hold on 
     ylabel(strcat('\mu (\mu ',unit,')over short '))
     xlabel('time (ms)','fontsize',10)
     ax1 = gca; % current axes
@@ -140,9 +140,14 @@ line(freq1(2:end)*1e-6,s1,'Parent',ax2,'Color','r');
 
     set(findall(Hmu,'-property','FontSize'),'FontSize',8) 
     
-    
-   figure; plot( 1e6*Datas_mu1 , Datas_std1./sqrt(Ephoton*BW*abs(mean(Datas_mu1))) , 'o') ; 
+   figure(2); hold on ; plot( 1e6*Datas_mu1 , Datas_std1./sqrt(Ephoton*BW*abs(Datas_mu1)) , 'o') ;  
+   %figure; plot( 1e6*Datas_mu1 , Datas_std1./Datas_mu1  , 'o') ;
     xlabel('Power PD (\mu W)')
     ylabel('\sigma / \sigma_{sn} over sort ')
 
+    
+
+    
+    
+    
     
