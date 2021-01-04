@@ -58,7 +58,7 @@
     s1 = Datas_std1./sqrt(Ephoton*BW*abs(mean(Datas_mu1)));
     s2 = Datas_std2./sqrt(Ephoton*BW*abs(mean(Datas_mu1)));
     [1e6*mean(Datas_mu1),mean(s1),mean(s2)]
-    Mesure(58,:) = [1e6*mean(Datas_mu1),mean(s1),mean(s2)]
+%     Mesure(58,:) = [1e6*mean(Datas_mu1),mean(s1),mean(s2)]
 
     %s3 = 1e6*sqrt(Ephoton*BW*abs(mean(Datas_mu1))); % shot noise for detector BW 150
  line( t2*1e3,s1,'Color','k'); 
@@ -140,10 +140,10 @@ line(freq1(2:end)*1e-6,s1,'Parent',ax2,'Color','r');
 
     set(findall(Hmu,'-property','FontSize'),'FontSize',8) 
     
-   figure(2); hold on ; plot( 1e6*Datas_mu1 , Datas_std1./sqrt(Ephoton*BW*abs(Datas_mu1)) , 'o') ;  
-   %figure; plot( 1e6*Datas_mu1 , Datas_std1./Datas_mu1  , 'o') ;
-    xlabel('Power PD (\mu W)')
-    ylabel('\sigma / \sigma_{sn} over sort ')
+%    figure(2); hold on ; plot( 1e6*Datas_mu1 , Datas_std1./sqrt(Ephoton*BW*abs(Datas_mu1)) , 'o') ;  
+%    %figure; plot( 1e6*Datas_mu1 , Datas_std1./Datas_mu1  , 'o') ;
+%     xlabel('Power PD (\mu W)')
+%     ylabel('\sigma / \sigma_{sn} over sort ')
 
     
 
