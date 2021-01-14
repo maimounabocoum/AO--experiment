@@ -10,7 +10,7 @@
 % adresse Bastille : '192.168.0.20'
 % adresse Jussieu :  '192.168.1.16'
 
- AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.137.2'; % IP address of the Aixplorer device
  % path at Jussieu :
  if strcmp(AixplorerIP,'192.168.1.16')
  addpath('D:\AO--commons\shared functions folder')
@@ -31,12 +31,13 @@
         Bacules         = 'off';
         Master          = 'on';
         GageActive      = 'on' ; 
-        WriteLogFile    = 'off';
-        Volt            = 10; %Volt
+        WriteLogFile    = 'on';
+        IsAixplorerLoop = 'on'; % 'on':loops sequences for ever , 'off' defult mode
+        Volt            = 15; %Volt
         SaveData        = 0 ; % set to 1 to save
         % 2eme contrainte : 
         % soit FreqSonde congrue à NUZ0 , soit entier*FreqSonde = NUech(=180e6)
-        FreqSonde       = 6 ; % MHz AO : 78 et 84 MHz to be multiple of 6
+        FreqSonde       = 3 ; % MHz AO : 78 et 84 MHz to be multiple of 6
         FreqSonde       = 180/round(180/FreqSonde); %MHz
         NbHemicycle     = 250 ;
         
@@ -45,9 +46,9 @@
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbZ         = 10;    % [6,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = 0 ;    % [-10:10];        % 20    Nb de composantes de Fourier en X, 'JM'
-        Phase       = [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
+        NbZ         = [1,1:10];    % [6,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = [-5:5] ;    % [-10:10];        % 20    Nb de composantes de Fourier en X, 'JM'
+        Phase       = [0,0.25,0.5,0.75]; % [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
         %        NUrep =   Nbz*(50kHz)         
@@ -61,19 +62,19 @@
         n_low = round( 180*DurationWaveform );
         NU_low = (180)/n_low;    % fundamental temporal frequency
         
-        Tau_cam          = 100 ; % camera integration time (us)
-        
+        Tau_cam          = 200 ; % camera integration time (us)
+        TrigoutDelay    = 50 ; % emission delay in us
         Foc             = 99; % mm
         X0              = 0;  % 19.2
         X1              = 40;
         step            = 1;     % in mm
         TxWidth         = 40;
         
-        Frep            =  max(2,50) ; % in Hz
-        NTrig           = 100;             % repeat 2 time not allowed
+        Frep            =  max(2,20) ;     % in Hz
+        NTrig           = 10;              % repeat 2 time not allowed
         Prof            = (1e-3*1540)*1000; % last digits in us 
         
-
+   
 %% default parameters for user input (used for saving)
 [nuX0,nuZ0] = EvalNu0( X0 , X1 , NU_low );      
 
@@ -95,7 +96,7 @@ Volt = min(50,Volt); % security for OP routine
 [SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , NbX , X0 , X1 ,Prof, NTrig ,Frep );
     case 'JM'
 Volt = min(Volt,20) ; 
- [SEQ,ActiveLIST,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OJMLusmeasure(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig ,NU_low,Tau_cam , Phase , Frep , Bacules , Master );
+ [SEQ,ActiveLIST,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OJMLusmeasure(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig ,NU_low,Tau_cam , Phase , Frep , Bacules , IsAixplorerLoop, Master ,TrigoutDelay);
 %[SEQ,MedElmtList,NUX,NUZ,nuX0,nuZ0] = AOSeqInit_OJM(AixplorerIP, Volt , FreqSonde , NbHemicycle , NbX , NbZ , X0 , X1 ,Prof, NTrig,DurationWaveform,Master);
     case 'OFJM'
 Volt = min(Volt,20) ; 
@@ -142,13 +143,14 @@ title(['shot Number = ',num2str(Nactive)])
 
 SEQ.InfoStruct.event(Nactive).duration
 
-%% write log file to share between applications (Labview) as csv format
+%% ================ write log file to share between applications (Labview) as csv format
+
 if strcmp(WriteLogFile,'on')
 % list of data type : isDataType
 % isfloat H:\
 % islogical
 % isstring
-SubFolderNameLocal         = generateSubFolderName('D:\Data\Mai');  % localhost save
+SubFolderNameLocal         = generateSubFolderName('D:\Datas\Mai');  % localhost save
 SubFolderNameHollande      = generateSubFolderName('Z:\Mai');       % 10.10.10.36 - holland save
 FileNameLocal_csv          = [SubFolderNameLocal,'\LogFile.csv'];
 FileNameHollande_csv       = [SubFolderNameHollande,'\LogFile.csv'];
@@ -188,7 +190,12 @@ FileNameHollande_csv       = [SubFolderNameHollande,'\LogFile.csv'];
  cell2csv(FileNameLocal_csv,  FinalCell , ';' ,'2015' ,'.' ) ;
  cell2csv(FileNameHollande_csv,  FinalCell , ';' ,'2015' ,'.' ) ;
 %fwritecell('exptable.txt',ParamList);
-end
+end   
+
+%% =================== load aixplorer sequence =====================%%%
+
+ % SEQ = AO_loadSequence( SEQ , AixplorerIP ) ;
+
 %%  ========================================== Init Gage ==================
 % Possible return values for status are:
 %   0 = Ready for acquisition or data transfer
@@ -199,42 +206,39 @@ end
 
 
 %%
-pause(1);
-
-if strcmp(GageActive,'on')
-     SampleRate    =   50;
-     Range         =   2; %Volt
-Nlines = length(SEQ.InfoStruct.event);    
-[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig*Nlines,Prof,c,SampleRate,Range,'on');
-% input on gageIntit: 'on' to activate external trig, 'off' : will trig on timout value
-raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
-
+% pause(1);
+% 
+% if strcmp(GageActive,'on')
+%      SampleRate    =   50;
+%      Range         =   2; %Volt
+%      Npoint          = ceil(( 500)/32)*32 ;
+% Nlines = 1%length(SEQ.InfoStruct.event);    
+% [ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig*Nlines,Npoint,SampleRate,Range,'on');
+% 
+% % input on gageIntit: 'on' to activate external trig, 'off' : will trig on timout value
+% raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
+% end
 %%%%%%%%%%%%%%%%%%%  lauch gage acquisition %%%%%%%%%%%%%%%%%%%
-
- ret = CsMl_Capture(Hgage);
+%  ret = CsMl_Capture(Hgage);
+%  
+%  CsMl_ErrorHandler(ret, 1, Hgage);
+%  status = CsMl_QueryStatus(Hgage);
  
- CsMl_ErrorHandler(ret, 1, Hgage);
- status = CsMl_QueryStatus(Hgage);
- 
- 
-  SEQ = SEQ.startSequence();
+%  SEQ = SEQ.startSequence();
 
 
- while status ~= 0
-  status = CsMl_QueryStatus(Hgage);
- end
-    
-    for SegmentNumber = 1:acqInfo.SegmentCount        
-        transfer.Segment       = SegmentNumber;                     % number of the memory segment to be read
-        [ret, datatmp, actual] = CsMl_Transfer(Hgage, transfer);    % transfer
-                                                                    % actual contains the actual length of the acquisition that may be
-                                                                    % different from the requested one.
-       raw((1+actual.ActualStart):actual.ActualLength,SegmentNumber) = datatmp' ;       
-    end
-    
-end
-figure;imagesc(raw)
-colormap(parula)
+%  while status ~= 0
+%   status = CsMl_QueryStatus(Hgage);
+%  end
+%     
+%     for SegmentNumber = 1:acqInfo.SegmentCount     
+%         transfer.Segment       = SegmentNumber;                     % number of the memory segment to be read
+%         [ret, datatmp, actual] = CsMl_Transfer(Hgage, transfer);    % transfer
+%                                                                     % actual contains the actual length of the acquisition that may be
+%                                                                     % different from the requested one.
+%        raw((1+actual.ActualStart):actual.ActualLength,SegmentNumber) = datatmp' ;       
+%     end
+
 
 %  Get system status
 %  Msg    = struct('name', 'get_status');
@@ -244,8 +248,9 @@ colormap(parula)
 %  Msg = struct('name', 'start_stop_sequence', 'start', 1);
 %  Status = remoteSendMessage(SEQ.Server, Msg)
 
-%  SEQ = SEQ.startSequence();
-%  SEQ = SEQ.stopSequence('Wait',0);
+%   SEQ = SEQ.startSequence(); 
+%   SEQ = SEQ.stopSequence('Wait',0);
+ 
 
 % ======================== data post processing =============================
 % SaveData        = 1; % set to 1 to save
@@ -254,10 +259,10 @@ colormap(parula)
 % lambda  = 780e-9;
 % Ephoton = h*(3e8/lambda);
 
- Pmain = 9;
- Pref = 2;
+%  Pmain = 9;
+%  Pref = 2;
 
- AcoustoOptiqueDATA_ANALYSES;
+ % AcoustoOptiqueDATA_ANALYSES;
 
 % save datas :
 

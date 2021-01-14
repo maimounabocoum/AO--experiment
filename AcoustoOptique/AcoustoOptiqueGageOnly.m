@@ -27,10 +27,10 @@
 clearvars -except Mesure;
      SaveData        = 0 ;              % set to 1 to save
      Frep            =  max(2,100) ;    % Reptition frequency from DG645 Master ( Hz )
-     NTrig           = 500;            % repeat 2 time not allowed 
+     NTrig           = 1;            % repeat 2 time not allowed 
      SampleRate    =   25e6;            % Gage sampling frequency in Hz (option: [50,25,10,5,2,1,0.5,0.2,0.1,0.05])
      Range         =   0.5;             % Gage dynamic range Volt (option: 5,2,1,0.5,0.2,0.1)
-     Npoint          = 500 ;           % number of point for single segment
+     Npoint          = 5000 ;           % number of point for single segment
      c = 1540;
 
 [ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Npoint,SampleRate,Range,'on');
@@ -73,7 +73,7 @@ SampleRate  = acqInfo.SampleRate; % SI unit
 
 % ======================== data post processing =============================
 
- AcoustoOptiqueDATA_ANALYSES;
+ %AcoustoOptiqueDATA_ANALYSES;
 
 % save datas :
 

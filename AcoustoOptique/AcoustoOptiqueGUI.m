@@ -6,8 +6,9 @@
 % adresse Jussieu  : '192.168.1.16'
 % adresse Bastille : '192.168.0.20'
 
- AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
-
+% AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.137.2'; % IP address of the Aixplorer device
+ 
  addpath('D:\AO--commons\shared functions folder')
  addpath('sequences');    
  addpath('subfunctions');
@@ -15,26 +16,26 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-       TypeOfSequence = 'JM';   %'OF'(focused waves) , 'OS' (plane structures waves), 
+       TypeOfSequence = 'OP';   %'OF'(focused waves) , 'OS' (plane structures waves), 
                                 %'OP' (plane waves) , 'JM' (Jean-Michel waves)
         
         Master      = 'on';     % Aixplorer as Master ('on') of Slave ('off') with respect to trigger
-        Volt        = 15;       % 'OF' , 'OS', 'OP' , 'JM'
-        FreqSonde   = 6;        % 'OF' , 'OS', 'OP' , 'JM'
-        NbHemicycle = 250;      % 'OF' , 'OS', 'OP' , 'JM'
-        Foc         = 5;        % 'OF'
-        AlphaM      = [-10,0,10]*pi/180;        % 'OP' list of angles in scan in Rad
-        X0          = 0;        % 'OF' , 'OS', 'OP' , 'JM'
-        X1          = 50 ;      % 'OF' , 'OS', 'OP' , 'JM'
-        NTrig       = 50;       % 'OF' , 'OS', 'OP' , 'JM'
-        Prof        = 300;      % 'OF' , 'OS', 'OP' , 'JM'
+        Volt        = 15;       % 'OF' , 'OS', 'OP' , 'JM' Volt
+        FreqSonde   = 6;        % 'OF' , 'OS', 'OP' , 'JM' MHz
+        NbHemicycle = 100;      % 'OF' , 'OS', 'OP' , 'JM'
+        Foc         = 5;        % 'OF' mm
+        AlphaM      = [0]*pi/180;        % 'OP' list of angles in scan in Rad
+        X0          = -1;        % 'OF' , 'OS', 'OP' , 'JM' in mm
+        X1          = 100 ;      % 'OF' , 'OS', 'OP' , 'JM' in mm
+        NTrig       = 4;       % 'OF' , 'OS', 'OP' , 'JM' 
+        Prof        = 300;      % 'OF' , 'OS', 'OP' , 'JM' in mm
         decimation  = [8] ;     % 'OS'
         NbZ         = 8;        % 'JM' harmonic along z 
         NbX         = 0;        % 'JM' harmonic along x 
         Phase       = [0];        % 'JM' phases per frequency in 2pi unit
         Tau_cam          = 100 ;  % 'JM' camera integration time (us) : sets the number of repetition patterns
         Bacules         = 'off';  % 'JM' alternates phase to provent Talbot effect
-        Frep            =  max(2,50) ;   % 'OF' , 'OS', 'OP' , 'JM'in Hz
+        Frep            =  max(2,100) ;   % 'OF' , 'OS', 'OP' , 'JM'in Hz
         
         
         % 'JM' 

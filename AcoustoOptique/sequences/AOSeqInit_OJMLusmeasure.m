@@ -4,7 +4,7 @@
 % définir les remote.fc et remote.rx, ainsi que les rxId des events.
 % DO NOT USE CLEAR OR CLEAR ALL use clearvars instead
 
-function [SEQ,MedElmtList,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OJMLusmeasure(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig, NU_low , Tau_cam , Phase , frep, Bascule ,Master)
+function [SEQ,MedElmtList,nuX0,nuZ0,NUX,NUZ,ParamList] = AOSeqInit_OJMLusmeasure(AixplorerIP, Volt , f0 , NbHemicycle , NbX , NbZ , X0 , X1 ,NTrig, NU_low , Tau_cam , Phase , frep, Bascule ,IsAixplorerLoop,Master,EmissionDelay)
 
 
 %% System parameters import :
@@ -185,7 +185,7 @@ ELUSEV{nbs} = elusev.elusev( ...
                     'TrigOut',      10, ... 0,...
                     'TrigIn',       0,...
                     'TrigAll',      1, ...
-                    'TrigOutDelay', 15, ...
+                    'TrigOutDelay', EmissionDelay, ...
                     'Repeat',       Nphase,...
                     0);            
             
@@ -251,6 +251,19 @@ TPC = remote.tpc( ...
     0);
 
 % USSE for the sequence
+
+if strcmp(IsAixplorerLoop,'on')
+SEQ = usse.usse( ...
+    'TPC', TPC, ...
+    'acmo', ACMOList, ...    
+    'Loopidx',1, ...     % index to which the loop goes back to
+    'Repeat', max(NTrig-1,1), ...  'Popup',0, ...
+    'DropFrames', 0, ...
+    'Loop', 1, ...
+    'DataFormat', 'RF', ...
+    'Popup', 0, ...
+    0);
+else
 SEQ = usse.usse( ...
     'TPC', TPC, ...
     'acmo', ACMOList, ...    
@@ -261,6 +274,7 @@ SEQ = usse.usse( ...
     'DataFormat', 'RF', ...
     'Popup', 0, ...
     0);
+end
 
 [SEQ, ~] = SEQ.buildRemote();
  display('Build OK')
@@ -270,21 +284,18 @@ SEQ = usse.usse( ...
 nuX0 = nuX0*1e3;
 nuZ0 = nuZ0*1e3;
 
-
-%%%    Do NOT CHANGE - Sequence execution 
-%%%    Initialize remote on systems
  %% initialize communation with remote aixplorer and load sequence
-try
- SEQ = SEQ.initializeRemote('IPaddress',AixplorerIP);
- display('============== Remote OK =============');
- display('Loading sequence to Hardware'); tic ;
- SEQ = SEQ.loadSequence();
- fprintf('Sequence has loaded in %f s \n\r',toc)
- display('--------ready to use -------------');
- 
-catch e
-  fprintf(e.message);  
-end
+% try
+%  SEQ = SEQ.initializeRemote('IPaddress',AixplorerIP);
+%  display('============== Remote OK =============');
+%  display('Loading sequence to Hardware'); tic ;
+%  SEQ = SEQ.loadSequence();
+%  fprintf('Sequence has loaded in %f s \n\r',toc)
+%  display('--------ready to use -------------');
+%  
+% catch e
+%   fprintf(e.message);  
+% end
 
 end
 
