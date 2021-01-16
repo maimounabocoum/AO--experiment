@@ -27,23 +27,29 @@
 clearvars -except Mesure;
      SaveData        = 0 ;              % set to 1 to save
      Frep            =  max(2,100) ;    % Reptition frequency from DG645 Master ( Hz )
-     NTrig           = 1;            % repeat 2 time not allowed 
-     SampleRate    =   25e6;            % Gage sampling frequency in Hz (option: [50,25,10,5,2,1,0.5,0.2,0.1,0.05])
-     Range         =   0.5;             % Gage dynamic range Volt (option: 5,2,1,0.5,0.2,0.1)
-     Npoint          = 5000 ;           % number of point for single segment
+     NTrig           = 44;            % repeat 2 time not allowed 
+     SampleRate      =   25e6;            % Gage sampling frequency in Hz (option: [50,25,10,5,2,1,0.5,0.2,0.1,0.05])
+     Range           =   0.5;             % Gage dynamic range Volt (option: 5,2,1,0.5,0.2,0.1)
+     Offset_gage     = 400; % Vpp in mV
+     Npoint          = 50000 ;           % number of point for single segment
      c = 1540;
 
-[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Npoint,SampleRate,Range,'on');
+[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Npoint,SampleRate,Range,'on',Offset_gage);
 % input on gageIntit: 'on' to activate external trig, 'off' : will trig on timout value
 raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
 
 Npoint      = acqInfo.Depth;      % SI unit
 SampleRate  = acqInfo.SampleRate; % SI unit
-%%
+
 %%%%%%%%%%%%%%%%%%%  lauch gage acquisition %%%%%%%%%%%%%%%%%%%
 
  ret = CsMl_Capture(Hgage);
  
+ pause(1)
+ 
+  SEQ = SEQ.startSequence();
+  
+  
  CsMl_ErrorHandler(ret, 1, Hgage);
  status = CsMl_QueryStatus(Hgage);
  
@@ -61,11 +67,11 @@ SampleRate  = acqInfo.SampleRate; % SI unit
     end
     
 
-% figure(1); imagesc(raw)
-% colormap(parula)
+figure(1); imagesc(raw)
+colormap(parula)
 
-% t = (1e6/acqInfo.SampleRate)*(1:size(raw,1));
-% figure(3); plot(t,raw)
+t = (1e6/acqInfo.SampleRate)*(1:size(raw,1));
+figure(3); plot(t,raw)
 % title('PD manip MG - collimated  - AO manip MG not Focused in AO')
 % xlabel('time(\mu s)')
 % ylabel('Volt')
@@ -91,4 +97,44 @@ save(FileName,'NTrig','Npoint','Frep','raw','SampleRate','c','Range','Fs1','Fs2'
 fprintf('Data has been saved under : \r %s \r\n',FileName);
 
 end
+%%
+start_index=650e-6*acqInfo.SampleRate;
+width=20e-6;
+raw2=(raw-min(raw(:)));
+figure(1)
+imagesc(raw2(:,1))
+% figure(2)
+raw_tronc=raw2(start_index:start_index+width*acqInfo.SampleRate,:);
+% plot(t(start_index:start_index+width*acqInfo.SampleRate),raw_tronc(:,1))
+figure(4)
+
+integ = sum(raw_tronc,1);
+integ_tronc= integ(4:end);
+
+plot(integ_tronc/integ_tronc(1),'r')
+% hold on
+% data = importdata('Z:\Louis\2021-01-14\RefOnly_modZ_exp19.dat');
+
+% figure(4)
+% data_tronc = data(4:end,1);
+% plot(data_tronc./data_tronc(1))
+hold on
+
+data2 = importdata('Z:\Louis\2021-01-14\RefOnly_modZ_exp20.dat');
+
+% figure(4)
+data_tronc2 = data2(4:end,1);
+plot(data_tronc2./data_tronc2(1),'g')
+ylim([0.9,1.4])
+legend('photodiode','CCD')
+%%
+data = importdata('Z:\Louis\2021-01-14\scanUs_On_modZ_exp100.dat');
+dataoff = importdata('Z:\Louis\2021-01-14\scanUs_Off_modZ_exp100.dat');
+figure(6)
+plot(data(5:end,1))
+hold on
+plot(dataoff(5:end,1),'r')
+legend('US on','US off')
+
+
 

@@ -1,4 +1,4 @@
-function [ret,handle,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Npoints,SamplingRate,Range,TriggerSatus)
+function [ret,handle,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Npoints,SamplingRate,Range,TriggerSatus,Offset_gage)
 % Set the acquisition, channel and trigger parameters for the system and
 % commit the parameters to the driver.
 % AO     = structure with the different parameters
@@ -117,7 +117,7 @@ end
 % Overwrite setting for channel 1
 chan(1).Coupling        = CsMl_Translate('DC', 'Coupling');
 chan(1).InputRange      = 2*Range*1e3; % Vpp in mV
-chan(1).DcOffset        = 500; % Vpp in mV
+chan(1).DcOffset        = Offset_gage; % Vpp in mV
 
 [ret] = CsMl_ConfigureChannel(handle, chan); % config chan parameters
 CsMl_ErrorHandler(ret, 1, handle);
@@ -147,7 +147,7 @@ trig.Slope              = CsMl_Translate('Positive', 'Slope'); % Aixplorer Trig 
 trig.Level              = 50; % in percent of the trig range (-100 to +100)
 trig.Source             = CsMl_Translate('External', 'Source');
 trig.ExtCoupling        = CsMl_Translate('DC', 'ExtCoupling');
-trig.ExtRange           = 10000; % Vpp in mV, 10000=+-5V
+trig.ExtRange           = 5000; % Vpp in mV, 10000=+-5V
     case 'off'
 trig.Trigger            = 1;
 trig.Slope              = CsMl_Translate('Negative', 'Slope'); % Aixplorer Trig has a neg slope
