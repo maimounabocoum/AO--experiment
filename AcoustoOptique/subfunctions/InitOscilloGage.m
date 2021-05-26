@@ -62,9 +62,9 @@ disp(s);
  
 %Customed Parameters
 
-acqInfo.SampleRate      = SamplingRate; % Max = 50 MHz, must be divider of 50;
+acqInfo.SampleRate      = SamplingRate;%Max = 50 MHz, must be divider of 50;
 acqInfo.SampleSize      = 1; %
-acqInfo.SegmentCount    = NTrig;   % Number of memory segments 
+acqInfo.SegmentCount    = NTrig; % Number of memory segments 
 acqInfo.Depth           = Npoints; % Must be a multiple of 32
 acqInfo.SegmentSize     = Npoints;
 
@@ -107,7 +107,7 @@ for i = 1:sysinfo.ChannelCount
     chan(i).Channel     = i;
     chan(i).Coupling    = CsMl_Translate('DC', 'Coupling');
     chan(i).DiffInput   = 0;
-    chan(i).InputRange  = 2*Range*1e3;% 2000; Vpp in mV
+    chan(i).InputRange  = 2000;%2000; Vpp in mV
     chan(i).Impedance   = 50; % 50 Ohms or 1 MOhms
     chan(i).DcOffset    = 0;
     chan(i).DirectAdc   = 0;
@@ -147,7 +147,7 @@ trig.Slope              = CsMl_Translate('Positive', 'Slope'); % Aixplorer Trig 
 trig.Level              = 50; % in percent of the trig range (-100 to +100)
 trig.Source             = CsMl_Translate('External', 'Source');
 trig.ExtCoupling        = CsMl_Translate('DC', 'ExtCoupling');
-trig.ExtRange           = 10000; % Vpp in mV, 10000=+-5V
+trig.ExtRange           = 5000; % Vpp in mV, 10000=+-5V
     case 'off'
 trig.Trigger            = 1;
 trig.Slope              = CsMl_Translate('Negative', 'Slope'); % Aixplorer Trig has a neg slope
@@ -168,10 +168,9 @@ CsMl_ErrorHandler(ret, 1, handle);
 % OnChange = 0, the values are sent regardless of whether they have changed
 % default values : Coerce = 0 ,OnChange = 1
 
-% flags.Coerce = 0;
-% flags.OnChange = 1;
-% ret = CsMl_Commit(handle, flags);
-ret = CsMl_Commit(handle);
+flags.Coerce = 1;
+flags.OnChange = 1;
+ret = CsMl_Commit(handle, flags);
 CsMl_ErrorHandler(ret, 1, handle);
 
 [ret, acqInfo] = CsMl_QueryAcquisition(handle);
@@ -180,7 +179,7 @@ CsMl_ErrorHandler(ret, 1, handle);
 [ret, sysinfo] = CsMl_GetSystemInfo(handle); % Get card infos
 CsMl_ErrorHandler(ret, 1, handle);
 
-%CsMl_ResetTimeStamp(ret);
+CsMl_ResetTimeStamp(handle);
 
 ret = 1;
 

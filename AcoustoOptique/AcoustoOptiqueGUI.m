@@ -26,8 +26,8 @@
         AlphaM      = [0]*pi/180;        % 'OP' list of angles in scan in Rad
         X0          = -1;        % 'OF' , 'OS', 'OP' , 'JM' in mm
         X1          = 100 ;      % 'OF' , 'OS', 'OP' , 'JM' in mm
-        NTrig       = 4;       % 'OF' , 'OS', 'OP' , 'JM' 
-        Prof        = 300;      % 'OF' , 'OS', 'OP' , 'JM' in mm
+        NTrig       = 1;       % 'OF' , 'OS', 'OP' , 'JM' 
+        Prof        = 50;      % 'OF' , 'OS', 'OP' , 'JM' in mm
         decimation  = [8] ;     % 'OS'
         NbZ         = 8;        % 'JM' harmonic along z 
         NbX         = 0;        % 'JM' harmonic along x 
@@ -92,10 +92,10 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
 %   2 = Triggered but still busy acquiring
 %   3 = Data transfer is in progress
      
-     SampleRate    =   10*1e6;
+     SampleRate    =   25e6;
      Range         =   1;
-     Offset_gage     = 400; % Vpp in mV
-     Npoint          = ceil(( SampleRate*ceil(Prof/(c*1e-3)))/32)*32 ;
+     Offset_gage     = 0; % Vpp in mV
+     Npoint          = ceil( (SampleRate*(Prof*1e-3)/c)/32 )*32 ;
      GageActive = 'on' ; % on to activate external trig, off : will trig on timout value
      
     if strcmp(AIXPLORER_Active,'on') 
@@ -103,7 +103,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
     else
     Nlines = (2*length(NbX)+1)*length(NbZ) ;
     end
- 
+    
 [ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig*Nlines,Npoint,SampleRate,Range,GageActive,Offset_gage);
 raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     
@@ -174,7 +174,7 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
         case 'OF'
             
     [Datas_mu,Datas_std, Datas_var] = RetreiveDatas(raw,NTrig,Nlines,ScanParam);
-    z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
+    z = (1:actual.ActualLength)*(c/SampleRate)*1e3;
     NbElemts = system.probe.NbElemts ;
     pitch = system.probe.Pitch ; 
     x = ScanParam*pitch;

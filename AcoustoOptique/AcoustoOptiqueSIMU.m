@@ -32,13 +32,12 @@
         Master          = 'on';
         GageActive      = 'on' ; 
         WriteLogFile    = 'on';
-        IsAixplorerLoop = 'off'; % 'on':loops sequences for ever , 'off' defult mode
+        IsAixplorerLoop = 'on'; % 'on':loops sequences for ever , 'off' defult mode
         Volt            = 15; %Volt
-        Offset_gage     = 520; % Vpp in mV
         SaveData        = 0 ; % set to 1 to save
         % 2eme contrainte : 
         % soit FreqSonde congrue à NUZ0 , soit entier*FreqSonde = NUech(=180e6)
-        FreqSonde       = 3; % MHz AO : 78 et 84 MHz to be multiple of 6
+        FreqSonde       = 3 ; % MHz AO : 78 et 84 MHz to be multiple of 6
         FreqSonde       = 180/round(180/FreqSonde); %MHz
         NbHemicycle     = 250 ;
         
@@ -48,7 +47,7 @@
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
         NbZ         = [1,1:10];    % [6,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = [-5:5];    % [-10:10];        % 20    Nb de composantes de Fourier en X, 'JM'
+        NbX         = [-5:5] ;    % [-10:10];        % 20    Nb de composantes de Fourier en X, 'JM'
         Phase       = [0,0.25,0.5,0.75]; % [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
@@ -71,8 +70,8 @@
         step            = 1;     % in mm
         TxWidth         = 40;
         
-        Frep            =  max(2,20) ;      % in Hz
-        NTrig           = 1;                % repeat 2 time not allowed
+        Frep            =  max(2,20) ;     % in Hz
+        NTrig           = 10;              % repeat 2 time not allowed
         Prof            = (1e-3*1540)*1000; % last digits in us 
         
    
@@ -195,7 +194,7 @@ end
 
 %% =================== load aixplorer sequence =====================%%%
 
-  SEQ = AO_loadSequence( SEQ , AixplorerIP ) ;
+ % SEQ = AO_loadSequence( SEQ , AixplorerIP ) ;
 
 %%  ========================================== Init Gage ==================
 % Possible return values for status are:
@@ -207,48 +206,39 @@ end
 
 
 %%
-clearvars raw
-
-if strcmp(GageActive,'on')
-    
-     SaveData        = 0 ;              % set to 1 to save
-     NTrig           = Nevent;            % repeat 2 time not allowed 
-     SampleRate      =   25e6;            % Gage sampling frequency in Hz (option: [50,25,10,5,2,1,0.5,0.2,0.1,0.05])
-     Range           =   0.5;             % Gage dynamic range Volt (option: 5,2,1,0.5,0.2,0.1)
-     Offset_gage     = 400; % Vpp in mV
-     Npoint          = 50000 ;           % number of point for single segment
-     c = 1540;
-   
-[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Npoint,SampleRate,Range,'on',Offset_gage);
-
-% input on gageIntit: 'on' to activate external trig, 'off' : will trig on timout value
-raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
-end
-%%%%%%%%%%%%%%%%%%  lauch gage acquisition %%%%%%%%%%%%%%%%%%%
- ret = CsMl_Capture(Hgage);
+% pause(1);
+% 
+% if strcmp(GageActive,'on')
+%      SampleRate    =   50;
+%      Range         =   2; %Volt
+%      Npoint          = ceil(( 500)/32)*32 ;
+% Nlines = 1%length(SEQ.InfoStruct.event);    
+% [ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig*Nlines,Npoint,SampleRate,Range,'on');
+% 
+% % input on gageIntit: 'on' to activate external trig, 'off' : will trig on timout value
+% raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
+% end
+%%%%%%%%%%%%%%%%%%%  lauch gage acquisition %%%%%%%%%%%%%%%%%%%
+%  ret = CsMl_Capture(Hgage);
+%  
+%  CsMl_ErrorHandler(ret, 1, Hgage);
+%  status = CsMl_QueryStatus(Hgage);
  
- CsMl_ErrorHandler(ret, 1, Hgage);
- status = CsMl_QueryStatus(Hgage);
- 
+%  SEQ = SEQ.startSequence();
 
-  pause(2);
- SEQ = SEQ.startSequence();
- pause(2);
 
- while status ~= 0
-  status = CsMl_QueryStatus(Hgage);
- end
-    
-    for SegmentNumber = 1:acqInfo.SegmentCount     
-        transfer.Segment       = SegmentNumber;                     % number of the memory segment to be read
-        [ret, datatmp, actual] = CsMl_Transfer(Hgage, transfer);    % transfer
-                                                                    % actual contains the actual length of the acquisition that may be
-                                                                    % different from the requested one.
-       raw((1+actual.ActualStart):actual.ActualLength,SegmentNumber) = datatmp' ;       
-    end
+%  while status ~= 0
+%   status = CsMl_QueryStatus(Hgage);
+%  end
+%     
+%     for SegmentNumber = 1:acqInfo.SegmentCount     
+%         transfer.Segment       = SegmentNumber;                     % number of the memory segment to be read
+%         [ret, datatmp, actual] = CsMl_Transfer(Hgage, transfer);    % transfer
+%                                                                     % actual contains the actual length of the acquisition that may be
+%                                                                     % different from the requested one.
+%        raw((1+actual.ActualStart):actual.ActualLength,SegmentNumber) = datatmp' ;       
+%     end
 
-figure; imagesc(raw)
-colormap(parula)
 
 %  Get system status
 %  Msg    = struct('name', 'get_status');
