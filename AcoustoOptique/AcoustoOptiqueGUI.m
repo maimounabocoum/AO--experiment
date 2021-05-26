@@ -4,10 +4,9 @@
 %% parameter for sequence :
 % ======================================================================= %
 % adresse Jussieu  : '192.168.1.16'
-% adresse Bastille : '192.168.0.20'
+% new AIXPLORER : '192.168.1.10'
 
-% AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
- AixplorerIP    = '192.168.137.2'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.1.10'; % IP address of the Aixplorer device
  
  addpath('D:\AO--commons\shared functions folder')
  addpath('sequences');    
@@ -16,13 +15,13 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-       TypeOfSequence = 'OP';   %'OF'(focused waves) , 'OS' (plane structures waves), 
+       TypeOfSequence = 'OF';   %'OF'(focused waves) , 'OS' (plane structures waves), 
                                 %'OP' (plane waves) , 'JM' (Jean-Michel waves)
         
         Master      = 'on';     % Aixplorer as Master ('on') of Slave ('off') with respect to trigger
         Volt        = 15;       % 'OF' , 'OS', 'OP' , 'JM' Volt
         FreqSonde   = 6;        % 'OF' , 'OS', 'OP' , 'JM' MHz
-        NbHemicycle = 100;      % 'OF' , 'OS', 'OP' , 'JM'
+        NbHemicycle = 5;      % 'OF' , 'OS', 'OP' , 'JM'
         Foc         = 5;        % 'OF' mm
         AlphaM      = [0]*pi/180;        % 'OP' list of angles in scan in Rad
         X0          = -1;        % 'OF' , 'OS', 'OP' , 'JM' in mm
@@ -95,6 +94,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
      
      SampleRate    =   10*1e6;
      Range         =   1;
+     Offset_gage     = 400; % Vpp in mV
      Npoint          = ceil(( SampleRate*ceil(Prof/(c*1e-3)))/32)*32 ;
      GageActive = 'on' ; % on to activate external trig, off : will trig on timout value
      
@@ -104,7 +104,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
     Nlines = (2*length(NbX)+1)*length(NbZ) ;
     end
  
-[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig*Nlines,Npoint,SampleRate,Range,GageActive);
+[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig*Nlines,Npoint,SampleRate,Range,GageActive,Offset_gage);
 raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     
 

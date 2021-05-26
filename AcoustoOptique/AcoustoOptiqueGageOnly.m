@@ -46,9 +46,6 @@ SampleRate  = acqInfo.SampleRate; % SI unit
  ret = CsMl_Capture(Hgage);
  
  pause(1)
- 
-  SEQ = SEQ.startSequence();
-  
   
  CsMl_ErrorHandler(ret, 1, Hgage);
  status = CsMl_QueryStatus(Hgage);
