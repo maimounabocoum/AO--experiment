@@ -19,22 +19,22 @@
                                 %'OP' (plane waves) , 'JM' (Jean-Michel waves)
         
         Master      = 'on';     % Aixplorer as Master ('on') of Slave ('off') with respect to trigger
-        Volt        = 15;       % 'OF' , 'OS', 'OP' , 'JM' Volt
-        FreqSonde   = 6;        % 'OF' , 'OS', 'OP' , 'JM' MHz
-        NbHemicycle = 5;      % 'OF' , 'OS', 'OP' , 'JM'
+        Volt        = 30;       % 'OF' , 'OS', 'OP' , 'JM' Volt
+        FreqSonde   = 3;        % 'OF' , 'OS', 'OP' , 'JM' MHz
+        NbHemicycle = 100;      % 'OF' , 'OS', 'OP' , 'JM'
         Foc         = 5;        % 'OF' mm
         AlphaM      = [0]*pi/180;        % 'OP' list of angles in scan in Rad
-        X0          = -1;        % 'OF' , 'OS', 'OP' , 'JM' in mm
-        X1          = 100 ;      % 'OF' , 'OS', 'OP' , 'JM' in mm
-        NTrig       = 1;       % 'OF' , 'OS', 'OP' , 'JM' 
-        Prof        = 50;      % 'OF' , 'OS', 'OP' , 'JM' in mm
-        decimation  = [8] ;     % 'OS'
-        NbZ         = 8;        % 'JM' harmonic along z 
-        NbX         = 0;        % 'JM' harmonic along x 
+        X0          = 10;        % 'OF' , 'OS', 'OP' , 'JM' in mm
+        X1          = 20 ;       % 'OF' , 'OS', 'OP' , 'JM' in mm
+        NTrig       = 100;       % 'OF' , 'OS', 'OP' , 'JM' 
+        Prof        = 50;        % 'OF' , 'OS', 'OP' , 'JM' in mm
+        decimation  = [8] ;      % 'OS'
+        NbZ         = 8;         % 'JM' harmonic along z 
+        NbX         = 0;         % 'JM' harmonic along x 
         Phase       = [0];        % 'JM' phases per frequency in 2pi unit
         Tau_cam          = 100 ;  % 'JM' camera integration time (us) : sets the number of repetition patterns
         Bacules         = 'off';  % 'JM' alternates phase to provent Talbot effect
-        Frep            =  max(2,100) ;   % 'OF' , 'OS', 'OP' , 'JM'in Hz
+        Frep            =  max(2,10) ;   % 'OF' , 'OS', 'OP' , 'JM'in Hz
         
         
         % 'JM' 
@@ -59,7 +59,7 @@ if strcmp(AIXPLORER_Active,'on')
 switch TypeOfSequence
     case 'OF'
 NbHemicycle = min(NbHemicycle,100);
-[SEQ,ScanParam] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
+[SEQ,ScanParam] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig,Frep ,Master);
     case 'OP'
 NbHemicycle = min(NbHemicycle,100);
 [SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof,NTrig ,Frep ,Master);

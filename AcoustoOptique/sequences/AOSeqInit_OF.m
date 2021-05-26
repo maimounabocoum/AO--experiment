@@ -1,7 +1,7 @@
 % Sequence AO Foc JB 01-04-15 ( d'apres 03-03-2015 Marc) modified by
 % Maïmouna Bocoum 26 - 02 -2017
 %% Init program
-function [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , f0 , NbHemicycle , Foc, X0 , X1 , Prof ,NTrig)
+function [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , f0 , NbHemicycle , Foc, X0 , X1 , Prof ,NTrig,frep ,Master)
 
 clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
@@ -36,7 +36,7 @@ TxWidth         = Foc/2;           % mm : effective width for focus line
 PropagationTime = (Prof)/(c)*1e3 ; % duration for one line in \mu s
 
 
-NoOp       = 2000;         % µs minimum time between two US pulses, (5 by default ??)
+NoOp       = 1e6/frep;                      % µs minimum time between two US pulses
 TrigOut    = 50;           % trigger duration µs
 Pause      = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause duration in µs
 
@@ -179,7 +179,7 @@ ELUSEV = elusev.elusev( ...
     'TrigOut',      TrigOut, ... 0,...
     'TrigIn',       0,... % trigged sequence 
     'TrigAll',      1, ...% 0: sends output trigger at first emission 
-    'TrigOutDelay', 0, ...
+    'TrigOutDelay', 100, ...
     0);
 
 ACMO = acmo.acmo( ...

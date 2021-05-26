@@ -26,10 +26,11 @@
 % AC/DC Coupling, 50Ω or 1MΩ Inputs
 clearvars -except Mesure;
      SaveData        = 0 ;              % set to 1 to save
+     %ActiveChannel   = {'1','2','3'} ;  % from 1 to 4 active channels 
      Frep            =  max(2,100) ;    % Reptition frequency from DG645 Master ( Hz )
-     NTrig           = 192;            % repeat 2 time not allowed 
+     NTrig           = 10;            % repeat 2 time not allowed 
      SampleRate      =   25e6;            % Gage sampling frequency in Hz (option: [50,25,10,5,2,1,0.5,0.2,0.1,0.05])
-     Range           =   0.5;             % Gage dynamic range Volt (option: 5,2,1,0.5,0.2,0.1)
+     Range           =   1;             % Gage dynamic range Volt (option: 5,2,1,0.5,0.2,0.1)
      Offset_gage     = 400; % Vpp in mV
      Npoint          = 50000 ;           % number of point for single segment
      c = 1540;
@@ -66,9 +67,10 @@ SampleRate  = acqInfo.SampleRate; % SI unit
 
 figure(1); imagesc(raw)
 colormap(parula)
+colorbar
 
 t = (1e6/acqInfo.SampleRate)*(1:size(raw,1));
-figure(3); plot(t,raw)
+figure(3); plot(t,raw*1e3)
 % title('PD manip MG - collimated  - AO manip MG not Focused in AO')
 % xlabel('time(\mu s)')
 % ylabel('Volt')
