@@ -15,27 +15,27 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-       TypeOfSequence = 'OF';   %'OF'(focused waves) , 'OS' (plane structures waves), 
-                                %'OP' (plane waves) , 'JM' (Jean-Michel waves)
+       TypeOfSequence = 'OF';    %'OF'(focused waves) , 'OS' (plane structures waves), 
+                                 %'OP' (plane waves) , 'JM' (Jean-Michel waves)
         
-        Master      = 'on';     % Aixplorer as Master ('on') of Slave ('off') with respect to trigger
-        Volt        = 30;       % 'OF' , 'OS', 'OP' , 'JM' Volt
-        FreqSonde   = 3;        % 'OF' , 'OS', 'OP' , 'JM' MHz
-        NbHemicycle = 100;      % 'OF' , 'OS', 'OP' , 'JM'
-        Foc         = 5;        % 'OF' mm
+        Master      = 'on';      % Aixplorer as Master ('on') of Slave ('off') with respect to trigger
+        Volt        = 30;        % 'OF' , 'OS', 'OP' , 'JM' Volt
+        FreqSonde   = 3;         % 'OF' , 'OS', 'OP' , 'JM' MHz
+        NbHemicycle = 30;        % 'OF' , 'OS', 'OP' , 'JM'
+        Foc         = 25;        % 'OF' mm
         AlphaM      = [0]*pi/180;        % 'OP' list of angles in scan in Rad
-        X0          = 10;        % 'OF' , 'OS', 'OP' , 'JM' in mm
-        X1          = 20 ;       % 'OF' , 'OS', 'OP' , 'JM' in mm
-        NTrig       = 100;       % 'OF' , 'OS', 'OP' , 'JM' 
-        Prof        = 50;        % 'OF' , 'OS', 'OP' , 'JM' in mm
+        X0          = 0;        % 'OF' , 'OS', 'OP' , 'JM' in mm
+        X1          = 38.5 ;       % 'OF' , 'OS', 'OP' , 'JM' in mm
+        NTrig       = 20;       % 'OF' , 'OS', 'OP' , 'JM' 
+        Prof        = 500;        % 'OF' , 'OS', 'OP' , 'JM' in mm
         decimation  = [8] ;      % 'OS'
         NbZ         = 8;         % 'JM' harmonic along z 
         NbX         = 0;         % 'JM' harmonic along x 
         Phase       = [0];        % 'JM' phases per frequency in 2pi unit
         Tau_cam          = 100 ;  % 'JM' camera integration time (us) : sets the number of repetition patterns
         Bacules         = 'off';  % 'JM' alternates phase to provent Talbot effect
-        Frep            =  max(2,10) ;   % 'OF' , 'OS', 'OP' , 'JM'in Hz
-        
+        Frep            =  max(2,100) ;   % 'OF' , 'OS', 'OP' , 'JM'in Hz
+        USemissionDelay = 40;   % 'OP' emission delay in us (error x10 in new aixplorer)
         
         % 'JM' 
         DurationWaveform = 20;  % 'JM' fondamental time along t -- do not edit --
@@ -59,10 +59,10 @@ if strcmp(AIXPLORER_Active,'on')
 switch TypeOfSequence
     case 'OF'
 NbHemicycle = min(NbHemicycle,100);
-[SEQ,ScanParam] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig,Frep ,Master);
+[SEQ,ScanParam] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig,Frep ,Master,USemissionDelay);
     case 'OP'
 NbHemicycle = min(NbHemicycle,100);
-[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof,NTrig ,Frep ,Master);
+[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof,NTrig ,Frep ,Master,USemissionDelay);
     case 'OS'
 Volt = min(50,Volt); % security for OP routine     
 [SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , decimation , X0 , X1 ,Prof, NTrig,Frep,Master);   
@@ -165,6 +165,7 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
         % SEQ = SEQ.stopSequence('Wait', 0);  
   
     % end
+   
     
     
 %% ======================== data post processing =============================
@@ -210,40 +211,41 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     % Datas_std: = data standard deviation
     % Datas_var: data variance
     
-    z = (1:actual.ActualLength)*(c/(1e6*SampleRate));
+    t = (1:actual.ActualLength)*(1/SampleRate);
     
     
     % plot raw datas
     Hmu = figure;
     set(Hmu,'WindowStyle','docked');
-    imagesc(Alphas*180/pi,z*1e3,1e3*Datas_mu)
-    xlabel('angle (°)')
-    ylabel('z (mm)')
+    %imagesc(Alphas*180/pi,t*1e6,1e3*Datas_mu)
+    plot(t*1e6,1e3*Datas_mu)
+    %xlabel('angle (°)')
+    xlabel('t (\mu s)')
     title('Averaged raw datas')
     cb = colorbar;
     ylabel(cb,'AC tension (mV)')
     colormap(parula)
     set(findall(Hmu,'-property','FontSize'),'FontSize',15) 
     
-    %  Load data to OP structure file :
-    MyImage = OP(Datas_mu,Alphas,z,SampleRate*1e6,c) ;
-    [I,z_out] = DataFiltering(MyImage) ;
-    NbElemts = system.probe.NbElemts ;
-    pitch = system.probe.Pitch ; 
-    X_m = (1:NbElemts)*(pitch*1e-3) ;
-    [theta,M0,X0,Z0] = EvalDelayLaw_shared(X_m,DelayLAWS,ActiveLIST,c); 
-
-    %  iRadon inversion :
-    Ireconstruct = Retroprojection_shared(I , X_m , z_out ,theta,M0,Hresconstruct);
-    
-    Hresconstruct = figure;
-    set(Hresconstruct,'WindowStyle','docked');
-    ylim([0 Prof])
-    cb = colorbar;
-    ylabel(cb,'a.u')
-    colormap(parula)
-    set(findall(Hresconstruct,'-property','FontSize'),'FontSize',15) 
-    
+    %  Load data to OP structure file :(temporalily commented: to be fixed)
+%     MyImage = OP(Datas_mu,Alphas,z,SampleRate*1e6,c) ;
+%     [I,z_out] = DataFiltering(MyImage) ;
+%     NbElemts = system.probe.NbElemts ;
+%     pitch = system.probe.Pitch ; 
+%     X_m = (1:NbElemts)*(pitch*1e-3) ;
+%     [theta,M0,X0,Z0] = EvalDelayLaw_shared(X_m,DelayLAWS,ActiveLIST,c); 
+% 
+%     %  iRadon inversion :
+%     Ireconstruct = Retroprojection_shared(I , X_m , z_out ,theta,M0,Hresconstruct);
+%     
+%     Hresconstruct = figure;
+%     set(Hresconstruct,'WindowStyle','docked');
+%     ylim([0 Prof])
+%     cb = colorbar;
+%     ylabel(cb,'a.u')
+%     colormap(parula)
+%     set(findall(Hresconstruct,'-property','FontSize'),'FontSize',15) 
+%     
     % RetroProj_cleaned(Alphas,Datas,SampleRate*1e6);
     % back to original folder 
     

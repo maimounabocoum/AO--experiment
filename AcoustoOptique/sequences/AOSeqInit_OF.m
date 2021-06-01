@@ -1,7 +1,7 @@
 % Sequence AO Foc JB 01-04-15 ( d'apres 03-03-2015 Marc) modified by
 % Maïmouna Bocoum 26 - 02 -2017
 %% Init program
-function [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , f0 , NbHemicycle , Foc, X0 , X1 , Prof ,NTrig,frep ,Master)
+function [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , f0 , NbHemicycle , Foc, X0 , X1 , Prof ,NTrig,frep ,Master,USemissionDelay)
 
 clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
@@ -179,7 +179,7 @@ ELUSEV = elusev.elusev( ...
     'TrigOut',      TrigOut, ... 0,...
     'TrigIn',       0,... % trigged sequence 
     'TrigAll',      1, ...% 0: sends output trigger at first emission 
-    'TrigOutDelay', 100, ...
+    'TrigOutDelay', USemissionDelay, ...
     0);
 
 ACMO = acmo.acmo( ...

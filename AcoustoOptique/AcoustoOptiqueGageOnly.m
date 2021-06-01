@@ -25,14 +25,14 @@
 % 1 GS Memory, 65 MHz Bandwidth
 % AC/DC Coupling, 50Ω or 1MΩ Inputs
 clearvars -except Mesure;
-     SaveData        = 0 ;              % set to 1 to save
+     SaveData        = 1 ;              % set to 1 to save
      %ActiveChannel   = {'1','2','3'} ;  % from 1 to 4 active channels 
      Frep            =  max(2,100) ;    % Reptition frequency from DG645 Master ( Hz )
-     NTrig           = 10;            % repeat 2 time not allowed 
-     SampleRate      =   25e6;            % Gage sampling frequency in Hz (option: [50,25,10,5,2,1,0.5,0.2,0.1,0.05])
+     NTrig           = 100;            % repeat 2 time not allowed 
+     SampleRate      =   10e6;            % Gage sampling frequency in Hz (option: [50,25,10,5,2,1,0.5,0.2,0.1,0.05])
      Range           =   1;             % Gage dynamic range Volt (option: 5,2,1,0.5,0.2,0.1)
-     Offset_gage     = 400; % Vpp in mV
-     Npoint          = 50000 ;           % number of point for single segment
+     Offset_gage     = 0; % Vpp in mV
+     Npoint          = 100000 ;           % number of point for single segment
      c = 1540;
 
 [ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Npoint,SampleRate,Range,'on',Offset_gage);
@@ -85,14 +85,14 @@ figure(3); plot(t,raw*1e3)
 if SaveData == 1
     
 %MainFolderName = 'D:\Datas\Mai\';
-MainFolderName = 'Z:\Mai\'; % Mapped network connection (sharing network needs to be on)
+MainFolderName = 'D:\Datas\mai\'; % Mapped network connection (sharing network needs to be on)
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'Test_Ref_nofilter_100Hz_Mod_10mHz';%RefOnly_100Hz_noFilter_
+CommentName    = 'mesure5_gainBURST_df=100Hz_refOn';%RefOnly_100Hz_noFilter_
 FileName       = generateSaveName(SubFolderName ,'name',CommentName);
 % savefig(Hmu,FileName);
 % saveas(Hmu,FileName,'png');
 
-save(FileName,'NTrig','Npoint','Frep','raw','SampleRate','c','Range','Fs1','Fs2');
+save(FileName,'NTrig','Npoint','Frep','raw','SampleRate','c','Range','Frep');
 fprintf('Data has been saved under : \r %s \r\n',FileName);
 
 end
