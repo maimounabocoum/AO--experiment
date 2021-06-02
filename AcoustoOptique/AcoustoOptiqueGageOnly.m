@@ -25,20 +25,29 @@
 % 1 GS Memory, 65 MHz Bandwidth
 % AC/DC Coupling, 50Ω or 1MΩ Inputs
 clearvars -except Mesure;
-     SaveData        = 1 ;              % set to 1 to save
-     %ActiveChannel   = {'1','2','3'} ;  % from 1 to 4 active channels 
-     Frep            =  max(2,100) ;    % Reptition frequency from DG645 Master ( Hz )
-     NTrig           = 100;            % repeat 2 time not allowed 
-     SampleRate      =   10e6;            % Gage sampling frequency in Hz (option: [50,25,10,5,2,1,0.5,0.2,0.1,0.05])
-     Range           =   1;             % Gage dynamic range Volt (option: 5,2,1,0.5,0.2,0.1)
-     Offset_gage     = 0; % Vpp in mV
-     Npoint          = 100000 ;           % number of point for single segment
+     SaveData        = 0 ;                  % set to 1 to save
+     modeIN          = 'Quad';            % options are : 'Single','Quad'
+     Frep            =  max(2,100) ;        % Reptition frequency from DG645 Master ( Hz )
+     NTrig           =  100;                % repeat 2 time not allowed 
+     SampleRate      =  10e6;               % Gage sampling frequency in Hz (option: [50,25,10,5,2,1,0.5,0.2,0.1,0.05])
+     Range           =  1;                  % Gage dynamic range Volt (option: 5,2,1,0.5,0.2,0.1)
+     Offset_gage     =  0;                  % Vpp in mV
+     Npoint          =  100000 ;            % number of point for single segment
      c = 1540;
 
-[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Npoint,SampleRate,Range,'on',Offset_gage);
+[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Npoint,SampleRate,Range,'on',Offset_gage,modeIN);
 % input on gageIntit: 'on' to activate external trig, 'off' : will trig on timout value
 raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
 
+% resize in case of multiple acquire:
+switch acqInfo.Mode
+    case 2
+        raw = repmat(raw,1,1,2);
+    case 4
+        raw = repmat(raw,1,1,2);
+end
+
+% redefine calue in case of coarse overwrite : 
 Npoint      = acqInfo.Depth;      % SI unit
 SampleRate  = acqInfo.SampleRate; % SI unit
 
@@ -55,22 +64,47 @@ SampleRate  = acqInfo.SampleRate; % SI unit
   status = CsMl_QueryStatus(Hgage);
  end
     
-    
-    for SegmentNumber = 1:acqInfo.SegmentCount     
+   for channel = 1:acqInfo.Mode 
+    for SegmentNumber = 1:acqInfo.SegmentCount   
+        transfer.Channel       = channel ;                          % channel to read from
         transfer.Segment       = SegmentNumber;                     % number of the memory segment to be read
         [ret, datatmp, actual] = CsMl_Transfer(Hgage, transfer);    % transfer
                                                                     % actual contains the actual length of the acquisition that may be
                                                                     % different from the requested one.
-       raw((1+actual.ActualStart):actual.ActualLength,SegmentNumber) = datatmp' ;       
+       raw((1+actual.ActualStart):actual.ActualLength,SegmentNumber,channel) = datatmp' ;       
     end
-    
+   end
 
-figure(1); imagesc(raw)
+%%  plot raw data
+n_plot = 4 ;
+
+figure(1); 
+imagesc(raw(:,:,n_plot))
 colormap(parula)
 colorbar
 
 t = (1e6/acqInfo.SampleRate)*(1:size(raw,1));
-figure(3); plot(t,raw*1e3)
+figure(3); plot(t,raw(:,:,n_plot)*1e3)
+
+%% calculate average and std:
+Datas_mu = [];
+Datas_std = [];
+Datas_var = [];
+for channel = 1:acqInfo.Mode 
+    [Datas_mu_k,Datas_std_k, Datas_var_k] = RetreiveDatas(raw(:,:,channel),NTrig,1,1);
+    Datas_mu  = [Datas_mu,Datas_mu_k];
+    Datas_std = [Datas_std,Datas_mu_k];
+    Datas_var = [Datas_var,Datas_mu_k];
+end
+t = (1e6/acqInfo.SampleRate)*(1:size(raw,1));
+figure(3); plot(t,Datas_mu*1e3)
+title('multiple record')
+xlabel('time(\mu s)')
+ylabel('mVolt')
+set(findall(gcf,'-property','FontSize'),'FontSize',15) 
+
+%%
+
 % title('PD manip MG - collimated  - AO manip MG not Focused in AO')
 % xlabel('time(\mu s)')
 % ylabel('Volt')
@@ -82,6 +116,7 @@ figure(3); plot(t,raw*1e3)
 
 % save datas :
 
+%%
 if SaveData == 1
     
 %MainFolderName = 'D:\Datas\Mai\';

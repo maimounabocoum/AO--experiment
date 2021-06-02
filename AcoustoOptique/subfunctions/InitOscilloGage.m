@@ -1,4 +1,4 @@
-function [ret,handle,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Npoints,SamplingRate,Range,TriggerSatus,Offset_gage)
+function [ret,handle,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Npoints,SamplingRate,Range,TriggerSatus,Offset_gage,modeIN)
 % Set the acquisition, channel and trigger parameters for the system and
 % commit the parameters to the driver.
 % AO     = structure with the different parameters
@@ -10,8 +10,6 @@ function [ret,handle,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Npoints,S
 %
 % Created by Clement on 10/06/2015
 % Last modified : Clement on 10/06/2015
-
-
 
 systems = CsMl_Initialize; % Initialize driver
 CsMl_ErrorHandler(systems);
@@ -60,13 +58,16 @@ disp(s);
 % ======================================================================= %
 %% Acquisition parameters
  
-%Customed Parameters
+% Customed Parameters (CSE4344 : 14-bit)
 
-acqInfo.SampleRate      = SamplingRate;%Max = 50 MHz, must be divider of 50;
-acqInfo.SampleSize      = 1; %
-acqInfo.SegmentCount    = NTrig; % Number of memory segments 
-acqInfo.Depth           = Npoints; % Must be a multiple of 32
+acqInfo.SampleRate      = SamplingRate; % Max = 50 MHz, must be divider of 50;
+acqInfo.SampleSize      = 1;            %
+acqInfo.SegmentCount    = NTrig;        % Number of memory segments 
+acqInfo.Depth           = Npoints;      % Must be a multiple of 32
 acqInfo.SegmentSize     = Npoints;
+acqInfo.ExtClock        = 0;
+acqInfo.Mode            = CsMl_Translate(modeIN, 'Mode');  % 'Single' , 'Dual' , 'Quad'
+acqInfo.SegmentSize     = acqInfo.Depth; % Must be a multiple of 32
 
 %====================== The acqInfo fields can include:
 %   SampleRate      - the rate at which to digitize the waveform
@@ -82,9 +83,6 @@ acqInfo.SegmentSize     = Npoints;
 %                     after the trigger event has occurred, in samples
 %   TimeStampConfig - the values for time stamp configuration
 
-acqInfo.ExtClock        = 0;
-acqInfo.Mode            = CsMl_Translate('Single', 'Mode');  % 'Single' , 'Dual' , 'Quad'
-acqInfo.SegmentSize     = acqInfo.Depth; % Must be a multiple of 32
 
 switch TriggerSatus   
     case 'on'
@@ -107,7 +105,7 @@ for i = 1:sysinfo.ChannelCount
     chan(i).Channel     = i;
     chan(i).Coupling    = CsMl_Translate('DC', 'Coupling');
     chan(i).DiffInput   = 0;
-    chan(i).InputRange  = 2000;%2000; Vpp in mV
+    chan(i).InputRange  = 2*Range*1e3; % Vpp in mV
     chan(i).Impedance   = 50; % 50 Ohms or 1 MOhms
     chan(i).DcOffset    = 0;
     chan(i).DirectAdc   = 0;
