@@ -1,7 +1,7 @@
 % Sequence AO Foc JB 01-04-15 ( d'apres 03-03-2015 Marc) modified by
 % Maïmouna Bocoum 26 - 02 -2017
 %% Init program
-function [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , f0 , NbHemicycle , Foc, X0 , X1 , Prof ,NTrig,frep ,Master,USemissionDelay)
+function [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , f0 , NbHemicycle , Foc, PosOFscan, X0 , X1 , Prof ,NTrig,frep ,Master,USemissionDelay)
 
 clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
@@ -115,9 +115,9 @@ MedElmtList = ElmtBorns(1):ElmtBorns(2)  ;
 % %% EVENT INITIALISATION
 % % ======================================================================= %
 
-for Nloop = 1:length(MedElmtList)
+for Nloop = 1:length(PosOFscan)
     
-    MedElmt  = MedElmtList(Nloop); %round(PosX/pitch);
+    MedElmt  = round( PosOFscan(Nloop)/pitch ); %round(PosX/pitch);
        
     % actual active element
     TxElemts = MedElmt-round(TxWidth/(2*pitch)):...
