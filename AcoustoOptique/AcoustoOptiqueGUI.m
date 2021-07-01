@@ -19,14 +19,14 @@
                                  %'OP' (plane waves) , 'JM' (Jean-Michel waves)
         
         Master      = 'on';      % Aixplorer as Master ('on') of Slave ('off') with respect to trigger
-        Volt        = 30;        % 'OF' , 'OS', 'OP' , 'JM' Volt
+        Volt        = 40;        % 'OF' , 'OS', 'OP' , 'JM' Volt
         FreqSonde   = 3;         % 'OF' , 'OS', 'OP' , 'JM' MHz
-        NbHemicycle = 100;        % 'OF' , 'OS', 'OP' , 'JM'
+        NbHemicycle = 10;        % 'OF' , 'OS', 'OP' , 'JM'
         Foc         = 25;        % 'OF' mm
         AlphaM      = [0]*pi/180;        % 'OP' list of angles in scan in Rad
         X0          = 0;        % 'OF' , 'OS', 'OP' , 'JM' in mm
         X1          = 35.8 ;       % 'OF' , 'OS', 'OP' , 'JM' in mm
-        PosOFscan   = 17.5;
+        PosOFscan   = 10:0.2:25; % 17.5
         NTrig       = 300;       % 'OF' , 'OS', 'OP' , 'JM' 
         Prof        = 600;        % 'OF' , 'OS', 'OP' , 'JM' in mm
         decimation  = [8] ;      % 'OS'
@@ -35,7 +35,7 @@
         Phase       = [0];        % 'JM' phases per frequency in 2pi unit
         Tau_cam          = 100 ;  % 'JM' camera integration time (us) : sets the number of repetition patterns
         Bacules         = 'off';  % 'JM' alternates phase to provent Talbot effect
-        Frep            =  max(2,10) ;   % 'OF' , 'OS', 'OP' , 'JM'in Hz
+        Frep            =  max(2,100) ;   % 'OF' , 'OS', 'OP' , 'JM'in Hz
         USemissionDelay = 65;   % 'OP' emission delay in us (error x10 in new aixplorer)
         
         % 'JM' 
@@ -183,26 +183,26 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     pitch = system.probe.Pitch ; 
     x = ScanParam*pitch;
 
-%     Hmu = figure;
-%     set(Hmu,'WindowStyle','docked');
-%     imagesc(x,z,1e3*Datas_mu)
-%     ylim([0 Prof])
-%     xlabel('x (mm)')
-%     ylabel('z (mm)')
-%     title('Averaged raw datas')
-%     cb = colorbar;
-%     ylabel(cb,'AC tension (mV)')
-%     colormap(parula)
-%     set(findall(Hmu,'-property','FontSize'),'FontSize',15) 
-    
-     Hmu = figure;
-     set(Hmu,'WindowStyle','docked');
-     title('OF scan at 17.5mm')
-     subplot(211); plot(t_aquisition*1e6,1e3*Datas_mu);
-     subplot(212); plot(t_aquisition*1e6,1e3*Datas_std);
-     xlabel('x (mm)')
-     ylabel('mVolt')
-     set(findall(Hmu,'-property','FontSize'),'FontSize',15) 
+    Hmu = figure;
+    set(Hmu,'WindowStyle','docked');
+    imagesc(x,z,1e3*Datas_mu)
+    ylim([0 Prof])
+    xlabel('x (mm)')
+    ylabel('z (mm)')
+    title('Averaged raw datas')
+    cb = colorbar;
+    ylabel(cb,'AC tension (mV)')
+    colormap(parula)
+    set(findall(Hmu,'-property','FontSize'),'FontSize',15) 
+%     
+%      Hmu = figure;
+%      set(Hmu,'WindowStyle','docked');
+%      title('OF scan at 17.5mm')
+%      subplot(211); plot(t_aquisition*1e6,1e3*Datas_mu);
+%      subplot(212); plot(t_aquisition*1e6,1e3*Datas_std);
+%      xlabel('x (mm)')
+%      ylabel('mVolt')
+%      set(findall(Hmu,'-property','FontSize'),'FontSize',15) 
      
         case 'OP'
     
@@ -337,7 +337,7 @@ SaveRaw = 0 ;
 
 MainFolderName = 'D:\Datas\mai';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = '5cm-1_burst_3170mA_ampli_100W_referenceON_10Hz';
+CommentName    = '5cm-1_burst_3170mA_ampli_100W_referenceON_100Hz';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence);
 savefig(Hmu,FileName);
 saveas(Hmu,FileName,'png');
@@ -347,7 +347,7 @@ switch TypeOfSequence
     case 'OF'
         if SaveRaw == 0
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
-              ,'X0','X1','NTrig','Nlines','Prof','ScanParam','pitch','NbElemts','x','z','Datas_mu','Datas_std','SampleRate','c','Range','TypeOfSequence','t_aquisition','Master');
+              ,'X0','X1','raw','NTrig','Nlines','Prof','ScanParam','pitch','NbElemts','x','z','Datas_mu','Datas_std','SampleRate','c','Range','TypeOfSequence','t_aquisition','Master');
         else
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
               ,'X0','X1','NTrig','Nlines','Prof','ScanParam','pitch','NbElemts','x','z','raw','SampleRate','c','Range','TypeOfSequence','t_aquisition','Master');            
@@ -355,7 +355,7 @@ save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
           
        case 'OP'
 save(FileName,'Volt','DelayLAWS','ActiveLIST','FreqSonde','NbHemicycle','Alphas'...
-              ,'X0','X1','NTrig','Nlines','Prof','ScanParam','pitch','NbElemts','x','z','Datas','SampleRate','c','Range','TypeOfSequence','t_aquisition','Master');
+              ,'X0','X1','NTrig','Nlines','Prof','ScanParam','pitch','NbElemts','x','z','Datas_mu','Datas_std','SampleRate','c','Range','TypeOfSequence','t_aquisition','Master');
 %saveas(Hresconstruct,[FileName,'_retrop'],'png');
     case 'OS'
         if SaveRaw == 0
