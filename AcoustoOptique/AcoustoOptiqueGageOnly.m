@@ -25,7 +25,7 @@
 % 1 GS Memory, 65 MHz Bandwidth
 % AC/DC Coupling, 50Ω or 1MΩ Inputs
 clearvars -except Mesure BW;
-     SaveData        = 1;                  % set to 1 to save
+     SaveData        = 1;                   % set to 1 to save
      modeIN          = 'Single';            % options are : 'Single','Quad'
      Frep            =  max(2,100) ;        % Reptition frequency from DG645 Master ( Hz )
      NTrig           =  300;                % repeat 2 time not allowed 
@@ -135,7 +135,7 @@ if SaveData == 1
 %MainFolderName = 'D:\Datas\Mai\';
 MainFolderName = 'D:\Datas\mai\'; % Mapped network connection (sharing network needs to be on)
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'Photodiode_X11mm_YBottommmAmpli_80W';
+CommentName    = 'PhotodiodeDET20C2_Yb3500A_ampli100W_density0p0179_pump500us';
 FileName       = generateSaveName(SubFolderName ,'name',CommentName);
  %savefig(Hmu,FileName);
  saveas(Hmu,FileName,'png');
