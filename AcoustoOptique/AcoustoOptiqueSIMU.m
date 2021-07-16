@@ -47,8 +47,8 @@
         
         % the case NbX = 0 is automatically generated, so NbX should be an
         % integer list > 0
-        NbZ         = [1,1:10];    % [6,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = [-5:5];    % [-10:10];        % 20    Nb de composantes de Fourier en X, 'JM'
+        NbZ         = 11:23;    % [10:23];        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = -5:5;     % [-5:5];        % 20    Nb de composantes de Fourier en X, 'JM'
         Phase       = [0,0.25,0.5,0.75]; % [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
 
         % note : Trep  = (20us)/Nbz
@@ -56,22 +56,22 @@
         
         % on choisira DurationWaveform telle que DurationWaveform*(180MHz)
         
-        DurationWaveform = 20; % fundamental temporal duration
+        DurationWaveform = 20; % fundamental temporal duration-- do not edit
         
         % contrainte : 
         % soit un multiple de 180 MHz
         n_low = round( 180*DurationWaveform );
         NU_low = (180)/n_low;    % fundamental temporal frequency
         
-        Tau_cam          = 200 ; % camera integration time (us)
-        TrigoutDelay    = 50 ; % emission delay in us
-        Foc             = 99; % mm
-        X0              = 0;  % 19.2
+        Tau_cam         = 110; %200 ; % camera integration time (us)
+        TrigoutDelay    = 43;  % emission delay in us
+        Foc             = 99;   % mm
+        X0              = 0;    % 19.2
         X1              = 40;
         step            = 1;     % in mm
         TxWidth         = 40;
         
-        Frep            =  max(2,20) ;      % in Hz
+        Frep            =  max(2,100) ;      % in Hz
         NTrig           = 1;                % repeat 2 time not allowed
         Prof            = (1e-3*1540)*1000; % last digits in us 
         
@@ -117,7 +117,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
 %% view sequence GUI
 fprintf('============================= SEQ ANALYSIS =======================\n');
 
-Nactive = 1;
+Nactive = 5;
 
 % total number of sequences :
 Nevent = length(SEQ.InfoStruct.event);
@@ -195,7 +195,7 @@ end
 
 %% =================== load aixplorer sequence =====================%%%
 
-  SEQ = AO_loadSequence( SEQ , AixplorerIP ) ;
+SEQ = AO_loadSequence( SEQ , AixplorerIP ) ;
 
 %%  ========================================== Init Gage ==================
 % Possible return values for status are:
@@ -211,7 +211,7 @@ clearvars raw
 
 if strcmp(GageActive,'on')
     
-     SaveData        = 0 ;              % set to 1 to save
+     SaveData        = 1 ;              % set to 1 to save
      NTrig           = Nevent;            % repeat 2 time not allowed 
      SampleRate      =   25e6;            % Gage sampling frequency in Hz (option: [50,25,10,5,2,1,0.5,0.2,0.1,0.05])
      Range           =   0.5;             % Gage dynamic range Volt (option: 5,2,1,0.5,0.2,0.1)
@@ -220,6 +220,7 @@ if strcmp(GageActive,'on')
      c = 1540;
    
 [ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Npoint,SampleRate,Range,'on',Offset_gage);
+
 
 % input on gageIntit: 'on' to activate external trig, 'off' : will trig on timout value
 raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
@@ -231,8 +232,8 @@ end
  status = CsMl_QueryStatus(Hgage);
  
 
-  pause(2);
- SEQ = SEQ.startSequence();
+ pause(2);
+ %SEQ = SEQ.startSequence();
  pause(2);
 
  while status ~= 0
@@ -280,14 +281,15 @@ if SaveData == 1
     
 MainFolderName = 'D:\Data\Mai';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'ScanJ0_Water';%RefOnly_100Hz_noFilter
+CommentName    = 'ScanJ0_gel1cm';%RefOnly_100Hz_noFilter
 FileName       = generateSaveName(SubFolderName ,'name',CommentName,'Fus',FreqSonde,'Volt',Volt);
 % savefig(Hmu,FileName);
 % saveas(Hmu,FileName,'png');
 
+% save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
+%               ,'X0','X1','NTrig','Nlines','Prof','Frep','ActiveLIST','Pref','NbElemts','t1','t2','raw','Pmain','SampleRate','c','Range','TypeOfSequence','Bacules');
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
-              ,'X0','X1','NTrig','Nlines','Prof','Frep','ActiveLIST','Pref','NbElemts','t1','t2','raw','Pmain','SampleRate','c','Range','TypeOfSequence','Bacules');
-
+              ,'X0','X1','NTrig','Prof','Frep','ActiveLIST','NbElemts','raw','SampleRate','c','Range','TypeOfSequence','Bacules');
 fprintf('Data has been saved under : \r %s \r\n',FileName);
 
 

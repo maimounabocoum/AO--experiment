@@ -33,7 +33,6 @@ Pause                  = max( NoOp-ceil(PropagationTime) , MinNoop ); % pause du
 
 %% =========================================================================
 pulseDuration = NbHemicycle*(0.5/f0) ; % US inital pulse duration in us
-Nphase        = max(1,length(Phase)); % number of different phase values per structuration
 
 % DurationWaveform = 1/NU_low ;
 %( n_rep + 2 ) : we chose 2 to make shure the full emission sequence will
@@ -54,9 +53,18 @@ nuZ0 = (NU_low*1e6)/(c*1e3);                 % Fondamental spatial frequency  in
 nuX0 = 1/(Nbtot*pitch);                      % Fondamental spatial frequency  in X (en mm-1)
 
 [NBX,NBZ] = meshgrid(NbX,NbZ);
+
 % initialization of empty frequency matrix
 NUX = zeros('like',NBX); 
 NUZ = zeros('like',NBZ); 
+
+% convert frequency to column in order to add useless frame at the top
+                            % program will then add Nphases useless frames at begin
+                            % to composate for first
+                            % frame CCD failure
+
+ NBX = [0;NBX(:)] ;
+ NBZ = [1;NBZ(:)] ;
 
 %% adding an offset for first trigged elements:
 
@@ -68,11 +76,14 @@ RX = remote.rx('fcId', 1, 'RxFreq', 60 , 'QFilter', 2, 'RxElemts', 1:128, 0);
 
 
 %% add phase variable
-PHASE = repmat(Phase(:),Nfrequencymodes,1);
+Nphase        = max(1,length(Phase)); % number of different phase values per structuration
+
+PHASE = repmat(Phase(:),Nfrequencymodes,1); 
+                                              
 
 %% updata log param struct
 % data types : int,str,double,bool
-ParamList = cell(Nfrequencymodes*Nphase + 2,4); % 1 line header + 1 line data type
+ParamList = cell(Nfrequencymodes*Nphase + 2 , 4); 
 ParamList(1,:) = {'Event','nbX','nbZ','phase'};
 ParamList(2,:) = {'int','int','int','double'};
 ParamList(3:end,4) = num2cell(PHASE); % fill in phase parameters
@@ -85,6 +96,7 @@ fprintf('Sequence is repeated %f times \n\r',n_rep)
 % [~,~,~,Waveform] = CalcMatHole(f0,0,0,nuX0,nuZ0,Xs,SampFreq,c);  
 
 for nbs = 1:Nfrequencymodes
+    
     
         nuZ  = NBZ(nbs)*nuZ0; % fréquence de modulation de phase (en Hz) 
         nuX  = NBX(nbs)*nuX0;  % fréquence spatiale (en mm-1)
