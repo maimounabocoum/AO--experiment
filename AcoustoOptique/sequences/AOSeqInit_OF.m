@@ -1,7 +1,7 @@
 % Sequence AO Foc JB 01-04-15 ( d'apres 03-03-2015 Marc) modified by
 % Maïmouna Bocoum 26 - 02 -2017
 %% Init program
-function [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , f0 , NbHemicycle , Foc, X0 , X1 , Prof ,NTrig)
+function [SEQ,MedElmtList] = AOSeqInit_OF(AixplorerIP, Volt , f0 , NbHemicycle , Foc, PosOFscan, X0 , X1 , Prof ,NTrig,frep ,Master,USemissionDelay)
 
 clear ELUSEV EVENTList TWList TXList TRIG ACMO ACMOList SEQ
 
@@ -36,7 +36,7 @@ TxWidth         = Foc/2;           % mm : effective width for focus line
 PropagationTime = (Prof)/(c)*1e3 ; % duration for one line in \mu s
 
 
-NoOp       = 2000;         % µs minimum time between two US pulses, (5 by default ??)
+NoOp       = 1e6/frep;                      % µs minimum time between two US pulses
 TrigOut    = 50;           % trigger duration µs
 Pause      = max( NoOp - ceil(PropagationTime) , MinNoop ); % pause duration in µs
 
@@ -61,7 +61,7 @@ DelayLaw = sqrt(Foc^2+(TxWidth/2)^2)/(c*1e-3) ...
  DlySmpl = round(DelayLaw/dt_s); 
 
  % common waveform for emission, square envoppe - non apodized:
- t_Wf = 0:dt_s:0.5*NbHemicycle/f0;
+ t_Wf = 0:dt_s:pulseDuration;
  Wf = sin(2*pi*f0*t_Wf); 
  
  % number of time-points necessary = points in waveform + maximum DelayLaw
@@ -115,9 +115,9 @@ MedElmtList = ElmtBorns(1):ElmtBorns(2)  ;
 % %% EVENT INITIALISATION
 % % ======================================================================= %
 
-for Nloop = 1:length(MedElmtList)
+for Nloop = 1:length(PosOFscan)
     
-    MedElmt  = MedElmtList(Nloop); %round(PosX/pitch);
+    MedElmt  = round( PosOFscan(Nloop)/pitch ); %round(PosX/pitch);
        
     % actual active element
     TxElemts = MedElmt-round(TxWidth/(2*pitch)):...
@@ -169,7 +169,8 @@ end
 %     'TrigOutDelay', 0, ...
 %     'Pause',        5e-3,...% pause in seconds
 %     0);
-
+    switch Master
+        case 'on'
 ELUSEV = elusev.elusev( ...
     'tx',           TXList, ...
     'tw',           TWList, ...
@@ -179,8 +180,22 @@ ELUSEV = elusev.elusev( ...
     'TrigOut',      TrigOut, ... 0,...
     'TrigIn',       0,... % trigged sequence 
     'TrigAll',      1, ...% 0: sends output trigger at first emission 
-    'TrigOutDelay', 0, ...
+    'TrigOutDelay', USemissionDelay, ...
     0);
+        case 'off'
+ELUSEV = elusev.elusev( ...
+    'tx',           TXList, ...
+    'tw',           TWList, ...
+    'rx',           RX,...
+    'fc',           FC,...
+    'event',        EVENTList, ...
+    'TrigOut',      0, ... 0,...
+    'TrigIn',       1,... % trigged sequence 
+    'TrigAll',      1, ...% 0: sends output trigger at first emission 
+    'TrigOutDelay', USemissionDelay, ...
+    0);
+
+    end
 
 ACMO = acmo.acmo( ...
     'elusev',           ELUSEV, ...

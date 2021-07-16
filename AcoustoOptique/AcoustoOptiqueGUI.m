@@ -4,10 +4,9 @@
 %% parameter for sequence :
 % ======================================================================= %
 % adresse Jussieu  : '192.168.1.16'
-% adresse Bastille : '192.168.0.20'
+% new AIXPLORER : '192.168.1.10'
 
-% AixplorerIP    = '192.168.1.16'; % IP address of the Aixplorer device
- AixplorerIP    = '192.168.137.2'; % IP address of the Aixplorer device
+ AixplorerIP    = '192.168.1.10'; % IP address of the Aixplorer device
  
  addpath('D:\AO--commons\shared functions folder')
  addpath('sequences');    
@@ -16,27 +15,28 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-       TypeOfSequence = 'OP';   %'OF'(focused waves) , 'OS' (plane structures waves), 
-                                %'OP' (plane waves) , 'JM' (Jean-Michel waves)
+       TypeOfSequence = 'OF';    %'OF'(focused waves) , 'OS' (plane structures waves), 
+                                 %'OP' (plane waves) , 'JM' (Jean-Michel waves)
         
-        Master      = 'on';     % Aixplorer as Master ('on') of Slave ('off') with respect to trigger
-        Volt        = 15;       % 'OF' , 'OS', 'OP' , 'JM' Volt
-        FreqSonde   = 6;        % 'OF' , 'OS', 'OP' , 'JM' MHz
-        NbHemicycle = 100;      % 'OF' , 'OS', 'OP' , 'JM'
-        Foc         = 5;        % 'OF' mm
+        Master      = 'on';      % Aixplorer as Master ('on') of Slave ('off') with respect to trigger
+        Volt        = 40;        % 'OF' , 'OS', 'OP' , 'JM' Volt
+        FreqSonde   = 3;         % 'OF' , 'OS', 'OP' , 'JM' MHz
+        NbHemicycle = 10;        % 'OF' , 'OS', 'OP' , 'JM'
+        Foc         = 25;        % 'OF' mm
         AlphaM      = [0]*pi/180;        % 'OP' list of angles in scan in Rad
-        X0          = -1;        % 'OF' , 'OS', 'OP' , 'JM' in mm
-        X1          = 100 ;      % 'OF' , 'OS', 'OP' , 'JM' in mm
-        NTrig       = 4;       % 'OF' , 'OS', 'OP' , 'JM' 
-        Prof        = 300;      % 'OF' , 'OS', 'OP' , 'JM' in mm
-        decimation  = [8] ;     % 'OS'
-        NbZ         = 8;        % 'JM' harmonic along z 
-        NbX         = 0;        % 'JM' harmonic along x 
+        X0          = 0;        % 'OF' , 'OS', 'OP' , 'JM' in mm
+        X1          = 35.8 ;       % 'OF' , 'OS', 'OP' , 'JM' in mm
+        PosOFscan   = 10:0.2:25; % 17.5
+        NTrig       = 300;       % 'OF' , 'OS', 'OP' , 'JM' 
+        Prof        = 600;        % 'OF' , 'OS', 'OP' , 'JM' in mm
+        decimation  = [8] ;      % 'OS'
+        NbZ         = 8;         % 'JM' harmonic along z 
+        NbX         = 0;         % 'JM' harmonic along x 
         Phase       = [0];        % 'JM' phases per frequency in 2pi unit
         Tau_cam          = 100 ;  % 'JM' camera integration time (us) : sets the number of repetition patterns
         Bacules         = 'off';  % 'JM' alternates phase to provent Talbot effect
         Frep            =  max(2,100) ;   % 'OF' , 'OS', 'OP' , 'JM'in Hz
-        
+        USemissionDelay = 65;   % 'OP' emission delay in us (error x10 in new aixplorer)
         
         % 'JM' 
         DurationWaveform = 20;  % 'JM' fondamental time along t -- do not edit --
@@ -46,7 +46,7 @@
         
         
         
-        SaveData = 0;           % set to 1 to save data
+        SaveData = 1;           % set to 1 to save data
         AIXPLORER_Active = 'on';% 'on' or 'off' 
 
  % estimation of loading time 
@@ -60,10 +60,10 @@ if strcmp(AIXPLORER_Active,'on')
 switch TypeOfSequence
     case 'OF'
 NbHemicycle = min(NbHemicycle,100);
-[SEQ,ScanParam] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc, X0 , X1 , Prof, NTrig);
+[SEQ,ScanParam] = AOSeqInit_OF(AixplorerIP, Volt , FreqSonde , NbHemicycle , Foc,PosOFscan, X0 , X1 , Prof, NTrig,Frep ,Master,USemissionDelay);
     case 'OP'
 NbHemicycle = min(NbHemicycle,100);
-[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof,NTrig ,Frep ,Master);
+[SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas] = AOSeqInit_OP(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM ,X0 , X1 ,Prof,NTrig ,Frep ,Master,USemissionDelay);
     case 'OS'
 Volt = min(50,Volt); % security for OP routine     
 [SEQ,DelayLAWS,ScanParam,ActiveLIST,Alphas,dFx] = AOSeqInit_OS(AixplorerIP, Volt , FreqSonde , NbHemicycle , AlphaM , decimation , X0 , X1 ,Prof, NTrig,Frep,Master);   
@@ -93,18 +93,20 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
 %   2 = Triggered but still busy acquiring
 %   3 = Data transfer is in progress
      
-     SampleRate    =   10*1e6;
-     Range         =   1;
-     Npoint          = ceil(( SampleRate*ceil(Prof/(c*1e-3)))/32)*32 ;
-     GageActive = 'on' ; % on to activate external trig, off : will trig on timout value
+     SampleRate      =   50e6;% Gage sampling frequency in Hz (option: [50,25,10,5,2,1,0.5,0.2,0.1,0.05])
+     Range           =   1;
+     Offset_gage     = 0; % Vpp in mV
+     Npoint          = ceil( (SampleRate*(Prof*1e-3)/c)/32 )*32 ;
+     GageActive      = 'on' ; % on to activate external trig, off : will trig on timout value
+     modeIN          = 'Single';            % options are : 'Single','Quad'
      
     if strcmp(AIXPLORER_Active,'on') 
     Nlines = length(SEQ.InfoStruct.event);  
     else
     Nlines = (2*length(NbX)+1)*length(NbZ) ;
     end
- 
-[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig*Nlines,Npoint,SampleRate,Range,GageActive);
+    
+[ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig*Nlines,Npoint,SampleRate,Range,GageActive,Offset_gage,modeIN);
 raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     
 
@@ -165,6 +167,7 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
         % SEQ = SEQ.stopSequence('Wait', 0);  
   
     % end
+   
     
     
 %% ======================== data post processing =============================
@@ -174,12 +177,13 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
         case 'OF'
             
     [Datas_mu,Datas_std, Datas_var] = RetreiveDatas(raw,NTrig,Nlines,ScanParam);
-    z = (1:actual.ActualLength)*(c/(1e6*SampleRate))*1e3;
+    t_aquisition = (1:actual.ActualLength)*(1/SampleRate);
+    z = c*t_aquisition*1e3;
     NbElemts = system.probe.NbElemts ;
     pitch = system.probe.Pitch ; 
     x = ScanParam*pitch;
 
-        Hmu = figure;
+    Hmu = figure;
     set(Hmu,'WindowStyle','docked');
     imagesc(x,z,1e3*Datas_mu)
     ylim([0 Prof])
@@ -190,19 +194,16 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     ylabel(cb,'AC tension (mV)')
     colormap(parula)
     set(findall(Hmu,'-property','FontSize'),'FontSize',15) 
-    
-    Hstd = figure;
-    set(Hstd,'WindowStyle','docked');
-    imagesc(x,z,1e3*Datas_std)
-    ylim([0 Prof])
-    xlabel('x (mm)')
-    ylabel('z (mm)')
-    title('STD raw datas')
-    cb = colorbar;
-    ylabel(cb,'AC tension (mV)')
-    colormap(parula)
-    set(findall(Hstd,'-property','FontSize'),'FontSize',15) 
-    
+%     
+%      Hmu = figure;
+%      set(Hmu,'WindowStyle','docked');
+%      title('OF scan at 17.5mm')
+%      subplot(211); plot(t_aquisition*1e6,1e3*Datas_mu);
+%      subplot(212); plot(t_aquisition*1e6,1e3*Datas_std);
+%      xlabel('x (mm)')
+%      ylabel('mVolt')
+%      set(findall(Hmu,'-property','FontSize'),'FontSize',15) 
+     
         case 'OP'
     
     [Datas_mu,Datas_std, Datas_var] = RetreiveDatas(raw,NTrig,Nlines,ScanParam);
@@ -210,40 +211,41 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
     % Datas_std: = data standard deviation
     % Datas_var: data variance
     
-    z = (1:actual.ActualLength)*(c/(1e6*SampleRate));
+    t_aquisition = (1:actual.ActualLength)*(1/SampleRate);
     
     
     % plot raw datas
     Hmu = figure;
     set(Hmu,'WindowStyle','docked');
-    imagesc(Alphas*180/pi,z*1e3,1e3*Datas_mu)
-    xlabel('angle (°)')
-    ylabel('z (mm)')
+    %imagesc(Alphas*180/pi,t*1e6,1e3*Datas_mu)
+    plot(t_aquisition*1e6,1e3*Datas_mu)
+    %xlabel('angle (°)')
+    xlabel('t (\mu s)')
     title('Averaged raw datas')
     cb = colorbar;
     ylabel(cb,'AC tension (mV)')
     colormap(parula)
     set(findall(Hmu,'-property','FontSize'),'FontSize',15) 
     
-    %  Load data to OP structure file :
-    MyImage = OP(Datas_mu,Alphas,z,SampleRate*1e6,c) ;
-    [I,z_out] = DataFiltering(MyImage) ;
-    NbElemts = system.probe.NbElemts ;
-    pitch = system.probe.Pitch ; 
-    X_m = (1:NbElemts)*(pitch*1e-3) ;
-    [theta,M0,X0,Z0] = EvalDelayLaw_shared(X_m,DelayLAWS,ActiveLIST,c); 
-
-    %  iRadon inversion :
-    Ireconstruct = Retroprojection_shared(I , X_m , z_out ,theta,M0,Hresconstruct);
-    
-    Hresconstruct = figure;
-    set(Hresconstruct,'WindowStyle','docked');
-    ylim([0 Prof])
-    cb = colorbar;
-    ylabel(cb,'a.u')
-    colormap(parula)
-    set(findall(Hresconstruct,'-property','FontSize'),'FontSize',15) 
-    
+    %  Load data to OP structure file :(temporalily commented: to be fixed)
+%     MyImage = OP(Datas_mu,Alphas,z,SampleRate*1e6,c) ;
+%     [I,z_out] = DataFiltering(MyImage) ;
+%     NbElemts = system.probe.NbElemts ;
+%     pitch = system.probe.Pitch ; 
+%     X_m = (1:NbElemts)*(pitch*1e-3) ;
+%     [theta,M0,X0,Z0] = EvalDelayLaw_shared(X_m,DelayLAWS,ActiveLIST,c); 
+% 
+%     %  iRadon inversion :
+%     Ireconstruct = Retroprojection_shared(I , X_m , z_out ,theta,M0,Hresconstruct);
+%     
+%     Hresconstruct = figure;
+%     set(Hresconstruct,'WindowStyle','docked');
+%     ylim([0 Prof])
+%     cb = colorbar;
+%     ylabel(cb,'a.u')
+%     colormap(parula)
+%     set(findall(Hresconstruct,'-property','FontSize'),'FontSize',15) 
+%     
     % RetroProj_cleaned(Alphas,Datas,SampleRate*1e6);
     % back to original folder 
     
@@ -331,11 +333,12 @@ raw   = zeros(acqInfo.Depth,acqInfo.SegmentCount);
  
  %% save datas :
 if SaveData == 1
-    
-MainFolderName = 'D:\Data\JM';
+SaveRaw = 0 ;
+
+MainFolderName = 'D:\Datas\mai';
 SubFolderName  = generateSubFolderName(MainFolderName);
-CommentName    = 'SL102_Intralipide10pourcent';
-FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence,'NbZ',max(NbZ),'NbZ',max(NbX));
+CommentName    = '5cm-1_burst_3170mA_ampli_100W_referenceON_100Hz';
+FileName       = generateSaveName(SubFolderName ,'name',CommentName,'TypeOfSequence',TypeOfSequence);
 savefig(Hmu,FileName);
 saveas(Hmu,FileName,'png');
 
@@ -344,7 +347,7 @@ switch TypeOfSequence
     case 'OF'
         if SaveRaw == 0
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
-              ,'X0','X1','NTrig','Nlines','Prof','ScanParam','pitch','NbElemts','x','z','Datas_mu','Datas_std','SampleRate','c','Range','TypeOfSequence','t_aquisition','Master');
+              ,'X0','X1','raw','NTrig','Nlines','Prof','ScanParam','pitch','NbElemts','x','z','Datas_mu','Datas_std','SampleRate','c','Range','TypeOfSequence','t_aquisition','Master');
         else
 save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
               ,'X0','X1','NTrig','Nlines','Prof','ScanParam','pitch','NbElemts','x','z','raw','SampleRate','c','Range','TypeOfSequence','t_aquisition','Master');            
@@ -352,7 +355,7 @@ save(FileName,'Volt','FreqSonde','NbHemicycle','Foc'...
           
        case 'OP'
 save(FileName,'Volt','DelayLAWS','ActiveLIST','FreqSonde','NbHemicycle','Alphas'...
-              ,'X0','X1','NTrig','Nlines','Prof','ScanParam','pitch','NbElemts','x','z','Datas','SampleRate','c','Range','TypeOfSequence','t_aquisition','Master');
+              ,'X0','X1','NTrig','Nlines','Prof','ScanParam','pitch','NbElemts','x','z','Datas_mu','Datas_std','SampleRate','c','Range','TypeOfSequence','t_aquisition','Master');
 %saveas(Hresconstruct,[FileName,'_retrop'],'png');
     case 'OS'
         if SaveRaw == 0
