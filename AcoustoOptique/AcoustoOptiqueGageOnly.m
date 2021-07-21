@@ -55,27 +55,44 @@ SampleRate  = acqInfo.SampleRate; % SI unit
   status = CsMl_QueryStatus(Hgage);
  end
     
-    
+
+ % initialize size of raw matrix depending on the number of channels:
+ switch acqInfo.Mode
+     case 1
+     raw = zeros(acqInfo.SegmentSize,acqInfo.SegmentCount) ;  
+     case 4
+     raw = zeros(acqInfo.SegmentSize,acqInfo.SegmentCount,4) ; 
+ end
+
+ 
+ % transfer loop on all required channel
+ for channel = 1:acqInfo.Mode
+     
+     transfer.Channel = channel;
+     
     for SegmentNumber = 1:acqInfo.SegmentCount     
         transfer.Segment       = SegmentNumber;                     % number of the memory segment to be read
         [ret, datatmp, actual] = CsMl_Transfer(Hgage, transfer);    % transfer
                                                                     % actual contains the actual length of the acquisition that may be
-                                                                    % different from the requested one.
+                                                                    % different from the requested one
        raw((1+actual.ActualStart):actual.ActualLength,SegmentNumber) = datatmp' ;       
     end
     
+ end  
 
-figure(1); imagesc(raw)
+%% -------------------- plot acquisition
+figure(1); 
+imagesc(raw(:,:,1))
 colormap(parula)
 
-t = (1e6/acqInfo.SampleRate)*(1:size(raw,1));
-figure(3); plot(t,raw)
+t = (1e6/SampleRate)*(1:Npoint); % time in us
+figure(3); plot(t,raw(:,:,1))
 % title('PD manip MG - collimated  - AO manip MG not Focused in AO')
 % xlabel('time(\mu s)')
 % ylabel('Volt')
 % set(findall(gcf,'-property','FontSize'),'FontSize',15) 
 
-% ======================== data post processing =============================
+%% ======================== data post processing =============================
 
  % AcoustoOptiqueDATA_ANALYSES;
 

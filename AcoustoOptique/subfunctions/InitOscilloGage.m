@@ -66,7 +66,7 @@ acqInfo.SegmentCount    = NTrig;        % Number of memory segments
 acqInfo.Depth           = Npoints;      % Must be a multiple of 32
 acqInfo.SegmentSize     = Npoints;
 acqInfo.ExtClock        = 0;
-acqInfo.Mode            = CsMl_Translate(modeIN, 'Mode');  % 'Single' , 'Dual' , 'Quad'
+acqInfo.Mode            = CsMl_Translate(modeIN, 'Mode');  % 'Single' , 'Quad'
 acqInfo.SegmentSize     = acqInfo.Depth; % Must be a multiple of 32
 
 %====================== The acqInfo fields can include:
