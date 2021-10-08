@@ -66,7 +66,7 @@ acqInfo.SegmentCount    = NTrig;        % Number of memory segments
 acqInfo.Depth           = Npoints;      % Must be a multiple of 32
 acqInfo.SegmentSize     = Npoints;
 acqInfo.ExtClock        = 0;
-acqInfo.Mode            = CsMl_Translate(modeIN, 'Mode');  % 'Single' , 'Quad'
+acqInfo.Mode            = CsMl_Translate(modeIN, 'Mode');  % 'Single' , 'Dual' , 'Quad' depending on card
 acqInfo.SegmentSize     = acqInfo.Depth; % Must be a multiple of 32
 
 %====================== The acqInfo fields can include:
@@ -107,15 +107,10 @@ for i = 1:sysinfo.ChannelCount
     chan(i).DiffInput   = 0;
     chan(i).InputRange  = 2*Range*1e3; % Vpp in mV
     chan(i).Impedance   = 50; % 50 Ohms or 1 MOhms
-    chan(i).DcOffset    = 0;
+    chan(i).DcOffset    = Offset_gage; % Vpp in mV
     chan(i).DirectAdc   = 0;
     chan(i).Filter      = 0; 
 end   
-
-% Overwrite setting for channel 1
-chan(1).Coupling        = CsMl_Translate('DC', 'Coupling');
-chan(1).InputRange      = 2*Range*1e3; % Vpp in mV
-chan(1).DcOffset        = Offset_gage; % Vpp in mV
 
 [ret] = CsMl_ConfigureChannel(handle, chan); % config chan parameters
 CsMl_ErrorHandler(ret, 1, handle);

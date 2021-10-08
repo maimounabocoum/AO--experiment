@@ -27,11 +27,11 @@
 clearvars -except Mesure;
      SaveData       = 0 ;               % set to 1 to save
      modeIN         = 'Single' ;        % 'Single' : acquisition on signal channel 'Quad': acquisition on four channel
-     Frep           =  max(2,500) ;     % Reptition frequency from DG645 Master ( Hz )
-     NTrig          =  44;              % repeat 2 time not allowed 
-     SampleRate     =  25e6;            % Gage sampling frequency in Hz (option: [50,25,10,5,2,1,0.5,0.2,0.1,0.05])
-     Range          =  0.5;             % Gage dynamic range Volt (option: 5,2,1,0.5,0.2,0.1)
-     Offset_gage    =  400;             % Vpp in mV
+     Frep           =  max(2,100) ;     % Reptition frequency from DG645 Master ( Hz )
+     NTrig          =  100;             % repeat 2 time not allowed 
+     SampleRate     =  5e6;             % Gage sampling frequency in Hz (option: [50,25,10,5,2,1,0.5,0.2,0.1,0.05])
+     Range          =  2;             % Gage dynamic range Volt (option: 5,2,1,0.5,0.2,0.1)
+     Offset_gage    =  0;               % Vpp in mV
      Npoint         =  5000 ;           % number of point for single segment
      c = 1540;
 
@@ -59,7 +59,9 @@ SampleRate  = acqInfo.SampleRate; % SI unit
  % initialize size of raw matrix depending on the number of channels:
  switch acqInfo.Mode
      case 1
-     raw = zeros(acqInfo.SegmentSize,acqInfo.SegmentCount) ;  
+     raw = zeros(acqInfo.SegmentSize,acqInfo.SegmentCount) ; 
+     case 2
+     raw = zeros(acqInfo.SegmentSize,acqInfo.SegmentCount) ; 
      case 4
      raw = zeros(acqInfo.SegmentSize,acqInfo.SegmentCount,4) ; 
  end
@@ -80,7 +82,7 @@ SampleRate  = acqInfo.SampleRate; % SI unit
     
  end  
 
-%% -------------------- plot acquisition
+% -------------------- plot acquisition
 figure(1); 
 imagesc(raw(:,:,1))
 colormap(parula)
@@ -94,7 +96,7 @@ figure(3); plot(t,raw(:,:,1))
 
 %% ======================== data post processing =============================
 
- % AcoustoOptiqueDATA_ANALYSES;
+  AcoustoOptiqueDATA_ANALYSES;
 
 %% --------------------------- save datas :
 Fs1 = SampleRate ;     % gage sampling frequncy
