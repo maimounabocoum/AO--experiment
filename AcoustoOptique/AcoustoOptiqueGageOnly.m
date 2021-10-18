@@ -82,7 +82,7 @@ SampleRate  = acqInfo.SampleRate; % SI unit
     
  end  
 
-% -------------------- plot acquisition
+%% -------------------- plot acquisition
 figure(1); 
 imagesc(raw(:,:,1))
 colormap(parula)
