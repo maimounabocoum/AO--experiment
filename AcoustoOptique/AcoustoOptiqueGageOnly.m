@@ -28,11 +28,11 @@ clearvars -except Mesure;
      SaveData       = 0 ;               % set to 1 to save
      modeIN         = 'Single' ;        % 'Single' : acquisition on signal channel 'Quad': acquisition on four channel
      Frep           =  max(2,100) ;     % Reptition frequency from DG645 Master ( Hz )
-     NTrig          =  100;             % repeat 2 time not allowed 
-     SampleRate     =  5e6;             % Gage sampling frequency in Hz (option: [50,25,10,5,2,1,0.5,0.2,0.1,0.05])
-     Range          =  2;             % Gage dynamic range Volt (option: 5,2,1,0.5,0.2,0.1)
+     NTrig          =  1;             % repeat 2 time not allowed 
+     SampleRate     =  0.5e6;             % Gage sampling frequency in Hz (option: [50,25,10,5,2,1,0.5,0.2,0.1,0.05])
+     Range          =  2;               % Gage dynamic range Volt (option: 5,2,1,0.5,0.2,0.1)
      Offset_gage    =  0;               % Vpp in mV
-     Npoint         =  5000 ;           % number of point for single segment
+     Npoint         =  50000 ;           % number of point for single segment
      c = 1540;
 
 [ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Npoint,SampleRate,Range,'on',Offset_gage,modeIN);
@@ -84,14 +84,11 @@ SampleRate  = acqInfo.SampleRate; % SI unit
 
 %% -------------------- plot acquisition
 figure(1); 
-imagesc(raw(:,:,1))
-colormap(parula)
-
 t = (1e6/SampleRate)*(1:Npoint); % time in us
-figure(3); plot(t,raw(:,:,1))
+figure(3); plot(t,mean(raw(:,:),2))
 % title('PD manip MG - collimated  - AO manip MG not Focused in AO')
-% xlabel('time(\mu s)')
-% ylabel('Volt')
+ xlabel('time(\mu s)')
+ ylabel('Volt')
 % set(findall(gcf,'-property','FontSize'),'FontSize',15) 
 
 %% ======================== data post processing =============================
