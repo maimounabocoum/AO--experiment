@@ -28,7 +28,7 @@ clearvars -except Mesure;
      SaveData       = 0 ;               % set to 1 to save
      modeIN         = 'Single' ;        % 'Single' : acquisition on signal channel 'Quad': acquisition on four channel
      Frep           =  max(2,100) ;     % Reptition frequency from DG645 Master ( Hz )
-     NTrig          =  1;             % repeat 2 time not allowed 
+     NTrig          =  0.2;             % repeat 2 time not allowed 
      SampleRate     =  0.5e6;             % Gage sampling frequency in Hz (option: [50,25,10,5,2,1,0.5,0.2,0.1,0.05])
      Range          =  2;               % Gage dynamic range Volt (option: 5,2,1,0.5,0.2,0.1)
      Offset_gage    =  0;               % Vpp in mV
@@ -83,9 +83,10 @@ SampleRate  = acqInfo.SampleRate; % SI unit
  end  
 
 %% -------------------- plot acquisition
-figure(1); 
+
 t = (1e6/SampleRate)*(1:Npoint); % time in us
-figure(3); plot(t,mean(raw(:,:),2))
+figure(3); 
+plot(t,mean(raw(:,:),2))
 % title('PD manip MG - collimated  - AO manip MG not Focused in AO')
  xlabel('time(\mu s)')
  ylabel('Volt')
