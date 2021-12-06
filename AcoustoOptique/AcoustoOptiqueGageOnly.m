@@ -28,11 +28,11 @@ clearvars -except Mesure;
      SaveData       = 0 ;               % set to 1 to save
      modeIN         = 'Single' ;        % 'Single' : acquisition on signal channel 'Quad': acquisition on four channel
      Frep           =  max(2,100) ;     % Reptition frequency from DG645 Master ( Hz )
-     NTrig          =  0.2;             % repeat 2 time not allowed 
-     SampleRate     =  0.5e6;             % Gage sampling frequency in Hz (option: [50,25,10,5,2,1,0.5,0.2,0.1,0.05])
-     Range          =  2;               % Gage dynamic range Volt (option: 5,2,1,0.5,0.2,0.1)
+     NTrig          =  10;             % repeat 2 time not allowed 
+     SampleRate     =  1e6;             % Gage sampling frequency in Hz (option: [50,25,10,5,2,1,0.5,0.2,0.1,0.05])
+     Range          =  0.5;               % Gage dynamic range Volt (option: 5,2,1,0.5,0.2,0.1)
      Offset_gage    =  0;               % Vpp in mV
-     Npoint         =  50000 ;           % number of point for single segment
+     Npoint         =  100000 ;           % number of point for single segment
      c = 1540;
 
 [ret,Hgage,acqInfo,sysinfo,transfer] = InitOscilloGage(NTrig,Npoint,SampleRate,Range,'on',Offset_gage,modeIN);

@@ -15,7 +15,7 @@
  addpath('D:\_legHAL_Marc')
  addPathLegHAL;
  
-       TypeOfSequence = 'OF';    %'OF'(focused waves) , 'OS' (plane structures waves), 
+       TypeOfSequence = 'JM';    %'OF'(focused waves) , 'OS' (plane structures waves), 
                                  %'OP' (plane waves) , 'JM' (Jean-Michel waves)
         
         Master      = 'on';      % Aixplorer as Master ('on') of Slave ('off') with respect to trigger
@@ -24,14 +24,14 @@
         NbHemicycle = 10;        % 'OF' , 'OS', 'OP' , 'JM'
         Foc         = 25;        % 'OF' mm
         AlphaM      = [0]*pi/180;        % 'OP' list of angles in scan in Rad
-        X0          = 0;        % 'OF' , 'OS', 'OP' , 'JM' in mm
-        X1          = 35.8 ;       % 'OF' , 'OS', 'OP' , 'JM' in mm
-        PosOFscan   = 10:0.2:25; % 17.5
-        NTrig       = 300;       % 'OF' , 'OS', 'OP' , 'JM' 
+        X0          = 0;          % 'OF' , 'OS', 'OP' , 'JM' in mm
+        X1          = 35.8 ;      % 'OF' , 'OS', 'OP' , 'JM' in mm
+        PosOFscan   = 10:0.2:25;  % 17.5
+        NTrig       = 300;        % 'OF' , 'OS', 'OP' , 'JM' 
         Prof        = 600;        % 'OF' , 'OS', 'OP' , 'JM' in mm
-        decimation  = [8] ;      % 'OS'
-        NbZ         = 8;         % 'JM' harmonic along z 
-        NbX         = 0;         % 'JM' harmonic along x 
+        decimation  = [8] ;       % 'OS'
+        NbZ         = -4:4;       % 'JM' harmonic along z 
+        NbX         = 1:8;        % 'JM' harmonic along x 
         Phase       = [0];        % 'JM' phases per frequency in 2pi unit
         Tau_cam          = 100 ;  % 'JM' camera integration time (us) : sets the number of repetition patterns
         Bacules         = 'off';  % 'JM' alternates phase to provent Talbot effect
@@ -47,10 +47,10 @@
         
         
         SaveData = 1;           % set to 1 to save data
-        AIXPLORER_Active = 'on';% 'on' or 'off' 
+        AIXPLORER_Active = 'off';% 'on' or 'off' 
 
  % estimation of loading time 
- fprintf('%i events, loading should take about %d seconds\n\r',length(NbX)*length(NbZ)*3);
+ fprintf('%i events, loading should take about %d seconds\n\r',length(NbX)*length(NbZ)*length(Phase));
 
 %% ============================   Initialize AIXPLORER
 % %% Sequence execution

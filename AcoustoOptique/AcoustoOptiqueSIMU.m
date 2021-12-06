@@ -9,7 +9,7 @@
 
 % adresse Bastille : '192.168.0.20'
 % adresse Jussieu :  '192.168.1.16'
-
+clearvars;
  AixplorerIP    = '192.168.137.2'; % IP address of the Aixplorer device
  % path at Jussieu :
  if strcmp(AixplorerIP,'192.168.1.16')
@@ -30,9 +30,9 @@
         TypeOfSequence  = 'JM'; % 'OP','OS','JM','OC','OFJM'
         Bacules         = 'off';
         Master          = 'on';
-        GageActive      = 'on' ; 
+        GageActive      = 'off' ; 
         WriteLogFile    = 'on';
-        IsAixplorerLoop = 'on'; % 'on':loops sequences for ever , 'off' defult mode
+        IsAixplorerLoop = 'off'; % 'on':loops sequences for ever , 'off' defult mode
         Volt            = 15; %Volt
         SaveData        = 0 ; % set to 1 to save
         % 2eme contrainte : 
@@ -44,11 +44,13 @@
         AlphaM          = 0; %(-20:20)*pi/180; specific OP
         
         
-        % the case NbX = 0 is automatically generated, so NbX should be an
-        % integer list > 0
-        NbZ         = [1,1:10];    % [6,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
-        NbX         = [-5:5] ;    % [-10:10];        % 20    Nb de composantes de Fourier en X, 'JM'
-        Phase       = [0,0.25,0.5,0.75]; % [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
+        % the case NbX = 0 is automatically generated
+        %so the first 4-short should not be accounted for
+        NbZ         = [1:5];     % [6,1:5];        % 8; % Nb de composantes de Fourier en Z, 'JM'
+        NbX         = [-5:5] ;   % [-10:10];       % 20    Nb de composantes de Fourier en X, 'JM'
+        Phase       = [0,0.25,0.5,0.75]; % phases per frequency in 2pi unit
+        % this correponds to the number of repetition for evnt structure
+        %(phase shifts are encoded optically in the reference beam)
 
         % note : Trep  = (20us)/Nbz
         %        NUrep =   Nbz*(50kHz)         
@@ -116,7 +118,7 @@ c = common.constants.SoundSpeed ; % sound velocity in m/s
 %% view sequence GUI
 fprintf('============================= SEQ ANALYSIS =======================\n');
 
-Nactive = 1;
+Nactive = 5;
 
 % total number of sequences :
 Nevent = length(SEQ.InfoStruct.event);
@@ -139,7 +141,7 @@ cb = colorbar;
 ylabel(cb,'Logic Tension ')
 xlabel('N element Index')
 ylabel('Emission Time ( \mu s)')
-title(['shot Number = ',num2str(Nactive)])
+title(['event index = ',num2str(Nactive)])
 
 SEQ.InfoStruct.event(Nactive).duration
 
